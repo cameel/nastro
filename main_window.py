@@ -22,4 +22,5 @@ class MainWindow(KMainWindow):
         self.main_panel_layout.addWidget(self.left_panel)
         self.main_panel_layout.addWidget(self.tape_widget)
 
+        self.resize(1200, 800)
         self.setCentralWidget(self.main_panel)
