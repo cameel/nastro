@@ -1,6 +1,6 @@
 """ The UI widget that represents a single note """
 
-from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel
+from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QPushButton
 from PyQt4.QtCore import SIGNAL
 
 class NoteWidget(QWidget):
@@ -19,8 +19,15 @@ class NoteWidget(QWidget):
 
         self._timestamp_label = QLabel(self._title_panel)
         self._title_editor    = QLineEdit(self._title_panel)
+        self._delete_button   = QPushButton(self._title_panel)
         self._title_layout.addWidget(self._timestamp_label)
         self._title_layout.addWidget(self._title_editor)
+        self._title_layout.addWidget(self._delete_button)
+
+        self._delete_button.setText('x')
+
+        self.connect(self._delete_button, SIGNAL('clicked()'), lambda : self.emit(SIGNAL('requestDelete()')))
+
     @property
     def note(self):
         return self._note
