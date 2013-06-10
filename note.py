@@ -6,3 +6,11 @@ class Note:
         self.body      = body
         self.tags      = tags
         self.timestamp = timestamp
+
+    def to_dict(self):
+        return {
+            'title':     self.title,
+            'body':      self.body,
+            'tags':      self.tags,
+            'timestamp': self.timestamp.isoformat()
+        }
