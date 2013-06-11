@@ -26,7 +26,7 @@ class NoteWidget(QWidget):
         self._title_layout.addWidget(self._title_editor)
         self._title_layout.addWidget(self._delete_button)
 
-        self._delete_button.setText('x')
+        self._delete_button.setText('delete')
 
         self.connect(self._delete_button, SIGNAL('clicked()'), lambda : self.emit(SIGNAL('requestDelete()')))
 
