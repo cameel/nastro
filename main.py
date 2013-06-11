@@ -5,10 +5,14 @@
 
 from PyKDE4.kdecore import KCmdLineArgs, KAboutData, ki18n
 from PyKDE4.kdeui   import KApplication
+from PyQt4.QtGui    import QMessageBox
 
 import sys
 
 from main_window import MainWindow
+
+application = None
+window      = None
 
 def create_about_data():
     app_name     = "Nastro"
@@ -28,6 +32,9 @@ def create_about_data():
     return KAboutData(app_name, catalog, program_name, version, description, license, copyright, text, home_page, bug_email)
 
 def create_application():
+    global application
+    global window
+
     about_data = create_about_data()
     KCmdLineArgs.init(sys.argv, about_data)
 
@@ -37,8 +44,25 @@ def create_application():
 
     return (about_data, application, window)
 
+def global_exception_handler(type, value, traceback):
+    global original_excepthook
+    global application
+    global window
+
+    QMessageBox.critical(window, "Unhandled exception: " + type.__name__, str(value))
+
+    # The standard exception hook prints the traceback to the stdout. We want that.
+    # If some other component has installed its own exception hook before us, we probably
+    # want it executed too. Hopefully it calls the standard one.
+    original_excepthook(type, value, traceback)
+
 if __name__ == '__main__':
+    global original_excepthook
+
     (about_data, application, window) = create_application()
+
+    original_excepthook = sys.excepthook
+    sys.excepthook      = global_exception_handler
 
     return_code = application.exec_()
     sys.exit(return_code)
