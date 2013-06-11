@@ -1,12 +1,13 @@
 """ The main UI component of the application. Controls the whole window """
 
 from PyKDE4.kdeui import KMainWindow, KDatePicker
-from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog
+from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox
 from PyQt4.QtCore import SIGNAL
 
 import simplejson
 
 from tape_widget import TapeWidget
+from note        import Note
 
 class MainWindow(KMainWindow):
     def __init__(self):
@@ -26,11 +27,13 @@ class MainWindow(KMainWindow):
         self.main_panel_layout.addWidget(self.tape_widget)
 
         file_menu      = self.menuBar().addMenu("File")
+        open_action    = file_menu.addAction("&Open...")
         save_as_action = file_menu.addAction("&Save as...")
         file_menu.addSeparator()
         exit_action    = file_menu.addAction("&Exit")
 
         self.connect(exit_action,    SIGNAL('triggered()'), self.close)
+        self.connect(open_action,    SIGNAL('triggered()'), self.load_file)
         self.connect(save_as_action, SIGNAL('triggered()'), self.save_file)
 
         self.resize(1200, 800)
@@ -52,3 +55,26 @@ class MainWindow(KMainWindow):
                     json_file.write(simplejson.dumps(notes, indent = 4, sort_keys = True))
                 else:
                     json_file.write(simplejson.dumps(notes))
+
+    def load_file(self):
+        file_name = QFileDialog.getOpenFileName(
+            self,
+            "Open...",
+            None,
+            "JSON files (*.json)"
+        )
+
+        if file_name != '':
+            try:
+                with open(file_name, 'r') as json_file:
+                    notes = simplejson.loads(json_file.read())
+
+                self.tape_widget.clear()
+                for note in notes:
+                    self.tape_widget.add_note(Note.from_dict(note))
+            except simplejson.scanner.JSONDecodeError:
+                QMessageBox.warning(self, "File error", "Failed to decode JSON data. The file has different format or is damaged.")
+                self.tape_widget.clear()
+            except:
+                self.tape_widget.clear()
+                raise
