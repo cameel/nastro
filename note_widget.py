@@ -36,7 +36,17 @@ class NoteWidget(QWidget):
 
         self._delete_button.setText('delete')
 
-        self.connect(self._delete_button, SIGNAL('clicked()'), lambda : self.emit(SIGNAL('requestDelete()')))
+        self.connect(self._delete_button, SIGNAL('clicked()'),     lambda : self.emit(SIGNAL('requestDelete()')))
+        self.connect(self._body_editor,   SIGNAL('textChanged()'), lambda : self.update_note_body())
+        self.connect(self._title_editor,  SIGNAL('textChanged(const QString &)'), lambda text: self.update_note_title(text))
+
+    def update_note_body(self):
+        if self._note != None:
+            self._note.body = self._body_editor.toPlainText()
+
+    def update_note_title(self, text):
+        if self._note != None:
+            self._note.title = text
 
     @property
     def note(self):
