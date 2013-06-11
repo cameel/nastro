@@ -1,6 +1,6 @@
 """ The UI widget that represents a single note """
 
-from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QPushButton, QSizePolicy
+from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QPushButton, QSizePolicy, QFont
 from PyQt4.QtCore import SIGNAL
 
 class NoteWidget(QWidget):
@@ -10,11 +10,18 @@ class NoteWidget(QWidget):
 
         self._main_layout = QVBoxLayout(self)
 
+        # Use Liberation Mono font if present. If not, TypeWriter hint
+        # will make Qt select some other monospace font.
+        monospace_font = QFont("Liberation Mono")
+        monospace_font.setStyleHint(QFont.TypeWriter)
+        monospace_font.setPointSize(10)
+
         self._title_panel  = QWidget(self)
         self._title_layout = QHBoxLayout(self._title_panel)
         self._body_editor  = QTextEdit(self)
         self._body_editor.setMinimumSize(0, 250)
         self._body_editor.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        self._body_editor.setCurrentFont(monospace_font)
 
         self._main_layout.addWidget(self._title_panel)
         self._main_layout.addWidget(self._body_editor)
