@@ -2,6 +2,9 @@
 
 from datetime import datetime
 
+class MissingProperties(Exception):
+    pass
+
 class Note:
     TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
@@ -20,3 +23,16 @@ class Note:
             # to parse as the microsecond part is omitted if it's 0.
             'timestamp': self.timestamp.strftime(self.TIMESTAMP_FORMAT)
         }
+
+    @classmethod
+    def from_dict(cls, note_dict):
+        missing_properties = set(['title', 'body', 'tags', 'timestamp']) - set(note_dict.keys())
+        if len(missing_properties) > 0:
+            raise MissingProperties("Not all required note properties are present")
+
+        return cls(
+            note_dict['title'],
+            note_dict['body'],
+            note_dict['tags'],
+            datetime.strptime(note_dict['timestamp'], cls.TIMESTAMP_FORMAT)
+        )
