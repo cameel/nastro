@@ -62,12 +62,16 @@ def global_exception_handler(type, value, traceback):
     global application
     global window
 
-    # The standard exception hook prints the traceback to the stdout. We want that.
-    # If some other component has installed its own exception hook before us, we probably
-    # want it executed too. Hopefully it calls the standard one.
-    original_excepthook(type, value, traceback)
+    if type != KeyboardInterrupt:
+        # The standard exception hook prints the traceback to the stdout. We want that.
+        # If some other component has installed its own exception hook before us, we probably
+        # want it executed too. Hopefully it calls the standard one.
+        original_excepthook(type, value, traceback)
 
-    QMessageBox.critical(window, "Unhandled exception: " + type.__name__, str(value))
+        QMessageBox.critical(window, "Unhandled exception: " + type.__name__, str(value))
+    else:
+        print("SIGINT")
+        sys.exit(1)
 
 if __name__ == '__main__':
     global original_excepthook
