@@ -6,6 +6,7 @@
 from PyKDE4.kdecore import KCmdLineArgs, KAboutData, ki18n
 from PyKDE4.kdeui   import KApplication
 from PyQt4.QtGui    import QMessageBox
+from PyQt4.QtCore   import QTimer
 
 import sys
 
@@ -44,6 +45,18 @@ def create_application():
 
     return (about_data, application, window)
 
+def start_signal_timer():
+    # NOTE: Python does not process signals while executing C extensions.
+    # This prevents us from stopping the application with Ctrl+C while the
+    # Qt loop is running. To let the application process signals we need to
+    # periodically pass control from Qt to the interpreter. This timer is a
+    # hack to achieve just that.
+    timer = QTimer()
+    timer.start(500)
+    timer.timeout.connect(lambda: None)
+
+    return timer
+
 def global_exception_handler(type, value, traceback):
     global original_excepthook
     global application
@@ -63,6 +76,8 @@ if __name__ == '__main__':
 
     original_excepthook = sys.excepthook
     sys.excepthook      = global_exception_handler
+
+    timer = start_signal_timer()
 
     return_code = application.exec_()
     sys.exit(return_code)
