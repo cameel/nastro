@@ -65,16 +65,15 @@ class MainWindow(KMainWindow):
         )
 
         if file_name != '':
-            try:
-                with open(file_name, 'r') as json_file:
-                    notes = simplejson.loads(json_file.read())
+            with open(file_name, 'r') as json_file:
+                try:
+                    raw_notes = simplejson.loads(json_file.read())
+                except simplejson.scanner.JSONDecodeError:
+                    QMessageBox.warning(self, "File error", "Failed to decode JSON data. The file has different format or is damaged.")
+                    return
 
-                self.tape_widget.clear()
-                for note in notes:
-                    self.tape_widget.add_note(Note.from_dict(note))
-            except simplejson.scanner.JSONDecodeError:
-                QMessageBox.warning(self, "File error", "Failed to decode JSON data. The file has different format or is damaged.")
-                self.tape_widget.clear()
-            except:
-                self.tape_widget.clear()
-                raise
+            notes = []
+            for note_dict in raw_notes:
+                notes.append(Note.from_dict(note_dict))
+
+            self.tape_widget.load_notes(notes)
