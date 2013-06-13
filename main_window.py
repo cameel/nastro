@@ -6,8 +6,9 @@ from PyQt4.QtCore import SIGNAL
 
 import simplejson
 
-from tape_widget import TapeWidget
-from note        import Note
+from tape_widget    import TapeWidget
+from note           import Note
+from opera_importer import import_opera_notes
 
 class MainWindow(KMainWindow):
     def __init__(self):
@@ -91,3 +92,7 @@ class MainWindow(KMainWindow):
             '~/.opera',
             "Opera Hotlist (*.adr)"
         )
+
+        if file_name != '':
+            notes = import_opera_notes(file_name)
+            self.tape_widget.load_notes(notes)
