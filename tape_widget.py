@@ -79,3 +79,13 @@ class TapeWidget(QWidget):
             notes.append(note_widget.note.to_dict())
 
         return notes
+
+    def load_notes(self, notes):
+        self.clear()
+
+        try:
+            for note in notes:
+                self.add_note(note)
+        except:
+            self.clear()
+            raise
