@@ -6,9 +6,9 @@ from PyQt4.QtCore import SIGNAL
 
 import simplejson
 
-from tape_widget    import TapeWidget
-from note           import Note
-from opera_importer import import_opera_notes
+from tape_widget            import TapeWidget
+from note                   import Note
+from opera.hotlist.importer import import_opera_notes
 
 class MainWindow(KMainWindow):
     def __init__(self):
