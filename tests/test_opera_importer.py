@@ -103,6 +103,11 @@ class OperaImporterTest(unittest.TestCase):
             ("\tąęół=cde\n",                 {'type': LineType.ATTRIBUTE, 'name': 'ąęół',         'value': 'cde'}),
             ("\tabc=\n",                     {'type': LineType.ATTRIBUTE, 'name': 'abc',          'value': ''}),
             ("\tTRASH_FOLDER=YES\n",         {'type': LineType.ATTRIBUTE, 'name': 'TRASH_FOLDER', 'value': 'YES'}),
+            ("\t\t=abc\n",                   {'type': LineType.ATTRIBUTE, 'name': '',             'value': 'abc'}),
+            ("\t  =abc\n",                   {'type': LineType.ATTRIBUTE, 'name': '',             'value': 'abc'}),
+            ("\t=abc\n",                     {'type': LineType.ATTRIBUTE, 'name': '',             'value': 'abc'}),
+            ("\t=\n",                        {'type': LineType.ATTRIBUTE, 'name': '',             'value': ''}),
+            ("\t = \n",                      {'type': LineType.ATTRIBUTE, 'name': '',             'value': ' '}),
             # Examples that should not be recognized
             ("#note\n",                      {'type': None}),
             (" #NOTE \n",                    {'type': None}),
@@ -111,8 +116,6 @@ class OperaImporterTest(unittest.TestCase):
             ("#A NOTE\n",                    {'type': None}),
             (" -\n",                         {'type': None}),
             ("1+2\n",                        {'type': None}),
-            ("\t=abc\n",                     {'type': None}),
-            ("\t=\n",                        {'type': None})
         ]
 
         for line, expected_result in fixtures:

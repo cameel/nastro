@@ -13,7 +13,7 @@ HEADER_LINE_PATTERNS = [
 ELEMENT_PATTERN    = re.compile('^#(?P<name>[A-Z_\-]+)\s*$')
 # NOTE: value is intentionally not being stripped from whitespace here. There may be a leading indentation
 # in NAME attributes that we want to preserve.
-ATTRIBUTE_PATTERN  = re.compile('^\t(?P<name>[^=]+)=(?P<value>.*)$')
+ATTRIBUTE_PATTERN  = re.compile('^\t(?P<name>[^=]*)=(?P<value>.*)$')
 END_MARKER_PATTERN = re.compile('^-\s*$')
 
 class LineType:
@@ -137,12 +137,14 @@ def parse_hotlist_line(line):
         assert 'name'  in match.groupdict()
         assert 'value' in match.groupdict()
 
+        groupdict = match.groupdict()
+
         return {
             'type':  LineType.ATTRIBUTE,
-            'name':  match.groupdict()['name'].strip(),
+            'name':  groupdict['name'].strip()  if 'name'  in groupdict else '',
             # NOTE: Value intentionally not stripped. Only specific, known attributes should be stripped
             # when it's known that the indentation is not significant for them.
-            'value': match.groupdict()['value']
+            'value': groupdict['value'] if 'value' in groupdict else ''
         }
 
     if is_header_line(line):
@@ -182,8 +184,7 @@ def element_to_note(element):
             # FIXME: What about notes without names?
             title_and_body = attributes['NAME'].replace('\02\02', '\n').split('\n', 1)
 
-            # Currently the regexes match only attributes with non-empty values
-            assert len(title_and_body) > 0
+            assert len(title_and_body) > 0, 'split() always returns at least one item'
 
             return Note(
                 title_and_body[0].strip(),
