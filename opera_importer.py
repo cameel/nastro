@@ -35,6 +35,9 @@ class StructuralError(ParseError):
 class DuplicateAttribute(ParseError):
     pass
 
+class MissingNoteAttributes(ParseError):
+    pass
+
 class ElementIterator:
     def __init__(self, note_file):
         self._note_file = note_file
@@ -167,7 +170,14 @@ def line_strip(text):
 def element_to_note(element):
     element_name, attributes = element
 
+    required_note_attributes = ['CREATED']
+
     if element_name == 'NOTE':
+        missing_attributes = [attribute_name for attribute_name in required_note_attributes if not attribute_name in attributes]
+        if len(missing_attributes) > 0:
+            note_id = attributes['ID'] if 'ID' in attributes else '???'
+            raise MissingNoteAttributes("Note (ID={}) is missing one or more required attributes: {}".format(note_id, ', '.join(missing_attributes)))
+
         if 'NAME' in attributes:
             # FIXME: What about notes without names?
             title_and_body = attributes['NAME'].replace('\02\02', '\n').split('\n', 1)

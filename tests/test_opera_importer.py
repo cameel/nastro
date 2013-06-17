@@ -6,7 +6,7 @@ from datetime   import datetime
 # FIXME: Python complains on import beyond top-level package when calleed as
 # `python -m unittest` if we use a relative import here.
 from opera_importer import is_header_line, parse_hotlist_line, LineType, ElementIterator, import_opera_notes, line_strip
-from opera_importer import DuplicateAttribute, InvalidLine, StructuralError, InvalidLine
+from opera_importer import DuplicateAttribute, InvalidLine, StructuralError, InvalidLine, MissingNoteAttributes
 from note           import Note
 
 NOTE_FILE_FIXTURES = [
@@ -254,6 +254,31 @@ class OperaImporterTest(unittest.TestCase):
         self.assertEqual(len(notes), 1)
         self.assertEqual(notes[0].title, "note title")
         self.assertEqual(notes[0].body,  "   note body")
+
+    def test_import_opera_notes_should_detect_missing_timestamp(self):
+        fixture = (
+            "#NOTE\n"
+            "	ID=386\n"
+            "	NAME=note\n"
+        )
+
+        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with self.assertRaises(MissingNoteAttributes):
+            with closing(StringIO(fixture)) as note_file:
+                import_opera_notes(note_file)
+
+    def test_import_opera_notes_should_detect_missing_timestamp_in_notes_with_no_text(self):
+        fixture = (
+            "#NOTE\n"
+            "	ID=386\n"
+        )
+
+        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with self.assertRaises(MissingNoteAttributes):
+            with closing(StringIO(fixture)) as note_file:
+                import_opera_notes(note_file)
 
 class ElementIteratorTest(unittest.TestCase):
     def test_read_element_attributes_should_extract_attributes_correctly_given_only_attribute_lines(self):
