@@ -118,6 +118,30 @@ class OperaImporterTest(unittest.TestCase):
         for line, expected_result in fixtures:
             self.assertEqual((parse_hotlist_line(line), line), (expected_result, line))
 
+    def test_parse_hotlist_line_should_strip_whitespace_from_attribute_names(self):
+        fixtures = [
+            # Strip name
+            ("\t\tID=3266\n",               {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266'}),
+            ("\t  ID=3266\n",               {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266'}),
+            ("\t  \tID=3266\n",             {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266'}),
+            ("\tID\t=3266\n",               {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266'}),
+            ("\tID =3266\n",                {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266'}),
+            ("\tID \t =3266\n",             {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266'}),
+            ("\t ID =3266\n",               {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266'}),
+            # Don't strip value
+            ("\tID=\t3266\n",               {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '\t3266'}),
+            ("\tID=  3266\n",               {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '  3266'}),
+            ("\tID=  \t3266\n",             {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '  \t3266'}),
+            ("\tID=3266\t\n",               {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266\t'}),
+            ("\tID=3266 \n",                {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266 '}),
+            ("\tID=3266 \t \n",             {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '3266 \t '}),
+            ("\tID= 3266 \n",               {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': ' 3266 '}),
+            ("\tID=\x02\x023266\x02\x02\n", {'type': LineType.ATTRIBUTE, 'name': 'ID', 'value': '\x02\x023266\x02\x02'}),
+        ]
+
+        for line, expected_result in fixtures:
+            self.assertEqual((parse_hotlist_line(line), line), (expected_result, line))
+
     def test_line_strip_should_strip_leading_and_trailing_empty_lines(self):
         leading_whitespace = (
             "\n"
@@ -209,8 +233,27 @@ class OperaImporterTest(unittest.TestCase):
         self.assertEqual(notes[0].timestamp, datetime(2011, 9, 11, 22, 56, 10))
 
         self.assertEqual(notes[1].title,     "note 2 title")
-        self.assertEqual(notes[1].body,      "\nnote body")
+        self.assertEqual(notes[1].body,      "note body")
         self.assertEqual(notes[1].timestamp, datetime(2011, 9, 28, 23, 20, 17))
+
+    def test_import_opera_notes_should_strip_leading_empty_lines_and_trailing_whitespace_from_note_body(self):
+        fixture = (
+            "#NOTE\n"
+            "	ID=386\n"
+            "	NAME=note title\x02\x02\x02\x02  \x02\x02\t\x02\x02   note body\t    \x02\x02\x02\x02  \x02\x02\t\x02\x02   \n"
+            "	CREATED=1301917631\n"
+            "	EXPANDED=YES\n"
+            "	UNIQUEID=4710F1B05EB111E0881E839B765D815D\n"
+        )
+
+        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            notes = import_opera_notes(note_file)
+
+        self.assertEqual(len(notes), 1)
+        self.assertEqual(notes[0].title, "note title")
+        self.assertEqual(notes[0].body,  "   note body")
 
 class ElementIteratorTest(unittest.TestCase):
     def test_read_element_attributes_should_extract_attributes_correctly_given_only_attribute_lines(self):

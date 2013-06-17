@@ -136,7 +136,9 @@ def parse_hotlist_line(line):
 
         return {
             'type':  LineType.ATTRIBUTE,
-            'name':  match.groupdict()['name'],
+            'name':  match.groupdict()['name'].strip(),
+            # NOTE: Value intentionally not stripped. Only specific, known attributes should be stripped
+            # when it's known that the indentation is not significant for them.
             'value': match.groupdict()['value']
         }
 
@@ -175,7 +177,7 @@ def element_to_note(element):
 
             return Note(
                 title_and_body[0].strip(),
-                title_and_body[1] if len(title_and_body) > 1 else '',
+                line_strip(title_and_body[1]) if len(title_and_body) > 1 else '',
                 [],
                 datetime.fromtimestamp(int(attributes['CREATED']))
             )
