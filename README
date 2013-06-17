@@ -1,0 +1,7 @@
+Dependencies:
+- Linux
+- KDE >= 4
+- Python >= 3
+    - pyqt
+    - pykde
+    - simplejson
