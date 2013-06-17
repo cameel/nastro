@@ -18,6 +18,7 @@ class NoteWidget(QWidget):
 
         self._main_layout.addWidget(self._title_panel)
         self._main_layout.addWidget(self._body_editor)
+        self._main_layout.addWidget(self._tag_editor)
 
         self._timestamp_label = QLabel(self._title_panel)
         self._title_editor    = QLineEdit(self._title_panel)
