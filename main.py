@@ -73,7 +73,7 @@ def global_exception_handler(type, value, traceback):
         print("SIGINT")
         sys.exit(1)
 
-if __name__ == '__main__':
+def main():
     global original_excepthook
 
     (about_data, application, window) = create_application()
@@ -85,3 +85,6 @@ if __name__ == '__main__':
 
     return_code = application.exec_()
     sys.exit(return_code)
+
+if __name__ == '__main__':
+    main()
