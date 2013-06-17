@@ -94,5 +94,6 @@ class MainWindow(KMainWindow):
         )
 
         if file_name != '':
-            notes = import_opera_notes(file_name)
+            with open(file_name, 'r') as note_file:
+                notes = import_opera_notes(note_file)
             self.tape_widget.load_notes(notes)

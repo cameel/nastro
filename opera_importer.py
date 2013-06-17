@@ -165,13 +165,12 @@ def element_to_note(element):
 
     return None
 
-def import_opera_notes(file_name):
+def import_opera_notes(note_file):
     notes = []
-    with open(file_name, 'r') as note_file:
-        for element in ElementIterator(note_file):
-            if element != 'end':
-                note = element_to_note(element)
-                if note != None:
-                    notes.append(note)
+    for element in ElementIterator(note_file):
+        if element != 'end':
+            note = element_to_note(element)
+            if note != None:
+                notes.append(note)
 
     return notes
