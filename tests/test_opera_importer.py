@@ -1,11 +1,13 @@
 import unittest
 from io         import StringIO
 from contextlib import closing
+from datetime   import datetime
 
 # FIXME: Python complains on import beyond top-level package when calleed as
 # `python -m unittest` if we use a relative import here.
-from opera_importer import is_header_line, parse_hotlist_line, LineType, ElementIterator
+from opera_importer import is_header_line, parse_hotlist_line, LineType, ElementIterator, import_opera_notes
 from opera_importer import DuplicateAttribute, InvalidLine, StructuralError, InvalidLine
+from note           import Note
 
 NOTE_FILE_FIXTURES = [
     (
@@ -115,6 +117,25 @@ class OperaImporterTest(unittest.TestCase):
 
         for line, expected_result in fixtures:
             self.assertEqual((parse_hotlist_line(line), line), (expected_result, line))
+
+    def test_import_opera_notes_should_import_a_well_formed_file(self):
+        fixture = NOTE_FILE_FIXTURES[0]
+
+        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            notes = import_opera_notes(note_file)
+
+        self.assertEqual(len(notes), 2)
+        self.assertTrue([isinstance(note, Note) for note in notes])
+
+        self.assertEqual(notes[0].title,     "note 1")
+        self.assertEqual(notes[0].body,      "")
+        self.assertEqual(notes[0].timestamp, datetime(2011, 9, 11, 22, 56, 10))
+
+        self.assertEqual(notes[1].title,     "note 2 title")
+        self.assertEqual(notes[1].body,      "\nnote body")
+        self.assertEqual(notes[1].timestamp, datetime(2011, 9, 28, 23, 20, 17))
 
 class ElementIteratorTest(unittest.TestCase):
     def test_read_element_attributes_should_extract_attributes_correctly_given_only_attribute_lines(self):
