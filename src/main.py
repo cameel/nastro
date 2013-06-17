@@ -10,7 +10,7 @@ from PyQt4.QtCore   import QTimer
 
 import sys
 
-from main_window import MainWindow
+from .main_window import MainWindow
 
 application = None
 window      = None
@@ -90,6 +90,3 @@ def main():
 
     return_code = application.exec_()
     sys.exit(return_code)
-
-if __name__ == '__main__':
-    main()

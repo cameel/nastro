@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from note      import Note
+from ...note   import Note
 from .iterator import HotlistIterator, ParseError
 
 class MissingNoteAttributes(ParseError):

@@ -3,11 +3,9 @@ from io         import StringIO
 from contextlib import closing
 from datetime   import datetime
 
-# FIXME: Python complains on import beyond top-level package when calleed as
-# `python -m unittest` if we use a relative import here.
 from ..iterator     import HotlistIterator
 from ..importer     import import_opera_notes, line_strip, MissingNoteAttributes
-from note           import Note
+from ....note       import Note
 from .test_iterator import NOTE_FILE_FIXTURES
 
 class HotlistImporterTest(unittest.TestCase):
