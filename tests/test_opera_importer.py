@@ -5,7 +5,7 @@ from datetime   import datetime
 
 # FIXME: Python complains on import beyond top-level package when calleed as
 # `python -m unittest` if we use a relative import here.
-from opera_importer import is_header_line, parse_hotlist_line, LineType, ElementIterator, import_opera_notes
+from opera_importer import is_header_line, parse_hotlist_line, LineType, ElementIterator, import_opera_notes, line_strip
 from opera_importer import DuplicateAttribute, InvalidLine, StructuralError, InvalidLine
 from note           import Note
 
@@ -117,6 +117,81 @@ class OperaImporterTest(unittest.TestCase):
 
         for line, expected_result in fixtures:
             self.assertEqual((parse_hotlist_line(line), line), (expected_result, line))
+
+    def test_line_strip_should_strip_leading_and_trailing_empty_lines(self):
+        leading_whitespace = (
+            "\n"
+            "     \n"
+            "\t\n"
+            "\t   \t\n"
+            "\n"
+            "\n"
+        )
+        body = (
+            "a line\n"
+            "next line\n"
+            "next line\n"
+            "\n"
+            "     \n"
+            "\t\n"
+            "\tnext line\n"
+            "\n"
+            "     next line"
+        )
+        trailing_whitespace = (
+            "\n"
+            "     \n"
+            "\t\n"
+            "\t   \t\n"
+            "\n"
+            "\n"
+        )
+        text = leading_whitespace + body + trailing_whitespace
+
+        stripped_text = line_strip(text)
+
+        self.assertEqual(stripped_text, body)
+
+    def test_line_strip_should_not_strip_leading_intentation(self):
+        leading_whitespace = (
+            "\n"
+            "   \n"
+            "    \n"
+        )
+        body = (
+            "    a line\n"
+            "  next line\n"
+            "\tnext line\n"
+            "\n"
+            "     \n"
+            "\t\n"
+            "\tnext line\n"
+            "\n"
+            "     next line"
+        )
+        trailing_whitespace = (
+            "\n"
+            "     \n"
+        )
+        text = leading_whitespace + body + trailing_whitespace
+
+        stripped_text = line_strip(text)
+
+        self.assertEqual(stripped_text, body)
+
+    def test_line_strip_should_return_empty_string_if_theres_only_whitespace(self):
+        text = (
+            "\n"
+            "     \n"
+            "\t\n"
+            "\t   \t\n"
+            "\n"
+            "\n"
+        )
+
+        stripped_text = line_strip(text)
+
+        self.assertEqual(stripped_text, '')
 
     def test_import_opera_notes_should_import_a_well_formed_file(self):
         fixture = NOTE_FILE_FIXTURES[0]

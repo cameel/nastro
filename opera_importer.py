@@ -145,6 +145,23 @@ def parse_hotlist_line(line):
 
     return {'type': None}
 
+def line_strip(text):
+    """Strips leading empty lines and all trailing whitespace from the text"""
+    try:
+        first_nonwhitespace_index = next(i for i, character in enumerate(text) if not character.isspace())
+    except StopIteration:
+        return ''
+
+    last_nonwhitespace_index = len(text) - 1 - next(i for i, character in enumerate(reversed(text)) if not character.isspace())
+    assert last_nonwhitespace_index >= first_nonwhitespace_index
+
+    try:
+        first_nonwhitespace_line_start = first_nonwhitespace_index - next(i for i, character in enumerate(reversed(text[:first_nonwhitespace_index])) if character == '\n')
+    except StopIteration:
+        first_nonwhitespace_line_start = 0
+
+    return text[first_nonwhitespace_line_start:last_nonwhitespace_index + 1]
+
 def element_to_note(element):
     element_name, attributes = element
 
