@@ -63,3 +63,11 @@ class NoteTest(unittest.TestCase):
         self.assertEqual(note.timestamp, datetime(2013, 6, 16))
         self.assertTrue(not hasattr(note, 'foo'))
 
+    def test_from_dict_should_detect_invalid_characters_in_tags(self):
+        with self.assertRaises(InvalidTagCharacter):
+            note = Note.from_dict({
+                'title':     "X",
+                'body':      "Y",
+                'tags':      ["a", "b", "c,d,e"],
+                'timestamp': "2013-06-16T00:00:00.000000"
+            })

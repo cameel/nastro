@@ -5,6 +5,9 @@ from datetime import datetime
 class MissingProperties(Exception):
     pass
 
+class InvalidTagCharacter(Exception):
+    pass
+
 class Note:
     TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
@@ -29,6 +32,9 @@ class Note:
         missing_properties = set(['title', 'body', 'tags', 'timestamp']) - set(note_dict.keys())
         if len(missing_properties) > 0:
             raise MissingProperties("Not all required note properties are present")
+
+        if any(',' in tag for tag in note_dict['tags']):
+            raise InvalidTagCharacter("Commas (,) are not allowed in tags")
 
         return cls(
             note_dict['title'],
