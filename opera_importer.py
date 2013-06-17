@@ -47,7 +47,7 @@ class ElementIterator:
         self._note_file.seek(0)
 
         line = self._last_line
-        while line != '' and (line.strip() == '' or is_header_line(line)):
+        while line != '' and (line.strip() == '' or type(self).is_header_line(line)):
             line = self._note_file.readline()
 
         self._last_line = line
@@ -61,7 +61,7 @@ class ElementIterator:
         if self._last_line == '':
             raise StopIteration
 
-        line_info = parse_hotlist_line(self._last_line)
+        line_info = type(self).parse_hotlist_line(self._last_line)
         assert line_info['type'] not in [LineType.EMPTY, LineType.HEADER]
 
         if line_info['type'] == None:
@@ -77,7 +77,7 @@ class ElementIterator:
         if line_info['type'] == LineType.ELEMENT:
             element_name = line_info['name']
 
-            (attributes, self._last_line) = ElementIterator.read_element_attributes(element_name, self._note_file)
+            (attributes, self._last_line) = type(self).read_element_attributes(element_name, self._note_file)
             return (element_name, attributes)
 
     @classmethod
@@ -86,7 +86,7 @@ class ElementIterator:
 
         line = note_file.readline()
         while line != '':
-            line_info = parse_hotlist_line(line)
+            line_info = cls.parse_hotlist_line(line)
 
             if line_info['type'] in [LineType.ELEMENT, LineType.END]:
                 return (attributes, line)
@@ -107,50 +107,52 @@ class ElementIterator:
 
         return (attributes, '')
 
-def is_header_line(line):
-    for pattern in HEADER_LINE_PATTERNS:
-        match = pattern.match(line)
+    @classmethod
+    def is_header_line(cls, line):
+        for pattern in HEADER_LINE_PATTERNS:
+            match = pattern.match(line)
+            if match != None:
+                return True
+
+        return False
+
+    @classmethod
+    def parse_hotlist_line(cls, line):
+        if line.strip() == '':
+            return {'type': LineType.EMPTY}
+
+        match = END_MARKER_PATTERN.match(line)
         if match != None:
-            return True
+            return {'type': LineType.END}
 
-    return False
+        match = ELEMENT_PATTERN.match(line)
+        if match != None:
+            assert 'name' in match.groupdict()
 
-def parse_hotlist_line(line):
-    if line.strip() == '':
-        return {'type': LineType.EMPTY}
+            return {
+                'type': LineType.ELEMENT,
+                'name': match.groupdict()['name']
+            }
 
-    match = END_MARKER_PATTERN.match(line)
-    if match != None:
-        return {'type': LineType.END}
+        match = ATTRIBUTE_PATTERN.match(line)
+        if match != None:
+            assert 'name'  in match.groupdict()
+            assert 'value' in match.groupdict()
 
-    match = ELEMENT_PATTERN.match(line)
-    if match != None:
-        assert 'name' in match.groupdict()
+            groupdict = match.groupdict()
 
-        return {
-            'type': LineType.ELEMENT,
-            'name': match.groupdict()['name']
-        }
+            return {
+                'type':  LineType.ATTRIBUTE,
+                'name':  groupdict['name'].strip()  if 'name'  in groupdict else '',
+                # NOTE: Value intentionally not stripped. Only specific, known attributes should be stripped
+                # when it's known that the indentation is not significant for them.
+                'value': groupdict['value'] if 'value' in groupdict else ''
+            }
 
-    match = ATTRIBUTE_PATTERN.match(line)
-    if match != None:
-        assert 'name'  in match.groupdict()
-        assert 'value' in match.groupdict()
+        if cls.is_header_line(line):
+            return {'type': LineType.HEADER}
 
-        groupdict = match.groupdict()
-
-        return {
-            'type':  LineType.ATTRIBUTE,
-            'name':  groupdict['name'].strip()  if 'name'  in groupdict else '',
-            # NOTE: Value intentionally not stripped. Only specific, known attributes should be stripped
-            # when it's known that the indentation is not significant for them.
-            'value': groupdict['value'] if 'value' in groupdict else ''
-        }
-
-    if is_header_line(line):
-        return {'type': LineType.HEADER}
-
-    return {'type': None}
+        return {'type': None}
 
 def line_strip(text):
     """Strips leading empty lines and all trailing whitespace from the text"""

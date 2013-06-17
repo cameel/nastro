@@ -5,7 +5,7 @@ from datetime   import datetime
 
 # FIXME: Python complains on import beyond top-level package when calleed as
 # `python -m unittest` if we use a relative import here.
-from opera_importer import is_header_line, parse_hotlist_line, LineType, ElementIterator, import_opera_notes, line_strip
+from opera_importer import LineType, ElementIterator, import_opera_notes, line_strip
 from opera_importer import DuplicateAttribute, InvalidLine, StructuralError, InvalidLine, MissingNoteAttributes
 from note           import Note
 
@@ -51,7 +51,213 @@ NOTE_FILE_FIXTURES = [
     )
 ]
 
-class OperaImporterTest(unittest.TestCase):
+class ElementIteratorTest(unittest.TestCase):
+    def test_element_iterator_should_iterate_over_notes_in_a_well_formed_file(self):
+        fixture = NOTE_FILE_FIXTURES[0]
+
+        assert all([ElementIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        notes = []
+        with closing(StringIO(fixture)) as note_file:
+            iterator = ElementIterator(note_file)
+            for note_info in iterator:
+                notes.append(note_info)
+
+        self.assertEqual(len(notes), 7)
+        self.assertEqual(notes[0], ('FOLDER', {
+            'ID':       '386',
+            'NAME':     "folder 1",
+            'CREATED':  '1301917631',
+            'EXPANDED': 'YES',
+            'UNIQUEID': '4710F1B05EB111E0881E839B765D815D'
+        }))
+        self.assertEqual(notes[1], ('FOLDER', {
+            'ID':       '388',
+            'NAME':     "folder 2",
+            'CREATED':  '1317504992',
+            'UNIQUEID': '6DEECC10EC7511E0866BFCFEA00A66EC'
+        }))
+        self.assertEqual(notes[2], ('NOTE', {
+            'ID':       '389',
+            'NAME':     "note 1",
+            'CREATED':  '1315774570',
+            'UNIQUEID': '7A622360DCB811E095CBF98131828EE4'
+        }))
+        self.assertEqual(notes[3], ('SEPERATOR', {
+            'ID':       '1718',
+            'UNIQUEID': '00864980724711E0866DB9FAAEFC5346'
+        }))
+        self.assertEqual(notes[4], ('NOTE', {
+            'ID':       '390',
+            'NAME':     "note 2 title\02\02\02\02note body",
+            'CREATED':  '1317244817',
+            'UNIQUEID': 'A9C9FFD0EA1711E087A2D913B5105712'
+        }))
+        self.assertEqual(notes[5], "end")
+        self.assertEqual(notes[6], "end")
+
+    def test_element_iterator_should_detect_invalid_lines(self):
+        fixture = (
+            "Opera Hotlist version 2.0\n"
+            "Options: encoding = utf8, version=3\n"
+            "\n"
+            "#FOLDER\n"
+            "	ID=386\n"
+            "***********************\n"
+            "	CREATED=1301917631\n"
+            "	EXPANDED=YES\n"
+            "	UNIQUEID=4710F1B05EB111E0881E839B765D815D\n"
+        )
+
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[5])['type'] == None
+
+        with closing(StringIO(fixture)) as note_file:
+            with self.assertRaises(InvalidLine):
+                iterator = ElementIterator(note_file)
+                for note_info in iterator:
+                    pass
+
+    def test_element_iterator_should_detect_attributes_outside_elements(self):
+        fixture = (
+            "Opera Hotlist version 2.0\n"
+            "Options: encoding = utf8, version=3\n"
+            "\n"
+            "	ID=386\n"
+            "#FOLDER\n"
+        )
+
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[3])['type'] == LineType.ATTRIBUTE
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[4])['type'] == LineType.ELEMENT
+
+        with closing(StringIO(fixture)) as note_file:
+            with self.assertRaises(StructuralError):
+                iterator = ElementIterator(note_file)
+                for note_info in iterator:
+                    pass
+    def test_read_element_attributes_should_extract_attributes_correctly_given_only_attribute_lines(self):
+        fixture = (
+            "	ID=413\n"
+            "	UNIQUEID=BCDBB060953E11E0A3A8D585C4226479\n"
+            "	NAME=note content\02\02\02\02next line\n"
+            "	CREATED=1307915751"
+        )
+        expected_attributes = {
+            'ID':       '413',
+            'UNIQUEID': 'BCDBB060953E11E0A3A8D585C4226479',
+            'NAME':     "note content\02\02\02\02next line",
+            'CREATED':  '1307915751'
+        }
+
+        assert all([ElementIterator.parse_hotlist_line(line)['type'] == LineType.ATTRIBUTE for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            (attributes, next_line) = ElementIterator.read_element_attributes('NOTE', note_file)
+
+            self.assertEqual(next_line, '')
+            self.assertEqual(attributes, expected_attributes)
+            self.assertEqual(note_file.tell(), len(fixture))
+
+    def test_read_element_attributes_should_skip_leading_empty_lines(self):
+        fixture = (
+            "\n"
+            "	\n"
+            "	ID=413\n"
+        )
+        expected_attributes = {
+            'ID': '413'
+        }
+
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[0])['type'] == LineType.EMPTY
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.EMPTY
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[2])['type'] == LineType.ATTRIBUTE
+
+        with closing(StringIO(fixture)) as note_file:
+            (attributes, next_line) = ElementIterator.read_element_attributes('NOTE', note_file)
+
+            self.assertEqual(next_line, '')
+            self.assertEqual(attributes, expected_attributes)
+            self.assertEqual(note_file.tell(), len(fixture))
+
+    def test_read_element_attributes_should_stop_before_folder_end(self):
+        fixture = (
+            "	ID=413\n"
+            "-\n"
+            "	UNIQUEID=BCD"
+        )
+        expected_attributes = {
+            'ID': '413'
+        }
+
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[0])['type'] == LineType.ATTRIBUTE
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.END
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[2])['type'] == LineType.ATTRIBUTE
+
+        with closing(StringIO(fixture)) as note_file:
+            (attributes, next_line) = ElementIterator.read_element_attributes('NOTE', note_file)
+
+            self.assertEqual(next_line, '-\n')
+            self.assertEqual(attributes, expected_attributes)
+            self.assertEqual(note_file.tell(), fixture.find("-\n") + len("-\n"))
+
+    def test_read_element_attributes_should_stop_before_next_element(self):
+        fixture = (
+            "	ID=413\n"
+            "#NOTE\n"
+            "	ID=414\n"
+        )
+        expected_attributes = {
+            'ID': '413'
+        }
+
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[0])['type'] == LineType.ATTRIBUTE
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.ELEMENT
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[2])['type'] == LineType.ATTRIBUTE
+
+        with closing(StringIO(fixture)) as note_file:
+            (attributes, next_line) = ElementIterator.read_element_attributes('NOTE', note_file)
+
+            self.assertEqual(next_line, '#NOTE\n')
+            self.assertEqual(attributes, expected_attributes)
+            self.assertEqual(note_file.tell(), fixture.find("#NOTE\n") + len("#NOTE\n"))
+
+    def test_read_element_attributes_should_detect_duplicate_attributes(self):
+        fixture = (
+            "	ID=413\n"
+            "	ID=414\n"
+        )
+
+        assert all([ElementIterator.parse_hotlist_line(line)['type'] == LineType.ATTRIBUTE for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            with self.assertRaises(DuplicateAttribute):
+                ElementIterator.read_element_attributes('NOTE', note_file)
+
+    def test_read_element_attributes_should_detect_invalid_lines(self):
+        fixture = (
+            "**********************\n"
+            "	ID=414\n"
+        )
+
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[0])['type'] == None
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.ATTRIBUTE
+
+        with closing(StringIO(fixture)) as note_file:
+            with self.assertRaises(InvalidLine):
+                ElementIterator.read_element_attributes('NOTE', note_file)
+
+    def test_read_element_attributes_should_detect_headers_in_a_wrong_place(self):
+        fixture = (
+            "Options: *\n"
+            "	ID=414\n"
+        )
+
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[0])['type'] == LineType.HEADER
+        assert ElementIterator.parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.ATTRIBUTE
+
+        with closing(StringIO(fixture)) as note_file:
+            with self.assertRaises(StructuralError):
+                ElementIterator.read_element_attributes('NOTE', note_file)
+
     def test_is_header_line_should_detect_header_lines(self):
         fixtures = [
             # Lines actually seen in the wild
@@ -77,7 +283,7 @@ class OperaImporterTest(unittest.TestCase):
         ]
 
         for expected_result, line in fixtures:
-            self.assertEqual((is_header_line(line), line), (expected_result, line))
+            self.assertEqual((ElementIterator.is_header_line(line), line), (expected_result, line))
 
     def test_parse_hotlist_line(self):
         fixtures = [
@@ -119,7 +325,7 @@ class OperaImporterTest(unittest.TestCase):
         ]
 
         for line, expected_result in fixtures:
-            self.assertEqual((parse_hotlist_line(line), line), (expected_result, line))
+            self.assertEqual((ElementIterator.parse_hotlist_line(line), line), (expected_result, line))
 
     def test_parse_hotlist_line_should_strip_whitespace_from_attribute_names(self):
         fixtures = [
@@ -143,8 +349,9 @@ class OperaImporterTest(unittest.TestCase):
         ]
 
         for line, expected_result in fixtures:
-            self.assertEqual((parse_hotlist_line(line), line), (expected_result, line))
+            self.assertEqual((ElementIterator.parse_hotlist_line(line), line), (expected_result, line))
 
+class OperaImporterTest(unittest.TestCase):
     def test_line_strip_should_strip_leading_and_trailing_empty_lines(self):
         leading_whitespace = (
             "\n"
@@ -223,7 +430,7 @@ class OperaImporterTest(unittest.TestCase):
     def test_import_opera_notes_should_import_a_well_formed_file(self):
         fixture = NOTE_FILE_FIXTURES[0]
 
-        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert all([ElementIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
             notes = import_opera_notes(note_file)
@@ -249,7 +456,7 @@ class OperaImporterTest(unittest.TestCase):
             "	UNIQUEID=4710F1B05EB111E0881E839B765D815D\n"
         )
 
-        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert all([ElementIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
             notes = import_opera_notes(note_file)
@@ -265,7 +472,7 @@ class OperaImporterTest(unittest.TestCase):
             "	CREATED=1317244817\n"
         )
 
-        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert all([ElementIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
             notes = import_opera_notes(note_file)
@@ -282,7 +489,7 @@ class OperaImporterTest(unittest.TestCase):
             "	NAME=note\n"
         )
 
-        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert all([ElementIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with self.assertRaises(MissingNoteAttributes):
             with closing(StringIO(fixture)) as note_file:
@@ -294,216 +501,9 @@ class OperaImporterTest(unittest.TestCase):
             "	ID=386\n"
         )
 
-        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert all([ElementIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with self.assertRaises(MissingNoteAttributes):
             with closing(StringIO(fixture)) as note_file:
                 import_opera_notes(note_file)
 
-class ElementIteratorTest(unittest.TestCase):
-    def test_read_element_attributes_should_extract_attributes_correctly_given_only_attribute_lines(self):
-        fixture = (
-            "	ID=413\n"
-            "	UNIQUEID=BCDBB060953E11E0A3A8D585C4226479\n"
-            "	NAME=note content\02\02\02\02next line\n"
-            "	CREATED=1307915751"
-        )
-        expected_attributes = {
-            'ID':       '413',
-            'UNIQUEID': 'BCDBB060953E11E0A3A8D585C4226479',
-            'NAME':     "note content\02\02\02\02next line",
-            'CREATED':  '1307915751'
-        }
-
-        assert all([parse_hotlist_line(line)['type'] == LineType.ATTRIBUTE for line in fixture.splitlines()])
-
-        with closing(StringIO(fixture)) as note_file:
-            (attributes, next_line) = ElementIterator.read_element_attributes('NOTE', note_file)
-
-            self.assertEqual(next_line, '')
-            self.assertEqual(attributes, expected_attributes)
-            self.assertEqual(note_file.tell(), len(fixture))
-
-    def test_read_element_attributes_should_skip_leading_empty_lines(self):
-        fixture = (
-            "\n"
-            "	\n"
-            "	ID=413\n"
-        )
-        expected_attributes = {
-            'ID': '413'
-        }
-
-        assert parse_hotlist_line(fixture.splitlines()[0])['type'] == LineType.EMPTY
-        assert parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.EMPTY
-        assert parse_hotlist_line(fixture.splitlines()[2])['type'] == LineType.ATTRIBUTE
-
-        with closing(StringIO(fixture)) as note_file:
-            (attributes, next_line) = ElementIterator.read_element_attributes('NOTE', note_file)
-
-            self.assertEqual(next_line, '')
-            self.assertEqual(attributes, expected_attributes)
-            self.assertEqual(note_file.tell(), len(fixture))
-
-    def test_read_element_attributes_should_stop_before_folder_end(self):
-        fixture = (
-            "	ID=413\n"
-            "-\n"
-            "	UNIQUEID=BCD"
-        )
-        expected_attributes = {
-            'ID': '413'
-        }
-
-        assert parse_hotlist_line(fixture.splitlines()[0])['type'] == LineType.ATTRIBUTE
-        assert parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.END
-        assert parse_hotlist_line(fixture.splitlines()[2])['type'] == LineType.ATTRIBUTE
-
-        with closing(StringIO(fixture)) as note_file:
-            (attributes, next_line) = ElementIterator.read_element_attributes('NOTE', note_file)
-
-            self.assertEqual(next_line, '-\n')
-            self.assertEqual(attributes, expected_attributes)
-            self.assertEqual(note_file.tell(), fixture.find("-\n") + len("-\n"))
-
-    def test_read_element_attributes_should_stop_before_next_element(self):
-        fixture = (
-            "	ID=413\n"
-            "#NOTE\n"
-            "	ID=414\n"
-        )
-        expected_attributes = {
-            'ID': '413'
-        }
-
-        assert parse_hotlist_line(fixture.splitlines()[0])['type'] == LineType.ATTRIBUTE
-        assert parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.ELEMENT
-        assert parse_hotlist_line(fixture.splitlines()[2])['type'] == LineType.ATTRIBUTE
-
-        with closing(StringIO(fixture)) as note_file:
-            (attributes, next_line) = ElementIterator.read_element_attributes('NOTE', note_file)
-
-            self.assertEqual(next_line, '#NOTE\n')
-            self.assertEqual(attributes, expected_attributes)
-            self.assertEqual(note_file.tell(), fixture.find("#NOTE\n") + len("#NOTE\n"))
-
-    def test_read_element_attributes_should_detect_duplicate_attributes(self):
-        fixture = (
-            "	ID=413\n"
-            "	ID=414\n"
-        )
-
-        assert all([parse_hotlist_line(line)['type'] == LineType.ATTRIBUTE for line in fixture.splitlines()])
-
-        with closing(StringIO(fixture)) as note_file:
-            with self.assertRaises(DuplicateAttribute):
-                ElementIterator.read_element_attributes('NOTE', note_file)
-
-    def test_read_element_attributes_should_detect_invalid_lines(self):
-        fixture = (
-            "**********************\n"
-            "	ID=414\n"
-        )
-
-        assert parse_hotlist_line(fixture.splitlines()[0])['type'] == None
-        assert parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.ATTRIBUTE
-
-        with closing(StringIO(fixture)) as note_file:
-            with self.assertRaises(InvalidLine):
-                ElementIterator.read_element_attributes('NOTE', note_file)
-
-    def test_read_element_attributes_should_detect_headers_in_a_wrong_place(self):
-        fixture = (
-            "Options: *\n"
-            "	ID=414\n"
-        )
-
-        assert parse_hotlist_line(fixture.splitlines()[0])['type'] == LineType.HEADER
-        assert parse_hotlist_line(fixture.splitlines()[1])['type'] == LineType.ATTRIBUTE
-
-        with closing(StringIO(fixture)) as note_file:
-            with self.assertRaises(StructuralError):
-                ElementIterator.read_element_attributes('NOTE', note_file)
-
-    def test_element_iterator_should_iterate_over_notes_in_a_well_formed_file(self):
-        fixture = NOTE_FILE_FIXTURES[0]
-
-        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
-
-        notes = []
-        with closing(StringIO(fixture)) as note_file:
-            iterator = ElementIterator(note_file)
-            for note_info in iterator:
-                notes.append(note_info)
-
-        self.assertEqual(len(notes), 7)
-        self.assertEqual(notes[0], ('FOLDER', {
-            'ID':       '386',
-            'NAME':     "folder 1",
-            'CREATED':  '1301917631',
-            'EXPANDED': 'YES',
-            'UNIQUEID': '4710F1B05EB111E0881E839B765D815D'
-        }))
-        self.assertEqual(notes[1], ('FOLDER', {
-            'ID':       '388',
-            'NAME':     "folder 2",
-            'CREATED':  '1317504992',
-            'UNIQUEID': '6DEECC10EC7511E0866BFCFEA00A66EC'
-        }))
-        self.assertEqual(notes[2], ('NOTE', {
-            'ID':       '389',
-            'NAME':     "note 1",
-            'CREATED':  '1315774570',
-            'UNIQUEID': '7A622360DCB811E095CBF98131828EE4'
-        }))
-        self.assertEqual(notes[3], ('SEPERATOR', {
-            'ID':       '1718',
-            'UNIQUEID': '00864980724711E0866DB9FAAEFC5346'
-        }))
-        self.assertEqual(notes[4], ('NOTE', {
-            'ID':       '390',
-            'NAME':     "note 2 title\02\02\02\02note body",
-            'CREATED':  '1317244817',
-            'UNIQUEID': 'A9C9FFD0EA1711E087A2D913B5105712'
-        }))
-        self.assertEqual(notes[5], "end")
-        self.assertEqual(notes[6], "end")
-
-    def test_element_iterator_should_detect_invalid_lines(self):
-        fixture = (
-            "Opera Hotlist version 2.0\n"
-            "Options: encoding = utf8, version=3\n"
-            "\n"
-            "#FOLDER\n"
-            "	ID=386\n"
-            "***********************\n"
-            "	CREATED=1301917631\n"
-            "	EXPANDED=YES\n"
-            "	UNIQUEID=4710F1B05EB111E0881E839B765D815D\n"
-        )
-
-        assert parse_hotlist_line(fixture.splitlines()[5])['type'] == None
-
-        with closing(StringIO(fixture)) as note_file:
-            with self.assertRaises(InvalidLine):
-                iterator = ElementIterator(note_file)
-                for note_info in iterator:
-                    pass
-
-    def test_element_iterator_should_detect_attributes_outside_elements(self):
-        fixture = (
-            "Opera Hotlist version 2.0\n"
-            "Options: encoding = utf8, version=3\n"
-            "\n"
-            "	ID=386\n"
-            "#FOLDER\n"
-        )
-
-        assert parse_hotlist_line(fixture.splitlines()[3])['type'] == LineType.ATTRIBUTE
-        assert parse_hotlist_line(fixture.splitlines()[4])['type'] == LineType.ELEMENT
-
-        with closing(StringIO(fixture)) as note_file:
-            with self.assertRaises(StructuralError):
-                iterator = ElementIterator(note_file)
-                for note_info in iterator:
-                    pass
