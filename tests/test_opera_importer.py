@@ -258,6 +258,23 @@ class OperaImporterTest(unittest.TestCase):
         self.assertEqual(notes[0].title, "note title")
         self.assertEqual(notes[0].body,  "   note body")
 
+    def test_import_opera_notes_should_not_ignore_notes_with_no_text(self):
+        fixture = (
+            "#NOTE\n"
+            "	ID=386\n"
+            "	CREATED=1317244817\n"
+        )
+
+        assert all([parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            notes = import_opera_notes(note_file)
+
+        self.assertEqual(len(notes), 1)
+        self.assertEqual(notes[0].title,     '')
+        self.assertEqual(notes[0].body,      '')
+        self.assertEqual(notes[0].timestamp, datetime(2011, 9, 28, 23, 20, 17))
+
     def test_import_opera_notes_should_detect_missing_timestamp(self):
         fixture = (
             "#NOTE\n"

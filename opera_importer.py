@@ -181,17 +181,22 @@ def element_to_note(element):
             raise MissingNoteAttributes("Note (ID={}) is missing one or more required attributes: {}".format(note_id, ', '.join(missing_attributes)))
 
         if 'NAME' in attributes:
-            # FIXME: What about notes without names?
             title_and_body = attributes['NAME'].replace('\02\02', '\n').split('\n', 1)
 
             assert len(title_and_body) > 0, 'split() always returns at least one item'
 
-            return Note(
-                title_and_body[0].strip(),
-                line_strip(title_and_body[1]) if len(title_and_body) > 1 else '',
-                [],
-                datetime.fromtimestamp(int(attributes['CREATED']))
-            )
+            title = title_and_body[0].strip()
+            body  = line_strip(title_and_body[1]) if len(title_and_body) > 1 else ''
+        else:
+            title = ''
+            body  = ''
+
+        return Note(
+            title,
+            body,
+            [],
+            datetime.fromtimestamp(int(attributes['CREATED']))
+        )
 
     return None
 
