@@ -97,3 +97,4 @@ class MainWindow(KMainWindow):
             with open(file_name, 'r') as note_file:
                 notes = import_opera_notes(note_file)
             self.tape_widget.load_notes(notes)
+            QMessageBox.information(self, "Success", "Successfully imported {} notes".format(len(notes)))
