@@ -70,6 +70,7 @@ def import_opera_notes(note_file):
         else:
             element_name, attributes = element
 
+            body = ''
             if element_name == 'FOLDER':
                 # NOTE: If there are two folders with identical names (or differing only with whitespace),
                 # they won't be unambiguously discernible by tags after import.
@@ -81,7 +82,7 @@ def import_opera_notes(note_file):
                     # future but only if someone actually needs it.
                     raise InvalidTagCharacter("Folders containing '{}' characters in titles are not supported.".format(FOLDER_TAG_SEPARATOR))
 
-            if element_name == 'NOTE':
+            if element_name == 'NOTE' or body != '':
                 note = element_to_note(attributes, folder_stack)
                 if note != None:
                     notes.append(note)

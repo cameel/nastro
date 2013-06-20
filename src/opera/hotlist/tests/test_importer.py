@@ -206,3 +206,26 @@ class HotlistImporterTest(unittest.TestCase):
         with self.assertRaises(StructuralError):
             with closing(StringIO(fixture)) as note_file:
                 import_opera_notes(note_file)
+
+    def test_import_opera_notes_should_add_folders_with_body_as_notes(self):
+        fixture = NOTE_FILE_FIXTURES[1]
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            notes = import_opera_notes(note_file)
+
+        self.assertEqual(len(notes), 3)
+        self.assertTrue([isinstance(note, Note) for note in notes])
+
+        self.assertEqual(notes[0].title, "F1")
+        self.assertEqual(notes[0].body,  "abc")
+        self.assertEqual(notes[0].tags,  ['F1'])
+
+        self.assertEqual(notes[1].title, "N1")
+        self.assertEqual(notes[1].body,  "")
+        self.assertEqual(notes[1].tags,  ['F1'])
+
+        self.assertEqual(notes[2].title, "N2")
+        self.assertEqual(notes[2].body,  "def")
+        self.assertEqual(notes[2].tags,  ['F1/F2'])
