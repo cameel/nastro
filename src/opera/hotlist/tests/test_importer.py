@@ -229,3 +229,13 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(notes[2].title, "N2")
         self.assertEqual(notes[2].body,  "def")
         self.assertEqual(notes[2].tags,  ['F1/F2'])
+
+    def test_import_opera_notes_should_detect_folder_without_matching_end(self):
+        fixture = NOTE_FILE_FIXTURES[1][0:-2]
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) > count_folder_ends(fixture)
+
+        with self.assertRaises(StructuralError):
+            with closing(StringIO(fixture)) as note_file:
+                import_opera_notes(note_file)

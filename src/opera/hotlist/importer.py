@@ -87,4 +87,8 @@ def import_opera_notes(note_file):
                 if note != None:
                     notes.append(note)
 
+    if len(folder_stack) > 0:
+        # It may be a good idea to replace it with a warning when we have na UI for importers
+        raise StructuralError("Not all folders have matching end markers. The file may have been truncated.")
+
     return notes
