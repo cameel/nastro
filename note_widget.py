@@ -1,6 +1,6 @@
 """ The UI widget that represents a single note """
 
-from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QPushButton, QSizePolicy
+from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QPushButton, QSizePolicy, QFont
 from PyQt4.QtCore import SIGNAL
 
 class NoteWidget(QWidget):
@@ -10,13 +10,22 @@ class NoteWidget(QWidget):
 
         self._main_layout = QVBoxLayout(self)
 
+        # Use Liberation Mono font if present. If not, TypeWriter hint
+        # will make Qt select some other monospace font.
+        monospace_font = QFont("Liberation Mono")
+        monospace_font.setStyleHint(QFont.TypeWriter)
+        monospace_font.setPointSize(10)
+
         self._title_panel  = QWidget(self)
         self._title_layout = QHBoxLayout(self._title_panel)
+        self._tag_editor   = QLineEdit(self)
         self._body_editor  = QTextEdit(self)
         self._body_editor.setMinimumSize(0, 250)
         self._body_editor.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        self._body_editor.setCurrentFont(monospace_font)
 
         self._main_layout.addWidget(self._title_panel)
+        self._main_layout.addWidget(self._tag_editor)
         self._main_layout.addWidget(self._body_editor)
         self._main_layout.addWidget(self._tag_editor)
 
@@ -29,7 +38,22 @@ class NoteWidget(QWidget):
 
         self._delete_button.setText('delete')
 
-        self.connect(self._delete_button, SIGNAL('clicked()'), lambda : self.emit(SIGNAL('requestDelete()')))
+        self.connect(self._delete_button, SIGNAL('clicked()'),     lambda : self.emit(SIGNAL('requestDelete()')))
+        self.connect(self._body_editor,   SIGNAL('textChanged()'), lambda : self.update_note_body())
+        self.connect(self._tag_editor,    SIGNAL('textChanged(const QString &)'), lambda text: self.update_note_tags(text))
+        self.connect(self._title_editor,  SIGNAL('textChanged(const QString &)'), lambda text: self.update_note_title(text))
+
+    def update_note_body(self):
+        if self._note != None:
+            self._note.body = self._body_editor.toPlainText()
+
+    def update_note_title(self, text):
+        if self._note != None:
+            self._note.title = text
+
+    def update_note_tags(self, text):
+        if self._note != None:
+            self._note.tags = [tag.strip() for tag in text.split(',')]
 
     @property
     def note(self):
@@ -39,6 +63,7 @@ class NoteWidget(QWidget):
     def note(self, value):
         self._note = value
         self._title_editor.setText(value.title)
+        self._tag_editor.setText(', '.join(value.tags))
         self._body_editor.setPlainText(value.body)
         # TODO: Use system settings for date format?
         self._timestamp_label.setText(value.timestamp.strftime("%Y-%m-%d %H:%M"))

@@ -66,3 +66,26 @@ class TapeWidget(QWidget):
             self._note_widgets.remove(note_widget)
 
         assert note not in self._note_widgets
+
+    def clear(self):
+        for note_widget in self._note_widgets:
+            note_widget.setParent(None)
+
+        self._note_widgets = []
+
+    def dump_notes(self):
+        notes = []
+        for note_widget in self._note_widgets:
+            notes.append(note_widget.note.to_dict())
+
+        return notes
+
+    def load_notes(self, notes):
+        self.clear()
+
+        try:
+            for note in notes:
+                self.add_note(note)
+        except:
+            self.clear()
+            raise
