@@ -3,12 +3,13 @@
 
 """ Entry point of the application """
 
-from PyKDE4.kdecore import KCmdLineArgs, KAboutData, ki18n
+from PyKDE4.kdecore import KCmdLineArgs, KCmdLineOptions, KAboutData, ki18n
 from PyKDE4.kdeui   import KApplication
 from PyQt4.QtGui    import QMessageBox
 from PyQt4.QtCore   import QTimer
 
 import sys
+import os
 
 from .main_window import MainWindow
 
@@ -36,7 +37,15 @@ def setup_command_line():
     about_data = create_about_data()
     KCmdLineArgs.init(sys.argv, about_data)
 
+    options = KCmdLineOptions()
+    options.add("+[note_file]", ki18n("A JSON note file to open at startup"))
+    KCmdLineArgs.addCmdLineOptions(options)
+
+    args   = KCmdLineArgs.parsedArgs()
     config = {}
+    if args.count() > 0:
+        config['note_file'] = args.arg(0)
+
     return (about_data, config)
 
 def create_application():
@@ -85,6 +94,14 @@ def main():
 
     original_excepthook = sys.excepthook
     sys.excepthook      = global_exception_handler
+
+    if 'note_file' in command_line_config:
+        if not os.path.isfile(command_line_config['note_file']):
+            print("Note file does not exist or is a directory: {}".format(command_line_config['note_file']))
+            window.close()
+            sys.exit(1)
+
+        window.open_note_file(command_line_config['note_file'])
 
     timer = start_signal_timer()
 
