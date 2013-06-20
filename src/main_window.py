@@ -38,15 +38,15 @@ class MainWindow(KMainWindow):
         import_opera_notes_action = import_menu.addAction("&Opera Notes...")
 
         self.connect(exit_action,    SIGNAL('triggered()'), self.close)
-        self.connect(open_action,    SIGNAL('triggered()'), self.load_file)
-        self.connect(save_as_action, SIGNAL('triggered()'), self.save_file)
+        self.connect(open_action,    SIGNAL('triggered()'), self.open_handler)
+        self.connect(save_as_action, SIGNAL('triggered()'), self.save_as_handler)
 
-        self.connect(import_opera_notes_action, SIGNAL('triggered()'), self.import_opera_notes)
+        self.connect(import_opera_notes_action, SIGNAL('triggered()'), self.import_opera_notes_handler)
 
         self.resize(1200, 800)
         self.setCentralWidget(self.main_panel)
 
-    def save_file(self):
+    def save_as_handler(self):
         file_name = QFileDialog.getSaveFileName(
             self,
             "Save as...",
@@ -55,15 +55,9 @@ class MainWindow(KMainWindow):
         )
 
         if file_name != '':
-            notes = self.tape_widget.dump_notes()
+            self.save_note_file_as(file_name)
 
-            with open(file_name, 'w') as json_file:
-                if __debug__:
-                    json_file.write(simplejson.dumps(notes, indent = 4, sort_keys = True))
-                else:
-                    json_file.write(simplejson.dumps(notes))
-
-    def load_file(self):
+    def open_handler(self):
         file_name = QFileDialog.getOpenFileName(
             self,
             "Open...",
@@ -72,20 +66,9 @@ class MainWindow(KMainWindow):
         )
 
         if file_name != '':
-            with open(file_name, 'r') as json_file:
-                try:
-                    raw_notes = simplejson.loads(json_file.read())
-                except simplejson.scanner.JSONDecodeError:
-                    QMessageBox.warning(self, "File error", "Failed to decode JSON data. The file has different format or is damaged.")
-                    return
+            self.open_note_file(file_name)
 
-            notes = []
-            for note_dict in raw_notes:
-                notes.append(Note.from_dict(note_dict))
-
-            self.tape_widget.load_notes(notes)
-
-    def import_opera_notes(self):
+    def import_opera_notes_handler(self):
         file_name = QFileDialog.getOpenFileName(
             self,
             "Open Opera Notes...",
@@ -94,7 +77,35 @@ class MainWindow(KMainWindow):
         )
 
         if file_name != '':
-            with open(file_name, 'r') as note_file:
-                notes = import_opera_notes(note_file)
-            self.tape_widget.load_notes(notes)
-            QMessageBox.information(self, "Success", "Successfully imported {} notes".format(len(notes)))
+            num_notes = self.import_opera_notes(file_name)
+            QMessageBox.information(self, "Success", "Successfully imported {} notes".format(num_notes))
+
+    def save_note_file_as(self, file_name):
+        notes = self.tape_widget.dump_notes()
+
+        with open(file_name, 'w') as json_file:
+            if __debug__:
+                json_file.write(simplejson.dumps(notes, indent = 4, sort_keys = True))
+            else:
+                json_file.write(simplejson.dumps(notes))
+
+    def open_note_file(self, file_name):
+        with open(file_name, 'r') as json_file:
+            try:
+                raw_notes = simplejson.loads(json_file.read())
+            except simplejson.scanner.JSONDecodeError:
+                QMessageBox.warning(self, "File error", "Failed to decode JSON data. The file has different format or is damaged.")
+                return
+
+        notes = []
+        for note_dict in raw_notes:
+            notes.append(Note.from_dict(note_dict))
+
+        self.tape_widget.load_notes(notes)
+
+    def import_opera_notes(self, file_name):
+        with open(file_name, 'r') as note_file:
+            notes = import_opera_notes(note_file)
+        self.tape_widget.load_notes(notes)
+
+        return len(notes)
