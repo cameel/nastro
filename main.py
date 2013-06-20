@@ -32,18 +32,22 @@ def create_about_data():
 
     return KAboutData(app_name, catalog, program_name, version, description, license, copyright, text, home_page, bug_email)
 
+def setup_command_line():
+    about_data = create_about_data()
+    KCmdLineArgs.init(sys.argv, about_data)
+
+    config = {}
+    return (about_data, config)
+
 def create_application():
     global application
     global window
-
-    about_data = create_about_data()
-    KCmdLineArgs.init(sys.argv, about_data)
 
     application = KApplication()
     window      = MainWindow()
     window.show()
 
-    return (about_data, application, window)
+    return (application, window)
 
 def start_signal_timer():
     # NOTE: Python does not process signals while executing C extensions.
@@ -76,7 +80,8 @@ def global_exception_handler(type, value, traceback):
 def main():
     global original_excepthook
 
-    (about_data, application, window) = create_application()
+    (about_data, command_line_config) = setup_command_line()
+    (application, window)             = create_application()
 
     original_excepthook = sys.excepthook
     sys.excepthook      = global_exception_handler
