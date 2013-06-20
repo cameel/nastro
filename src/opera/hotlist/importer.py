@@ -25,6 +25,18 @@ def line_strip(text):
 
     return text[first_nonwhitespace_line_start:last_nonwhitespace_index + 1]
 
+def title_body_split(name_attribute):
+    if name_attribute != None:
+        title_and_body = name_attribute.replace('\02\02', '\n').split('\n', 1)
+        assert len(title_and_body) > 0, 'split() always returns at least one item'
+
+        return (
+            title_and_body[0].strip(),
+            line_strip(title_and_body[1]) if len(title_and_body) > 1 else ''
+        )
+    else:
+        return ('', '')
+
 def element_to_note(element):
     element_name, attributes = element
 
@@ -36,16 +48,7 @@ def element_to_note(element):
             note_id = attributes['ID'] if 'ID' in attributes else '???'
             raise MissingNoteAttributes("Note (ID={}) is missing one or more required attributes: {}".format(note_id, ', '.join(missing_attributes)))
 
-        if 'NAME' in attributes:
-            title_and_body = attributes['NAME'].replace('\02\02', '\n').split('\n', 1)
-
-            assert len(title_and_body) > 0, 'split() always returns at least one item'
-
-            title = title_and_body[0].strip()
-            body  = line_strip(title_and_body[1]) if len(title_and_body) > 1 else ''
-        else:
-            title = ''
-            body  = ''
+        (title, body) = title_body_split(attributes.get('NAME'))
 
         return Note(
             title,
