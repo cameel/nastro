@@ -4,7 +4,7 @@ from contextlib import closing
 from datetime   import datetime
 
 from ..iterator     import HotlistIterator, LineType, StructuralError
-from ..importer     import import_opera_notes, line_strip, MissingNoteAttributes
+from ..importer     import import_opera_notes, line_strip, MissingNoteAttributes, FOLDER_TAG_SEPARATOR
 from ....note       import Note
 from .test_iterator import NOTE_FILE_FIXTURES
 
@@ -239,3 +239,37 @@ class HotlistImporterTest(unittest.TestCase):
         with self.assertRaises(StructuralError):
             with closing(StringIO(fixture)) as note_file:
                 import_opera_notes(note_file)
+
+    def test_import_opera_notes_should_not_escape_or_remove_tag_separators_from_folder_titles(self):
+        folder_title = "F1" + FOLDER_TAG_SEPARATOR + "F2"
+        note_title   = "N1" + FOLDER_TAG_SEPARATOR + "N2"
+        note_body    = "N3" + FOLDER_TAG_SEPARATOR + "N4"
+
+        fixture = (
+            "Opera Hotlist version 2.0\n"
+            "Options: encoding = utf8, version=3\n"
+            "\n"
+            "#FOLDER\n"
+            "	ID=1\n"
+            "	NAME=" + folder_title + "\n"
+            "	CREATED=1301917631\n"
+            "\n"
+            "#NOTE\n"
+            "	ID=2\n"
+            "	NAME=" + note_title + "\x02\x02" + note_body + "\n"
+            "	CREATED=1315774570\n"
+            "\n"
+            "-\n"
+        )
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            notes = import_opera_notes(note_file)
+
+        self.assertEqual(len(notes), 1)
+        self.assertTrue([isinstance(note, Note) for note in notes])
+
+        self.assertEqual(notes[0].title, note_title)
+        self.assertEqual(notes[0].body,  note_body)
+        self.assertEqual(notes[0].tags,  [folder_title])

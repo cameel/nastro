@@ -49,8 +49,6 @@ def element_to_note(attributes, folder_path):
 
     (title, body) = title_body_split(attributes.get('NAME'))
 
-    assert len([folder_title for folder_title in folder_path if FOLDER_TAG_SEPARATOR in folder_title]) == 0
-
     return Note(
         title,
         body,
@@ -76,11 +74,6 @@ def import_opera_notes(note_file):
                 # they won't be unambiguously discernible by tags after import.
                 (title, body) = title_body_split(attributes.get('NAME'))
                 folder_stack.append(title)
-
-                if FOLDER_TAG_SEPARATOR in title:
-                    # We would have to escape these characters. For now just bail out. We'll implement this in
-                    # future but only if someone actually needs it.
-                    raise InvalidTagCharacter("Folders containing '{}' characters in titles are not supported.".format(FOLDER_TAG_SEPARATOR))
 
             if element_name == 'NOTE' or body != '':
                 note = element_to_note(attributes, folder_stack)
