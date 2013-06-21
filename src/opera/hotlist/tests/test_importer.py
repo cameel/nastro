@@ -4,7 +4,7 @@ from contextlib import closing
 from datetime   import datetime
 
 from ..iterator     import HotlistIterator, LineType, StructuralError
-from ..importer     import import_opera_notes, line_strip, MissingNoteAttributes, FOLDER_TAG_SEPARATOR
+from ..importer     import import_opera_notes, line_strip, MissingNoteAttributes, InvalidAttributeValue, FOLDER_TAG_SEPARATOR
 from ....note       import Note
 from .test_iterator import NOTE_FILE_FIXTURES
 
@@ -273,3 +273,96 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(notes[0].title, note_title)
         self.assertEqual(notes[0].body,  note_body)
         self.assertEqual(notes[0].tags,  [folder_title])
+
+    def test_import_opera_notes_should_skip_notes_inside_trash_folder(self):
+        fixture = NOTE_FILE_FIXTURES[2]
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) == count_folder_ends(fixture)
+
+        with closing(StringIO(fixture)) as note_file:
+            notes = import_opera_notes(note_file, skip_trash_folder = True)
+
+        self.assertEqual(len(notes), 2)
+        self.assertTrue([isinstance(note, Note) for note in notes])
+
+        self.assertEqual(notes[0].title, "N1")
+        self.assertEqual(notes[0].tags,  ['F1'])
+
+        self.assertEqual(notes[1].title, "N2")
+        self.assertEqual(notes[1].tags,  [''])
+
+    def test_import_opera_notes_should_not_skip_notes_inside_trash_folder_if_requested_not_to(self):
+        fixture = NOTE_FILE_FIXTURES[2]
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) == count_folder_ends(fixture)
+
+        with closing(StringIO(fixture)) as note_file:
+            notes = import_opera_notes(note_file, skip_trash_folder = False)
+
+        self.assertEqual(len(notes), 5)
+        self.assertTrue([isinstance(note, Note) for note in notes])
+
+        self.assertEqual(notes[0].title, "N1")
+        self.assertEqual(notes[0].tags,  ['F1'])
+
+        self.assertEqual(notes[1].title, "NT1")
+        self.assertEqual(notes[1].tags,  ['F1/T1'])
+
+        self.assertEqual(notes[2].title, "NT2")
+        self.assertEqual(notes[2].tags,  ['F1/T1'])
+
+        self.assertEqual(notes[3].title, "NT3")
+        self.assertEqual(notes[3].tags,  ['F1/T1/FT1'])
+
+        self.assertEqual(notes[4].title, "N2")
+        self.assertEqual(notes[4].tags,  [''])
+
+    def test_import_opera_notes_should_not_detect_invalid_trash_folder_attribute_values(self):
+        fixture = (
+            "#FOLDER\n"
+            "	ID=1\n"
+            "	NAME=T1\n"
+            "	CREATED=1301917631\n"
+            "	TRASH FOLDER=NEIN\n"
+            "-\n"
+        )
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) == count_folder_ends(fixture)
+
+        with self.assertRaises(InvalidAttributeValue):
+            with closing(StringIO(fixture)) as note_file:
+                import_opera_notes(note_file, skip_trash_folder = True)
+
+        with self.assertRaises(InvalidAttributeValue):
+            with closing(StringIO(fixture)) as note_file:
+                import_opera_notes(note_file, skip_trash_folder = False)
+
+    def test_import_opera_notes_should_detect_nested_trash_folders(self):
+        fixture = (
+            "#FOLDER\n"
+            "	ID=1\n"
+            "	NAME=T1\n"
+            "	CREATED=1301917631\n"
+            "	TRASH FOLDER=YES\n"
+            "#FOLDER\n"
+            "	ID=2\n"
+            "	NAME=T2\n"
+            "	CREATED=1301917631\n"
+            "	TRASH FOLDER=YES\n"
+            "-\n"
+            "-\n"
+        )
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) == count_folder_ends(fixture)
+
+        with self.assertRaises(StructuralError):
+            with closing(StringIO(fixture)) as note_file:
+                import_opera_notes(note_file, skip_trash_folder = True)
+
+        with self.assertRaises(StructuralError):
+            with closing(StringIO(fixture)) as note_file:
+                import_opera_notes(note_file, skip_trash_folder = False)
