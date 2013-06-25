@@ -59,11 +59,12 @@ class TapeWidget(QWidget):
 
     def remove_note(self, note):
         # TODO: Removal by index may be more efficient for large lists
-        note_widget = next(widget for widget in self._note_widgets if widget.note == note)
-
-        if note_widget != None:
+        try:
+            note_widget = next(widget for widget in self._note_widgets if widget.note == note)
             note_widget.setParent(None)
             self._note_widgets.remove(note_widget)
+        except StopIteration:
+            pass
 
         assert note not in self._note_widgets
 
