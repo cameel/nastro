@@ -46,7 +46,7 @@ class TapeWidget(QWidget):
                 title     = "Note {}".format(len(self._note_widgets) + 1),
                 body      = "",
                 tags      = [],
-                timestamp = datetime.now()
+                timestamp = datetime.utcnow()
             )
 
         # TODO: Get layout directly from widget
