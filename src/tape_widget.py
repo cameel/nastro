@@ -31,7 +31,7 @@ class TapeWidget(QWidget):
         self._main_layout.addLayout(self._button_layout)
         self._main_layout.addWidget(self._scroll_area)
 
-        self.connect(self._add_note_button, SIGNAL('clicked()'), lambda : self.add_note())
+        self.connect(self._add_note_button, SIGNAL('clicked()'),                   self.add_note)
 
         # NOTE: There are some caveats regarding setWidget() and show()
         # See QScrollArea.setWidget() docs.
