@@ -20,11 +20,11 @@ class TapeWidgetTest(unittest.TestCase):
         self.application = None
 
     def test_replace_tape_widget_should_destroy_old_tape_and_put_a_new_one_on_the_panel(self):
-        old_tape_widget   = self.window.tape_widget
-        main_panel_layout = self.window.main_panel_layout
+        old_tape_widget = self.window.tape_widget
+        main_panel      = self.window.main_panel
 
         assert isinstance(old_tape_widget, TapeWidget)
-        assert 0 <= main_panel_layout.indexOf(old_tape_widget) < main_panel_layout.count()
+        assert 0 <= main_panel.indexOf(old_tape_widget) < main_panel.count()
 
         old_tape_widget.add_note()
         old_tape_widget.add_note()
@@ -44,5 +44,5 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertNotEqual(self.window.tape_widget, old_tape_widget)
         self.assertEqual(len(self.window.tape_widget._note_widgets), 1)
         self.assertEqual(self.window.tape_widget._note_widgets[0].note, new_note)
-        self.assertTrue(0 <= main_panel_layout.indexOf(self.window.tape_widget) < main_panel_layout.count())
-        self.assertEqual(self.window.tape_widget.parentWidget(), self.window.main_panel)
+        self.assertTrue(0 <= main_panel.indexOf(self.window.tape_widget) < main_panel.count())
+        self.assertEqual(self.window.tape_widget.parentWidget(), main_panel)

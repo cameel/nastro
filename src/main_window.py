@@ -117,5 +117,4 @@ class MainWindow(KMainWindow):
         self.tape_widget.setParent(None)
 
         self.tape_widget = new_tape_widget
-        self.main_panel_layout.addWidget(new_tape_widget)
-        self.tape_widget.setParent(self.main_panel)
+        self.main_panel.addWidget(new_tape_widget)
