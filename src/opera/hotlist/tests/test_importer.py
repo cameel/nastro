@@ -120,10 +120,12 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(notes[0].title,       "note 1")
         self.assertEqual(notes[0].body,        "")
         self.assertEqual(notes[0].created_at,  localtime_to_utc(datetime(2011, 9, 11, 22, 56, 10)))
+        self.assertEqual(notes[0].modified_at, notes[0].created_at)
 
         self.assertEqual(notes[1].title,      "note 2 title")
         self.assertEqual(notes[1].body,       "note body")
         self.assertEqual(notes[1].created_at, localtime_to_utc(datetime(2011, 9, 28, 23, 20, 17)))
+        self.assertEqual(notes[1].modified_at, notes[1].created_at)
 
     def test_import_opera_notes_should_strip_leading_empty_lines_and_trailing_whitespace_from_note_body(self):
         fixture = (
@@ -160,6 +162,7 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(notes[0].title,       '')
         self.assertEqual(notes[0].body,        '')
         self.assertEqual(notes[0].created_at,  localtime_to_utc(datetime(2011, 9, 28, 23, 20, 17)))
+        self.assertEqual(notes[0].modified_at, notes[0].created_at)
 
     def test_import_opera_notes_should_detect_missing_timestamp(self):
         fixture = (

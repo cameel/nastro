@@ -63,6 +63,7 @@ class TapeWidgetTest(unittest.TestCase):
 
         # ASSUMPTION: This test executes in much less than 10 seconds.
         self.assertTrue(note_widget.note.created_at > datetime.utcnow() - timedelta(0, 10))
+        self.assertEqual(note_widget.note.created_at, note_widget.note.modified_at)
 
     def test_add_note_should_add_existing_note(self):
         assert len(self.tape_widget._note_widgets) == 0

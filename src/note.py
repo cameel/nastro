@@ -11,11 +11,12 @@ class InvalidTagCharacter(Exception):
 class Note:
     TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-    def __init__(self, title, body, tags, created_at):
+    def __init__(self, title, body, tags, created_at, modified_at = None):
         self.title       = title
         self.body        = body
         self.tags        = tags
         self.created_at  = created_at
+        self.modified_at = modified_at if modified_at != None else created_at
 
     def to_dict(self):
         return {
@@ -24,12 +25,13 @@ class Note:
             'tags':        self.tags,
             # NOTE: isoformat() is supposedly faster but it's output is harder
             # to parse as the microsecond part is omitted if it's 0.
-            'created_at':  self.created_at.strftime(self.TIMESTAMP_FORMAT)
+            'created_at':  self.created_at.strftime(self.TIMESTAMP_FORMAT),
+            'modified_at': self.modified_at.strftime(self.TIMESTAMP_FORMAT)
         }
 
     @classmethod
     def from_dict(cls, note_dict):
-        missing_properties = set(['title', 'body', 'tags', 'created_at']) - set(note_dict.keys())
+        missing_properties = set(['title', 'body', 'tags', 'created_at', 'modified_at']) - set(note_dict.keys())
         if len(missing_properties) > 0:
             raise MissingProperties("Not all required note properties are present")
 
@@ -40,7 +42,8 @@ class Note:
             title       = note_dict['title'],
             body        = note_dict['body'],
             tags        = note_dict['tags'],
-            created_at  = datetime.strptime(note_dict['created_at'],  cls.TIMESTAMP_FORMAT)
+            created_at  = datetime.strptime(note_dict['created_at'],  cls.TIMESTAMP_FORMAT),
+            modified_at = datetime.strptime(note_dict['modified_at'], cls.TIMESTAMP_FORMAT)
         )
 
     def __repr__(self):
