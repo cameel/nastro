@@ -4,6 +4,21 @@ from datetime import datetime
 from ..note import Note, InvalidTagCharacter, MissingProperties
 
 class NoteTest(unittest.TestCase):
+    def test_init_should_initialize_note(self):
+        note = Note(
+            title       = "X",
+            body        = "Y",
+            tags        = ["a", "b", "c"],
+            created_at  = datetime(2013, 6, 16),
+            modified_at = datetime(2013, 7, 16)
+        )
+
+        self.assertEqual(note.title,       "X")
+        self.assertEqual(note.body,        "Y")
+        self.assertEqual(note.tags,        ["a", "b", "c"])
+        self.assertEqual(note.created_at,  datetime(2013, 6, 16))
+        self.assertEqual(note.modified_at, datetime(2013, 7, 16))
+
     def test_init_should_set_modified_at_to_created_at_if_not_specified(self):
         note = Note(
             title       = "X",
