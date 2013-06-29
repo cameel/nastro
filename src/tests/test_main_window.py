@@ -32,10 +32,10 @@ class TapeWidgetTest(unittest.TestCase):
         old_note2 = old_tape_widget._note_widgets[1].note
 
         new_note = Note(
-            title     = "X",
-            body      = "Y",
-            tags      = ["Z"],
-            timestamp = datetime.utcnow()
+            title      = "X",
+            body       = "Y",
+            tags       = ["Z"],
+            created_at = datetime.utcnow()
         )
 
         self.window._replace_tape_widget([new_note])

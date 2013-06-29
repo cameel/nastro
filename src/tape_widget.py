@@ -44,10 +44,10 @@ class TapeWidget(QWidget):
             assert note not in self._note_widgets
         else:
             note = Note(
-                title     = "Note {}".format(len(self._note_widgets) + 1),
-                body      = "",
-                tags      = [],
-                timestamp = datetime.utcnow()
+                title       = "Note {}".format(len(self._note_widgets) + 1),
+                body        = "",
+                tags        = [],
+                created_at  = datetime.utcnow()
             )
 
         # TODO: Get layout directly from widget

@@ -30,10 +30,10 @@ class NoteWidget(QWidget):
         self._main_layout.addWidget(self._body_editor)
         self._main_layout.addWidget(self._tag_editor)
 
-        self._timestamp_label = QLabel(self._title_panel)
-        self._title_editor    = QLineEdit(self._title_panel)
-        self._delete_button   = QPushButton(self._title_panel)
-        self._title_layout.addWidget(self._timestamp_label)
+        self._created_at_label = QLabel(self._title_panel)
+        self._title_editor     = QLineEdit(self._title_panel)
+        self._delete_button    = QPushButton(self._title_panel)
+        self._title_layout.addWidget(self._created_at_label)
         self._title_layout.addWidget(self._title_editor)
         self._title_layout.addWidget(self._delete_button)
 
@@ -67,5 +67,5 @@ class NoteWidget(QWidget):
         self._tag_editor.setText(', '.join(value.tags))
         self._body_editor.setPlainText(value.body)
         # TODO: Use system settings for date format?
-        self._timestamp_label.setText(utc_to_localtime(value.timestamp).strftime("%Y-%m-%d %H:%M"))
+        self._created_at_label.setText(utc_to_localtime(value.created_at).strftime("%Y-%m-%d %H:%M"))
 
