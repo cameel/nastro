@@ -13,9 +13,7 @@ class NoteWidget(QWidget):
 
         # Use Liberation Mono font if present. If not, TypeWriter hint
         # will make Qt select some other monospace font.
-        monospace_font = QFont("Liberation Mono")
-        monospace_font.setStyleHint(QFont.TypeWriter)
-        monospace_font.setPointSize(10)
+        monospace_font = QFont("Liberation Mono", 10, QFont.TypeWriter)
 
         self._title_panel  = QWidget(self)
         self._title_layout = QHBoxLayout(self._title_panel)
