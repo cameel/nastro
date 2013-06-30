@@ -15,6 +15,9 @@ class NoteWidget(QWidget):
         # will make Qt select some other monospace font.
         monospace_font = QFont("Liberation Mono", 10, QFont.TypeWriter)
 
+        timestamp_font = QFont()
+        timestamp_font.setPointSize(7)
+
         self._title_panel  = QWidget(self)
         self._title_layout = QHBoxLayout(self._title_panel)
         self._tag_editor   = QLineEdit(self)
@@ -28,10 +31,18 @@ class NoteWidget(QWidget):
         self._main_layout.addWidget(self._body_editor)
         self._main_layout.addWidget(self._tag_editor)
 
-        self._created_at_label = QLabel(self._title_panel)
+        self._created_at_label  = QLabel(self._title_panel)
+        self._modified_at_label = QLabel(self._title_panel)
+        self._created_at_label.setFont(timestamp_font)
+        self._modified_at_label.setFont(timestamp_font)
+
+        self._timestamp_layout = QVBoxLayout()
+        self._timestamp_layout.addWidget(self._created_at_label)
+        self._timestamp_layout.addWidget(self._modified_at_label)
+
         self._title_editor     = QLineEdit(self._title_panel)
         self._delete_button    = QPushButton(self._title_panel)
-        self._title_layout.addWidget(self._created_at_label)
+        self._title_layout.addLayout(self._timestamp_layout)
         self._title_layout.addWidget(self._title_editor)
         self._title_layout.addWidget(self._delete_button)
 
@@ -66,4 +77,5 @@ class NoteWidget(QWidget):
         self._body_editor.setPlainText(value.body)
         # TODO: Use system settings for date format?
         self._created_at_label.setText(utc_to_localtime(value.created_at).strftime("%Y-%m-%d %H:%M"))
+        self._modified_at_label.setText(utc_to_localtime(value.modified_at).strftime("%Y-%m-%d %H:%M"))
 
