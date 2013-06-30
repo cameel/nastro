@@ -1,5 +1,7 @@
 """ The UI widget that represents a single note """
 
+from datetime import datetime
+
 from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QPushButton, QSizePolicy, QFont
 from PyQt4.QtCore import SIGNAL
 from .utils       import utc_to_localtime
@@ -55,15 +57,27 @@ class NoteWidget(QWidget):
 
     def update_note_body(self):
         if self._note != None:
-            self._note.body = self._body_editor.toPlainText()
+            self._note.body        = self._body_editor.toPlainText()
+            self._note.modified_at = datetime.utcnow()
+            self.refresh_timestamps()
 
     def update_note_title(self, text):
         if self._note != None:
             self._note.title = text
+            self._note.modified_at = datetime.utcnow()
+            self.refresh_timestamps()
 
     def update_note_tags(self, text):
         if self._note != None:
             self._note.tags = [tag.strip() for tag in text.split(',')]
+            self._note.modified_at = datetime.utcnow()
+            self.refresh_timestamps()
+
+    def refresh_timestamps(self):
+        if self._note != None:
+            # TODO: Use system settings for date format?
+            self._created_at_label.setText(utc_to_localtime(self._note.created_at).strftime("%Y-%m-%d %H:%M"))
+            self._modified_at_label.setText(utc_to_localtime(self._note.modified_at).strftime("%Y-%m-%d %H:%M"))
 
     @property
     def note(self):
@@ -75,7 +89,4 @@ class NoteWidget(QWidget):
         self._title_editor.setText(value.title)
         self._tag_editor.setText(', '.join(value.tags))
         self._body_editor.setPlainText(value.body)
-        # TODO: Use system settings for date format?
-        self._created_at_label.setText(utc_to_localtime(value.created_at).strftime("%Y-%m-%d %H:%M"))
-        self._modified_at_label.setText(utc_to_localtime(value.modified_at).strftime("%Y-%m-%d %H:%M"))
-
+        self.refresh_timestamps()

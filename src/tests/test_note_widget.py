@@ -43,6 +43,21 @@ class NoteWidgetTest(unittest.TestCase):
         assert self.note_widget._body_editor.toPlainText() == new_text
         self.assertEqual(self.note_widget.note.body, new_text)
 
+    def test_writing_in_body_editor_should_update_modified_at_timestamp(self):
+        # NOTE: Insert note first save values later - we're only interested in changes made after the note is inserted.
+        self.note_widget.note = self.note
+
+        new_text           = "new text"
+        modified_at_before = self.note.modified_at
+
+        assert self.note.body != new_text
+        assert self.note_widget._body_editor.toPlainText() == self.note.body
+
+        self.note_widget._body_editor.setText(new_text)
+
+        assert self.note_widget._body_editor.toPlainText() == new_text
+        self.assertTrue(self.note_widget.note.modified_at > modified_at_before)
+
     def test_writing_in_title_editor_should_update_note_title(self):
         new_text              = "new text"
         self.note_widget.note = self.note
@@ -54,6 +69,21 @@ class NoteWidgetTest(unittest.TestCase):
 
         assert self.note_widget._title_editor.text() == new_text
         self.assertEqual(self.note_widget.note.title, new_text)
+
+    def test_writing_in_title_editor_should_update_modified_at_timestamp(self):
+        # NOTE: Insert note first save values later - we're only interested in changes made after the note is inserted.
+        self.note_widget.note = self.note
+
+        new_text           = "new text"
+        modified_at_before = self.note.modified_at
+
+        assert self.note.title != new_text
+        assert self.note_widget._title_editor.text() == self.note.title
+
+        self.note_widget._title_editor.setText(new_text)
+
+        assert self.note_widget._title_editor.text() == new_text
+        self.assertTrue(self.note_widget.note.modified_at > modified_at_before)
 
     def test_writing_in_tag_editor_should_update_note_tags(self):
         new_tags              = ["A", "B"]
@@ -67,3 +97,20 @@ class NoteWidgetTest(unittest.TestCase):
 
         assert self.note_widget._tag_editor.text() == new_text
         self.assertEqual(self.note_widget.note.tags, new_tags)
+
+    def test_writing_in_tag_editor_should_update_modified_at_timestamp(self):
+        # NOTE: Insert note first save values later - we're only interested in changes made after the note is inserted.
+        self.note_widget.note = self.note
+
+        new_tags           = ["A", "B"]
+        new_text           = ', '.join(new_tags)
+        modified_at_before = self.note.modified_at
+
+        assert self.note.tags != new_tags
+        assert self.note_widget._tag_editor.text() == ', '.join(self.note.tags)
+
+        self.note_widget._tag_editor.setText(new_text)
+
+        assert self.note_widget._tag_editor.text() == new_text
+        self.assertTrue(self.note_widget.note.modified_at > modified_at_before)
+
