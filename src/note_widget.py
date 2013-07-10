@@ -50,28 +50,32 @@ class NoteWidget(QWidget):
 
         self._delete_button.setText('delete')
 
-        self.connect(self._delete_button, SIGNAL('clicked()'),     lambda : self.emit(SIGNAL('requestDelete()')))
-        self.connect(self._body_editor,   SIGNAL('textChanged()'), lambda : self.update_note_body())
+        self.connect(self._delete_button, SIGNAL('clicked()'),                    lambda:      self.emit(SIGNAL('requestDelete()')))
+        self.connect(self._body_editor,   SIGNAL('textChanged()'),                lambda:      self.update_note_body())
         self.connect(self._tag_editor,    SIGNAL('textChanged(const QString &)'), lambda text: self.update_note_tags(text))
         self.connect(self._title_editor,  SIGNAL('textChanged(const QString &)'), lambda text: self.update_note_title(text))
 
     def update_note_body(self):
         if self._note != None:
-            self._note.body        = self._body_editor.toPlainText()
-            self._note.modified_at = datetime.utcnow()
-            self.refresh_timestamps()
+            new_body = self._body_editor.toPlainText()
+            if self._note.body != new_body:
+                self._note.body        = new_body
+                self._note.modified_at = datetime.utcnow()
+                self.refresh_timestamps()
 
     def update_note_title(self, text):
-        if self._note != None:
+        if self._note != None and self._note.title != text:
             self._note.title = text
             self._note.modified_at = datetime.utcnow()
             self.refresh_timestamps()
 
     def update_note_tags(self, text):
         if self._note != None:
-            self._note.tags = [tag.strip() for tag in text.split(',')]
-            self._note.modified_at = datetime.utcnow()
-            self.refresh_timestamps()
+            new_tags = [tag.strip() for tag in text.split(',')]
+            if self._note.tags != new_tags:
+                self._note.tags = new_tags
+                self._note.modified_at = datetime.utcnow()
+                self.refresh_timestamps()
 
     def refresh_timestamps(self):
         if self._note != None:
@@ -86,7 +90,11 @@ class NoteWidget(QWidget):
     @note.setter
     def note(self, value):
         self._note = value
+
         self._title_editor.setText(value.title)
         self._tag_editor.setText(', '.join(value.tags))
         self._body_editor.setPlainText(value.body)
+
+        # NOTE: setText() calls above cause textChanged() events to fire but they do nothing because
+        # the values do not change. As a fortunate consequence, refresh_timestamps() does not get called thrice.
         self.refresh_timestamps()
