@@ -42,3 +42,6 @@ class Note:
             note_dict['tags'],
             datetime.strptime(note_dict['timestamp'], cls.TIMESTAMP_FORMAT)
         )
+
+    def __repr__(self):
+        return 'Note' + repr(self.to_dict())
