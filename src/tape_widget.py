@@ -32,7 +32,9 @@ class TapeWidget(QWidget):
         self._main_layout.addWidget(self._scroll_area)
 
         self.connect(self._add_note_button, SIGNAL('clicked()'),                   self.add_note)
+        """
         self.connect(self._search_box,      SIGNAL('textEdited(const QString &)'), self.search_handler)
+        """
 
         # NOTE: There are some caveats regarding setWidget() and show()
         # See QScrollArea.setWidget() docs.
@@ -87,10 +89,12 @@ class TapeWidget(QWidget):
 
         return [note_matches(text.lower(), note_widget.note) for note_widget in self._note_widgets]
 
+    """
     def search_handler(self, text):
         mask = self.search(text)
         for i, note_matches in enumerate(mask):
             self._note_widgets[i].setVisible(note_matches)
+    """
 
     def clear(self):
         for note_widget in self._note_widgets:
