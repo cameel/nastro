@@ -49,6 +49,10 @@ class TapeWidget(QWidget):
     def note_count(self):
         return len(self._note_widgets)
 
+    def notes(self):
+        for note_widget in self._note_widgets:
+            yield note_widget.note
+
     def add_note(self, note = None):
         if note != None:
             assert note not in self._note_widgets

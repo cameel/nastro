@@ -61,6 +61,16 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.tape_widget.note_count(), len(self.notes))
 
+    def test_notes_should_enumerate_all_notes_in_the_same_order_as_note(self):
+        with self.assertRaises(StopIteration):
+            next(self.tape_widget.notes())
+
+        for note in self.notes:
+            self.tape_widget.add_note(note)
+
+        for (i, note) in enumerate(self.tape_widget.notes()):
+            self.assertEqual(note, self.tape_widget.note(i))
+
     def test_add_note_should_create_a_new_note(self):
         assert self.tape_widget.note_count() == 0
 
