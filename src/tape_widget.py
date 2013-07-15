@@ -1,7 +1,7 @@
 """ The UI widget that represents a scrollable tape composed of notes """
 
-from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton
-from PyQt4.QtCore import SIGNAL
+from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QStandardItem, QStandardItemModel
+from PyQt4.QtCore import SIGNAL, Qt
 
 from datetime import datetime
 
@@ -31,6 +31,8 @@ class TapeWidget(QWidget):
         self._main_layout.addLayout(self._button_layout)
         self._main_layout.addWidget(self._scroll_area)
 
+        self._tape_model    = QStandardItemModel()
+
         self.connect(self._add_note_button, SIGNAL('clicked()'),                   self.add_note)
         """
         self.connect(self._search_box,      SIGNAL('textEdited(const QString &)'), self.search_handler)
@@ -42,23 +44,29 @@ class TapeWidget(QWidget):
         self._scroll_area.setWidget(self._note_panel)
 
     def note(self, index):
-        assert 0 <= index < len(self._note_widgets)
+        assert 0 <= index < self._tape_model.rowCount()
 
-        return self._note_widgets[index].note
+        note = self._tape_model.item(index).data(Qt.EditRole)
+        assert isinstance(note, Note)
+
+        return note
 
     def note_count(self):
-        return len(self._note_widgets)
+        return self._tape_model.rowCount()
 
     def notes(self):
-        for note_widget in self._note_widgets:
-            yield note_widget.note
+        for i in range(self._tape_model.rowCount()):
+            note = self._tape_model.item(i).data(Qt.EditRole)
+            assert isinstance(note, Note)
+
+            yield note
 
     def add_note(self, note = None):
         if note != None:
-            assert note not in self.notes()
+            assert self._find_note(note) == None
         else:
             note = Note(
-                title       = "Note {}".format(len(self._note_widgets) + 1),
+                title       = "Note {}".format(self._tape_model.rowCount() + 1),
                 body        = "",
                 tags        = [],
                 created_at  = datetime.utcnow()
@@ -71,6 +79,10 @@ class TapeWidget(QWidget):
         self._note_widgets.append(note_widget)
 
         self.connect(note_widget, SIGNAL('requestDelete()'), lambda : self.remove_note(note))
+        root_item = self._tape_model.invisibleRootItem()
+        item = QStandardItem()
+        item.setData(note, Qt.EditRole)
+        root_item.appendRow(item)
 
     def remove_note(self, note):
         # TODO: Removal by index may be more efficient for large lists
@@ -82,6 +94,15 @@ class TapeWidget(QWidget):
             pass
 
         assert note not in self._note_widgets
+        note_position = self._find_note(note)
+        if note_position != None:
+            self._tape_model.takeRow(note_position)
+
+    def _find_note(self, note_to_find):
+        try:
+            return next(i for (i, note) in enumerate(self.notes()) if note == note_to_find)
+        except StopIteration:
+            return None
 
     def search(self, text):
         def note_matches(lowercase_text, note):
@@ -91,7 +112,7 @@ class TapeWidget(QWidget):
 
             return False
 
-        return [note_matches(text.lower(), note_widget.note) for note_widget in self._note_widgets]
+        return [note_matches(text.lower(), note) for note in self.notes()]
 
     """
     def search_handler(self, text):
@@ -105,11 +126,12 @@ class TapeWidget(QWidget):
             note_widget.setParent(None)
 
         self._note_widgets = []
+        self._tape_model.clear()
 
     def dump_notes(self):
         notes = []
-        for note_widget in self._note_widgets:
-            notes.append(note_widget.note.to_dict())
+        for note in self.notes():
+            notes.append(note.to_dict())
 
         return notes
 

@@ -263,3 +263,15 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertTrue(    self.tape_widget._note_widgets[1].isVisible())
         self.assertTrue(not self.tape_widget._note_widgets[2].isVisible())
     """
+
+    def test_dump_notes_should_dump_all_notes_as_dicts(self):
+        for note in self.notes:
+            self.tape_widget.add_note(note)
+
+        dump = self.tape_widget.dump_notes()
+
+        self.assertEqual(len(dump), len(self.notes))
+        for (dumped_note, note) in zip(dump, self.notes):
+            # NOTE: Intentionally not checking all properties. Don't want to sync this every time one is added.
+            self.assertEqual(dumped_note['title'], note.title)
+            self.assertEqual(dumped_note['body'],  note.body)
