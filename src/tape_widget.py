@@ -39,6 +39,14 @@ class TapeWidget(QWidget):
         self._scroll_area.setWidgetResizable(True)
         self._scroll_area.setWidget(self._note_panel)
 
+    def note(self, index):
+        assert 0 <= index < len(self._note_widgets)
+
+        return self._note_widgets[index].note
+
+    def note_count(self):
+        return len(self._note_widgets)
+
     def add_note(self, note = None):
         if note != None:
             assert note not in self._note_widgets
