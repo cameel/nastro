@@ -55,7 +55,7 @@ class TapeWidget(QWidget):
 
     def add_note(self, note = None):
         if note != None:
-            assert note not in self._note_widgets
+            assert note not in self.notes()
         else:
             note = Note(
                 title       = "Note {}".format(len(self._note_widgets) + 1),
