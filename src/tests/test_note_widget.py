@@ -5,6 +5,7 @@ from datetime import datetime
 from PyQt4.QtTest import QTest
 from PyQt4.QtGui  import QApplication
 
+from ..utils       import localtime_to_utc
 from ..note        import Note
 from ..note_widget import NoteWidget
 
@@ -156,3 +157,8 @@ class NoteWidgetTest(unittest.TestCase):
 
         assert self.note_widget._tag_editor.text() == text_before
         self.assertTrue(self.note_widget.note.modified_at == modified_at_before)
+
+    def test_format_timestamp_should_convert_a_timestamp_into_a_readable_string_repesentation(self):
+        timestamp = datetime(2000, 12, 31)
+
+        self.assertEqual(self.note_widget._format_timestamp(localtime_to_utc(timestamp)), "2000-12-31 00:00")

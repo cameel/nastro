@@ -80,8 +80,8 @@ class NoteWidget(QWidget):
     def refresh_timestamps(self):
         if self._note != None:
             # TODO: Use system settings for date format?
-            self._created_at_label.setText(utc_to_localtime(self._note.created_at).strftime("%Y-%m-%d %H:%M"))
-            self._modified_at_label.setText(utc_to_localtime(self._note.modified_at).strftime("%Y-%m-%d %H:%M"))
+            self._created_at_label.setText(self._format_timestamp(self._note.created_at))
+            self._modified_at_label.setText(self._format_timestamp(self._note.modified_at))
 
     @property
     def note(self):
@@ -98,3 +98,9 @@ class NoteWidget(QWidget):
         # NOTE: setText() calls above cause textChanged() events to fire but they do nothing because
         # the values do not change. As a fortunate consequence, refresh_timestamps() does not get called thrice.
         self.refresh_timestamps()
+
+    def _format_timestamp(self, timestamp):
+        assert timestamp != None
+
+        # TODO: Use system settings for date format?
+        return utc_to_localtime(timestamp).strftime("%Y-%m-%d %H:%M")
