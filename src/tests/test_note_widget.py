@@ -115,11 +115,11 @@ class NoteWidgetTest(unittest.TestCase):
 
     def test_writing_in_tag_editor_should_update_note_tags(self):
         new_tags              = ["A", "B"]
-        new_text              = ', '.join(new_tags)
+        new_text              = Note.join_tags(new_tags)
         self.note_widget.note = self.note
 
         assert self.note.tags != new_tags
-        assert self.note_widget._tag_editor.text() == ', '.join(self.note.tags)
+        assert self.note_widget._tag_editor.text() == Note.join_tags(self.note.tags)
 
         self.note_widget._tag_editor.setText(new_text)
 
@@ -131,11 +131,11 @@ class NoteWidgetTest(unittest.TestCase):
         self.note_widget.note = self.note
 
         new_tags           = ["A", "B"]
-        new_text           = ', '.join(new_tags)
+        new_text           = Note.join_tags(new_tags)
         modified_at_before = self.note.modified_at
 
         assert self.note.tags != new_tags
-        assert self.note_widget._tag_editor.text() == ', '.join(self.note.tags)
+        assert self.note_widget._tag_editor.text() == Note.join_tags(self.note.tags)
 
         self.note_widget._tag_editor.setText(new_text)
 
@@ -147,7 +147,7 @@ class NoteWidgetTest(unittest.TestCase):
         self.note_widget.note = self.note
 
         tags_before        = self.note.tags
-        text_before        = ', '.join(tags_before)
+        text_before        = Note.join_tags(tags_before)
         modified_at_before = self.note.modified_at
 
         assert self.note_widget._tag_editor.text() == text_before

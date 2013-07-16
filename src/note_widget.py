@@ -71,7 +71,7 @@ class NoteWidget(QWidget):
 
     def update_note_tags(self, text):
         if self._note != None:
-            new_tags = [tag.strip() for tag in text.split(',')]
+            new_tags = Note.split_tags(text)
             if self._note.tags != new_tags:
                 self._note.tags = new_tags
                 self._note.modified_at = datetime.utcnow()
@@ -92,7 +92,7 @@ class NoteWidget(QWidget):
         self._note = value
 
         self._title_editor.setText(value.title)
-        self._tag_editor.setText(', '.join(value.tags))
+        self._tag_editor.setText(Note.join_tags(value.tags))
         self._body_editor.setPlainText(value.body)
 
         # NOTE: setText() calls above cause textChanged() events to fire but they do nothing because

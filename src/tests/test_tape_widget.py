@@ -141,8 +141,8 @@ class TapeWidgetTest(unittest.TestCase):
         assert keyword in self.notes[1].body
         assert not keyword.lower() in self.notes[0].body.lower()
         assert not keyword.lower() in self.notes[2].body.lower()
-        assert all(keyword.lower() not in note.title.lower()         for note in self.notes[0:3])
-        assert all(keyword.lower() not in ''.join(note.tags).lower() for note in self.notes[0:3])
+        assert all(keyword.lower() not in note.title.lower()                for note in self.notes[0:3])
+        assert all(keyword.lower() not in Note.join_tags(note.tags).lower() for note in self.notes[0:3])
 
         for note in self.notes[0:3]:
             self.tape_widget.add_note(note)
@@ -161,8 +161,8 @@ class TapeWidgetTest(unittest.TestCase):
         assert keyword.lower() in self.notes[3].body
         assert not keyword.lower() in self.notes[0].body.lower()
         assert not keyword.lower() in self.notes[2].body.lower()
-        assert all(keyword.lower() not in note.title.lower()         for note in self.notes[0:4])
-        assert all(keyword.lower() not in ''.join(note.tags).lower() for note in self.notes[0:4])
+        assert all(keyword.lower() not in note.title.lower()                for note in self.notes[0:4])
+        assert all(keyword.lower() not in Note.join_tags(note.tags).lower() for note in self.notes[0:4])
 
         for note in self.notes[0:4]:
             self.tape_widget.add_note(note)
@@ -177,9 +177,9 @@ class TapeWidgetTest(unittest.TestCase):
 
         assert self.tape_widget.note_count() == 0
         assert keyword in self.notes[0].title
-        assert all(keyword.lower() not in note.title.lower()         for note in self.notes[1:4])
-        assert all(keyword.lower() not in note.body.lower()          for note in self.notes[0:4])
-        assert all(keyword.lower() not in ''.join(note.tags).lower() for note in self.notes[0:4])
+        assert all(keyword.lower() not in note.title.lower()                for note in self.notes[1:4])
+        assert all(keyword.lower() not in note.body.lower()                 for note in self.notes[0:4])
+        assert all(keyword.lower() not in Note.join_tags(note.tags).lower() for note in self.notes[0:4])
 
         for note in self.notes[0:4]:
             self.tape_widget.add_note(note)
@@ -193,9 +193,9 @@ class TapeWidgetTest(unittest.TestCase):
         keyword = 'III'
 
         assert self.tape_widget.note_count() == 0
-        assert all(keyword.lower() not in note.title.lower()         for note in self.notes[0:4])
-        assert all(keyword.lower() not in note.body.lower()          for note in self.notes[0:4])
-        assert all(keyword.lower() not in ''.join(note.tags).lower() for note in self.notes[0:3])
+        assert all(keyword.lower() not in note.title.lower()                for note in self.notes[0:4])
+        assert all(keyword.lower() not in note.body.lower()                 for note in self.notes[0:4])
+        assert all(keyword.lower() not in Note.join_tags(note.tags).lower() for note in self.notes[0:3])
         assert keyword.lower() in self.notes[3].tags[1].lower()
 
         for note in self.notes[0:4]:
@@ -244,9 +244,9 @@ class TapeWidgetTest(unittest.TestCase):
         assert keyword in self.notes[1].body
         assert not keyword.lower() in self.notes[0].body.lower()
         assert not keyword.lower() in self.notes[2].body.lower()
-        assert all(keyword.lower() not in note.title.lower()         for note in self.notes[0:3])
-        assert all(keyword.lower() not in ''.join(note.tags).lower() for note in self.notes[0:3])
-        assert all(keyword.lower() not in ''.join(note.tags).lower() for note in self.notes[0:3])
+        assert all(keyword.lower() not in note.title.lower()                for note in self.notes[0:3])
+        assert all(keyword.lower() not in Note.join_tags(note.tags).lower() for note in self.notes[0:3])
+        assert all(keyword.lower() not in Note.join_tags(note.tags).lower() for note in self.notes[0:3])
 
         for note in self.notes[0:3]:
             self.tape_widget.add_note(note)

@@ -48,5 +48,13 @@ class Note:
             modified_at = datetime.strptime(note_dict['modified_at'], cls.TIMESTAMP_FORMAT)
         )
 
+    @classmethod
+    def split_tags(cls, text):
+        return [tag.strip() for tag in text.split(',')]
+
+    @classmethod
+    def join_tags(cls, tags):
+        return ', '.join(tags)
+
     def __repr__(self):
         return 'Note' + repr(self.to_dict())

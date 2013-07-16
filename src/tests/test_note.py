@@ -124,3 +124,29 @@ class NoteTest(unittest.TestCase):
                 'created_at':  "2013-06-16T00:00:00.000000",
                 'modified_at': "2013-07-16T00:00:00.000000"
             })
+
+    def test_split_tags_should_split_a_string_into_a_list_of_tags(self):
+        self.assertEqual(Note.split_tags(''),                 [''])
+        self.assertEqual(Note.split_tags(','),                ['', ''])
+        self.assertEqual(Note.split_tags(',,,'),              ['', '', '', ''])
+        self.assertEqual(Note.split_tags('a'),                ['a'])
+        self.assertEqual(Note.split_tags('a, b'),             ['a', 'b'])
+        self.assertEqual(Note.split_tags(' a,b '),            ['a', 'b'])
+        self.assertEqual(Note.split_tags('b, a'),             ['b', 'a'])
+        self.assertEqual(Note.split_tags('a, a, a'),          ['a', 'a', 'a'])
+        self.assertEqual(Note.split_tags('abc def, ghi'),     ['abc def', 'ghi'])
+        self.assertEqual(Note.split_tags('\tabc\tdef,\tghi'), ['abc\tdef', 'ghi'])
+        self.assertEqual(Note.split_tags('\nabc\ndef,\nghi'), ['abc\ndef', 'ghi'])
+
+    def test_join_tags_should_join_a_list_of_tags_into_a_string(self):
+        self.assertEqual(Note.join_tags([]),                      '')
+        self.assertEqual(Note.join_tags(['', '']),                ', ')
+        self.assertEqual(Note.join_tags(['', '', '', '']),        ', , , ')
+        self.assertEqual(Note.join_tags(['a']),                   'a')
+        self.assertEqual(Note.join_tags(['a', 'b']),              'a, b')
+        self.assertEqual(Note.join_tags([' a', 'b ']),            ' a, b ')
+        self.assertEqual(Note.join_tags(['b', 'a']),              'b, a')
+        self.assertEqual(Note.join_tags(['a', 'a', 'a']),         'a, a, a')
+        self.assertEqual(Note.join_tags([' abc def ', 'ghi']),    ' abc def , ghi')
+        self.assertEqual(Note.join_tags(['\tabc\tdef\t', 'ghi']), '\tabc\tdef\t, ghi')
+        self.assertEqual(Note.join_tags(['\nabc\ndef\n', 'ghi']), '\nabc\ndef\n, ghi')
