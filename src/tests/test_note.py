@@ -126,10 +126,11 @@ class NoteTest(unittest.TestCase):
             })
 
     def test_split_tags_should_split_a_string_into_a_list_of_tags(self):
-        self.assertEqual(Note.split_tags(''),                 [''])
-        self.assertEqual(Note.split_tags(','),                ['', ''])
-        self.assertEqual(Note.split_tags(',,,'),              ['', '', '', ''])
+        self.assertEqual(Note.split_tags(''),                 [])
+        self.assertEqual(Note.split_tags(','),                [])
+        self.assertEqual(Note.split_tags(',,,'),              [])
         self.assertEqual(Note.split_tags('a'),                ['a'])
+        self.assertEqual(Note.split_tags('a,,,'),             ['a'])
         self.assertEqual(Note.split_tags('a, b'),             ['a', 'b'])
         self.assertEqual(Note.split_tags(' a,b '),            ['a', 'b'])
         self.assertEqual(Note.split_tags('b, a'),             ['b', 'a'])
@@ -143,6 +144,7 @@ class NoteTest(unittest.TestCase):
         self.assertEqual(Note.join_tags(['', '']),                ', ')
         self.assertEqual(Note.join_tags(['', '', '', '']),        ', , , ')
         self.assertEqual(Note.join_tags(['a']),                   'a')
+        self.assertEqual(Note.join_tags(['a', '', '', '', '']),   'a, , , , ')
         self.assertEqual(Note.join_tags(['a', 'b']),              'a, b')
         self.assertEqual(Note.join_tags([' a', 'b ']),            ' a, b ')
         self.assertEqual(Note.join_tags(['b', 'a']),              'b, a')
