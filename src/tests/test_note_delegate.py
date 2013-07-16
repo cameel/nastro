@@ -53,7 +53,7 @@ class NoteDelegateTest(unittest.TestCase):
         new_note = Note(
             title      = "X",
             body       = "Y",
-            tags       = ["Z", "W"],
+            tags       = ["W", "Z"],
             created_at = datetime.utcnow()
         )
         assert new_note.to_dict() != self.note.to_dict()

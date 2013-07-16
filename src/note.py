@@ -50,7 +50,7 @@ class Note:
 
     @classmethod
     def split_tags(cls, text):
-        return [tag.strip() for tag in text.split(',') if tag.strip() != '']
+        return sorted(set([tag.strip() for tag in text.split(',') if tag.strip() != '']))
 
     @classmethod
     def join_tags(cls, tags):

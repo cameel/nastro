@@ -133,11 +133,16 @@ class NoteTest(unittest.TestCase):
         self.assertEqual(Note.split_tags('a,,,'),             ['a'])
         self.assertEqual(Note.split_tags('a, b'),             ['a', 'b'])
         self.assertEqual(Note.split_tags(' a,b '),            ['a', 'b'])
-        self.assertEqual(Note.split_tags('b, a'),             ['b', 'a'])
-        self.assertEqual(Note.split_tags('a, a, a'),          ['a', 'a', 'a'])
         self.assertEqual(Note.split_tags('abc def, ghi'),     ['abc def', 'ghi'])
         self.assertEqual(Note.split_tags('\tabc\tdef,\tghi'), ['abc\tdef', 'ghi'])
         self.assertEqual(Note.split_tags('\nabc\ndef,\nghi'), ['abc\ndef', 'ghi'])
+
+    def test_split_tags_should_sort_tags_alphabetically(self):
+        self.assertEqual(Note.split_tags('b, a, c'), ['a', 'b', 'c'])
+
+    def test_split_tags_should_remove_duplicates(self):
+        self.assertEqual(Note.split_tags('a, a, a'),      ['a'])
+        self.assertEqual(Note.split_tags('a, b,  a,  b'), ['a', 'b'])
 
     def test_join_tags_should_join_a_list_of_tags_into_a_string(self):
         self.assertEqual(Note.join_tags([]),                      '')
