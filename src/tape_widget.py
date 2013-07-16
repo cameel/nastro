@@ -1,12 +1,12 @@
 """ The UI widget that represents a scrollable tape composed of notes """
 
-from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QStandardItem, QStandardItemModel
+from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QStandardItem, QStandardItemModel, QListView
 from PyQt4.QtCore import SIGNAL, Qt
 
 from datetime import datetime
 
-from .note_widget import NoteWidget
-from .note        import Note
+from .note_delegate import NoteDelegate
+from .note          import Note
 
 class TapeWidget(QWidget):
     def __init__(self, parent = None):
@@ -20,6 +20,7 @@ class TapeWidget(QWidget):
         self._note_panel    = QWidget()
         self._note_layout   = QVBoxLayout(self._note_panel)
         self._button_layout = QHBoxLayout()
+        self._note_list_view = QListView()
 
         self._add_note_button = QPushButton(self)
         self._add_note_button.setText("New note")
@@ -30,8 +31,13 @@ class TapeWidget(QWidget):
         self._main_layout.addWidget(self._search_box)
         self._main_layout.addLayout(self._button_layout)
         self._main_layout.addWidget(self._scroll_area)
+        self._main_layout.addWidget(self._note_list_view)
 
         self._tape_model    = QStandardItemModel()
+        self._note_delegate = NoteDelegate()
+
+        self._note_list_view.setItemDelegate(self._note_delegate)
+        self._note_list_view.setModel(self._tape_model)
 
         self.connect(self._add_note_button, SIGNAL('clicked()'),                   self.add_note)
         """
