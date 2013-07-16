@@ -19,6 +19,15 @@ class NoteTest(unittest.TestCase):
         self.assertEqual(note.created_at,  datetime(2013, 6, 16))
         self.assertEqual(note.modified_at, datetime(2013, 7, 16))
 
+    def test_init_should_initialize_note_with_defaults(self):
+        note = Note()
+
+        self.assertEqual(note.title, '')
+        self.assertEqual(note.body,  '')
+        self.assertEqual(note.tags,  [])
+
+        # TODO: Use mocks for datetime to test created_at and modified_at
+
     def test_init_should_set_modified_at_to_created_at_if_not_specified(self):
         note = Note(
             title       = "X",

@@ -11,7 +11,7 @@ class InvalidTagCharacter(Exception):
 class Note:
     TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-    def __init__(self, title, body, tags, created_at, modified_at = None):
+    def __init__(self, title = '', body = '', tags = [], created_at = datetime.utcnow(), modified_at = None):
         self.title       = title
         self.body        = body
         self.tags        = tags
