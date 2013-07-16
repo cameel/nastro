@@ -12,14 +12,9 @@ class TapeWidget(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
 
-        self._note_widgets = []
-
-        self._main_layout   = QVBoxLayout(self)
-        self._search_box    = QLineEdit(self)
-        self._scroll_area   = QScrollArea(self)
-        self._note_panel    = QWidget()
-        self._note_layout   = QVBoxLayout(self._note_panel)
-        self._button_layout = QHBoxLayout()
+        self._main_layout    = QVBoxLayout(self)
+        self._search_box     = QLineEdit(self)
+        self._button_layout  = QHBoxLayout()
         self._note_list_view = QListView()
 
         self._add_note_button = QPushButton(self)
@@ -30,7 +25,6 @@ class TapeWidget(QWidget):
 
         self._main_layout.addWidget(self._search_box)
         self._main_layout.addLayout(self._button_layout)
-        self._main_layout.addWidget(self._scroll_area)
         self._main_layout.addWidget(self._note_list_view)
 
         self._tape_model    = QStandardItemModel()
@@ -43,11 +37,6 @@ class TapeWidget(QWidget):
         """
         self.connect(self._search_box,      SIGNAL('textEdited(const QString &)'), self.search_handler)
         """
-
-        # NOTE: There are some caveats regarding setWidget() and show()
-        # See QScrollArea.setWidget() docs.
-        self._scroll_area.setWidgetResizable(True)
-        self._scroll_area.setWidget(self._note_panel)
 
     def note(self, index):
         assert 0 <= index < self._tape_model.rowCount()
@@ -78,13 +67,6 @@ class TapeWidget(QWidget):
                 created_at  = datetime.utcnow()
             )
 
-        # TODO: Get layout directly from widget
-        note_widget      = NoteWidget(self._note_panel)
-        note_widget.note = note
-        self._note_layout.addWidget(note_widget)
-        self._note_widgets.append(note_widget)
-
-        self.connect(note_widget, SIGNAL('requestDelete()'), lambda : self.remove_note(note))
         root_item = self._tape_model.invisibleRootItem()
         item = QStandardItem()
         item.setData(note, Qt.EditRole)
@@ -92,14 +74,6 @@ class TapeWidget(QWidget):
 
     def remove_note(self, note):
         # TODO: Removal by index may be more efficient for large lists
-        try:
-            note_widget = next(widget for widget in self._note_widgets if widget.note == note)
-            note_widget.setParent(None)
-            self._note_widgets.remove(note_widget)
-        except StopIteration:
-            pass
-
-        assert note not in self._note_widgets
         note_position = self._find_note(note)
         if note_position != None:
             self._tape_model.takeRow(note_position)
@@ -128,10 +102,6 @@ class TapeWidget(QWidget):
     """
 
     def clear(self):
-        for note_widget in self._note_widgets:
-            note_widget.setParent(None)
-
-        self._note_widgets = []
         self._tape_model.clear()
 
     def dump_notes(self):
