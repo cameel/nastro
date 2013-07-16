@@ -40,11 +40,34 @@ class NoteDelegateTest(unittest.TestCase):
 
     def test_setEditorData_should_copy_data_from_note_to_editor(self):
         editor = NoteWidget()
-        assert editor.note != self.note
+        assert editor.dump_note().to_dict() != self.note.to_dict()
 
         self.note_delegate.setEditorData(editor, self.item.index())
 
-        self.assertEqual(editor.note, self.note)
+        self.assertEqual(editor.dump_note().to_dict(), self.note.to_dict())
+
+    def test_setModelData_should_copy_data_from_editor_to_note(self):
+        assert isinstance(self.item.data(Qt.EditRole), Note)
+        assert self.item.data(Qt.EditRole).to_dict() == self.note.to_dict()
+
+        new_note = Note(
+            title      = "X",
+            body       = "Y",
+            tags       = ["Z", "W"],
+            created_at = datetime.utcnow()
+        )
+        assert new_note.to_dict() != self.note.to_dict()
+
+        editor = NoteWidget()
+        editor.load_note(new_note)
+
+        self.note_delegate.setModelData(editor, self.model, self.item.index())
+        new_item_value = self.item.data(Qt.EditRole)
+
+        self.assertTrue(isinstance(new_item_value, Note))
+        self.assertNotEqual(new_item_value, self.note)
+        self.assertNotEqual(new_item_value, new_note)
+        self.assertEqual(new_item_value.to_dict(), new_note.to_dict())
 
     def test_updateEditorGeometry_should_change_editor_size_and_position(self):
         self.option.rect = QRect(11, 22, 33, 44)

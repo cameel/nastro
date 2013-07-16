@@ -4,12 +4,15 @@ from datetime import datetime
 
 from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QPushButton, QSizePolicy, QFont
 from PyQt4.QtCore import SIGNAL
-from .utils       import utc_to_localtime
+
+from .utils import utc_to_localtime
+from .note  import Note
 
 class NoteWidget(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
-        self._note = None
+        self._note_created_at  = datetime.utcnow()
+        self._note_modified_at = datetime.utcnow()
 
         self._main_layout = QVBoxLayout(self)
 
@@ -51,56 +54,39 @@ class NoteWidget(QWidget):
         self._delete_button.setText('delete')
 
         self.connect(self._delete_button, SIGNAL('clicked()'),                    lambda:      self.emit(SIGNAL('requestDelete()')))
-        self.connect(self._body_editor,   SIGNAL('textChanged()'),                lambda:      self.update_note_body())
-        self.connect(self._tag_editor,    SIGNAL('textChanged(const QString &)'), lambda text: self.update_note_tags(text))
-        self.connect(self._title_editor,  SIGNAL('textChanged(const QString &)'), lambda text: self.update_note_title(text))
+        self.connect(self._body_editor,   SIGNAL('textChanged()'),                lambda:      self.touch())
+        self.connect(self._tag_editor,    SIGNAL('textChanged(const QString &)'), lambda text: self.touch())
+        self.connect(self._title_editor,  SIGNAL('textChanged(const QString &)'), lambda text: self.touch())
 
-    def update_note_body(self):
-        if self._note != None:
-            new_body = self._body_editor.toPlainText()
-            if self._note.body != new_body:
-                self._note.body        = new_body
-                self._note.modified_at = datetime.utcnow()
-                self.refresh_timestamps()
+    def load_note(self, note):
+        self._title_editor.setText(note.title)
+        self._body_editor.setPlainText(note.body)
+        self._tag_editor.setText(Note.join_tags(note.tags))
+        self._note_created_at  = note.created_at
+        self._note_modified_at = note.modified_at
 
-    def update_note_title(self, text):
-        if self._note != None and self._note.title != text:
-            self._note.title = text
-            self._note.modified_at = datetime.utcnow()
-            self.refresh_timestamps()
-
-    def update_note_tags(self, text):
-        if self._note != None:
-            new_tags = Note.split_tags(text)
-            if self._note.tags != new_tags:
-                self._note.tags = new_tags
-                self._note.modified_at = datetime.utcnow()
-                self.refresh_timestamps()
-
-    def refresh_timestamps(self):
-        if self._note != None:
-            # TODO: Use system settings for date format?
-            self._created_at_label.setText(self._format_timestamp(self._note.created_at))
-            self._modified_at_label.setText(self._format_timestamp(self._note.modified_at))
-
-    @property
-    def note(self):
-        return self._note
-
-    @note.setter
-    def note(self, value):
-        self._note = value
-
-        self._title_editor.setText(value.title)
-        self._tag_editor.setText(Note.join_tags(value.tags))
-        self._body_editor.setPlainText(value.body)
-
-        # NOTE: setText() calls above cause textChanged() events to fire but they do nothing because
-        # the values do not change. As a fortunate consequence, refresh_timestamps() does not get called thrice.
+        # NOTE: Set timestamps last because setText() calls trigger textChanged signals
+        # that cause modified_at to be updated.
         self.refresh_timestamps()
+
+    def dump_note(self):
+        return Note(
+            title       = self._title_editor.text(),
+            body        = self._body_editor.toPlainText(),
+            tags        = Note.split_tags(self._tag_editor.text()),
+            created_at  = self._note_created_at,
+            modified_at = self._note_modified_at
+        )
+
+    def touch(self):
+        self._note_modified_at = datetime.utcnow()
 
     def _format_timestamp(self, timestamp):
         assert timestamp != None
 
         # TODO: Use system settings for date format?
         return utc_to_localtime(timestamp).strftime("%Y-%m-%d %H:%M")
+
+    def refresh_timestamps(self):
+        self._created_at_label.setText(self._format_timestamp(self._note_created_at))
+        self._modified_at_label.setText(self._format_timestamp(self._note_modified_at))

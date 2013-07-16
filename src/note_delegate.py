@@ -22,10 +22,10 @@ class NoteDelegate(QItemDelegate):
         value = index.model().data(index, Qt.EditRole)
         assert isinstance(value, Note), "Note instance expected, got {}: '{}'".format(value.__class__, value)
 
-        editor.note = value
+        editor.load_note(value)
 
     def setModelData(self, editor, model, index):
-        value = editor.note
+        value = editor.dump_note()
         assert isinstance(value, Note), "Note instance expected, got {}: '{}'".format(value.__class__, value)
 
         model.setData(index, value, Qt.EditRole)
@@ -36,7 +36,7 @@ class NoteDelegate(QItemDelegate):
 
         painter.save()
 
-        self._display_widget.note = value
+        self._display_widget.load_note(value)
         self._display_widget.resize(option.rect.size())
 
         # FIXME: Draw the widget directly, without the intermediate pixmap
@@ -53,5 +53,5 @@ class NoteDelegate(QItemDelegate):
         value = index.model().data(index, Qt.DisplayRole)
         assert isinstance(value, Note), "Note instance expected, got {}: '{}'".format(value.__class__, value)
 
-        self._display_widget.note = value
+        self._display_widget.load_note(value) 
         return self._display_widget.sizeHint()
