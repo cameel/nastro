@@ -5,8 +5,8 @@ from PyQt4.QtCore import SIGNAL
 
 from datetime import datetime
 
-from note_widget import NoteWidget
-from note        import Note
+from .note_widget import NoteWidget
+from .note        import Note
 
 class TapeWidget(QWidget):
     def __init__(self, parent = None):

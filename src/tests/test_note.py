@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime
 
-from note import Note, InvalidTagCharacter, MissingProperties
+from ..note import Note, InvalidTagCharacter, MissingProperties
 
 class NoteTest(unittest.TestCase):
     def test_from_dict_should_return_note_objects(self):

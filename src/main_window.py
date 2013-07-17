@@ -6,8 +6,9 @@ from PyQt4.QtCore import SIGNAL
 
 import simplejson
 
-from tape_widget import TapeWidget
-from note        import Note
+from .tape_widget            import TapeWidget
+from .note                   import Note
+from .opera.hotlist.importer import import_opera_notes
 
 class MainWindow(KMainWindow):
     def __init__(self):
@@ -30,11 +31,17 @@ class MainWindow(KMainWindow):
         open_action    = file_menu.addAction("&Open...")
         save_as_action = file_menu.addAction("&Save as...")
         file_menu.addSeparator()
+        import_menu    = file_menu.addMenu("&Import")
+        file_menu.addSeparator()
         exit_action    = file_menu.addAction("&Exit")
+
+        import_opera_notes_action = import_menu.addAction("&Opera Notes...")
 
         self.connect(exit_action,    SIGNAL('triggered()'), self.close)
         self.connect(open_action,    SIGNAL('triggered()'), self.load_file)
         self.connect(save_as_action, SIGNAL('triggered()'), self.save_file)
+
+        self.connect(import_opera_notes_action, SIGNAL('triggered()'), self.import_opera_notes)
 
         self.resize(1200, 800)
         self.setCentralWidget(self.main_panel)
@@ -77,3 +84,17 @@ class MainWindow(KMainWindow):
                 notes.append(Note.from_dict(note_dict))
 
             self.tape_widget.load_notes(notes)
+
+    def import_opera_notes(self):
+        file_name = QFileDialog.getOpenFileName(
+            self,
+            "Open Opera Notes...",
+            '~/.opera',
+            "Opera Hotlist (*.adr)"
+        )
+
+        if file_name != '':
+            with open(file_name, 'r') as note_file:
+                notes = import_opera_notes(note_file)
+            self.tape_widget.load_notes(notes)
+            QMessageBox.information(self, "Success", "Successfully imported {} notes".format(len(notes)))
