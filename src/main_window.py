@@ -1,7 +1,7 @@
 """ The main UI component of the application. Controls the whole window """
 
 from PyKDE4.kdeui import KMainWindow, KDatePicker
-from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox
+from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
 from PyQt4.QtCore import SIGNAL
 
 import simplejson
@@ -14,7 +14,7 @@ class MainWindow(KMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.main_panel        = QWidget()
+        self.main_panel        = QSplitter()
         self.left_panel        = QWidget(self.main_panel)
         self.date_picker       = KDatePicker(self.left_panel)
         self.left_panel_layout = QVBoxLayout(self.left_panel)
@@ -23,9 +23,8 @@ class MainWindow(KMainWindow):
 
         self.tape_widget = TapeWidget(self.main_panel)
 
-        self.main_panel_layout = QHBoxLayout(self.main_panel)
-        self.main_panel_layout.addWidget(self.left_panel)
-        self.main_panel_layout.addWidget(self.tape_widget)
+        self.main_panel.addWidget(self.left_panel)
+        self.main_panel.addWidget(self.tape_widget)
 
         file_menu      = self.menuBar().addMenu("File")
         open_action    = file_menu.addAction("&Open...")
@@ -117,5 +116,4 @@ class MainWindow(KMainWindow):
         self.tape_widget.setParent(None)
 
         self.tape_widget = new_tape_widget
-        self.main_panel_layout.addWidget(new_tape_widget)
-        self.tape_widget.setParent(self.main_panel)
+        self.main_panel.addWidget(new_tape_widget)
