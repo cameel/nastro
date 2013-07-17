@@ -1,7 +1,7 @@
 """ A Qt delegate for models dealing with Note objects """
 
-from PyQt4.QtGui  import QItemDelegate, QStyle, QPixmap
-from PyQt4.QtCore import Qt, QSize, QPoint
+from PyQt4.QtGui  import QItemDelegate, QStyle, QPixmap, QPen
+from PyQt4.QtCore import Qt, QSize, QPoint, QRect
 
 from datetime import datetime
 
@@ -30,6 +30,14 @@ class NoteDelegate(QItemDelegate):
 
         model.setData(index, value, Qt.EditRole)
 
+    def _draw_focus_frame(self, painter, rect, width):
+        pen = QPen()
+        pen.setWidth(width)
+        pen.setStyle(Qt.DashLine)
+
+        painter.setPen(pen)
+        painter.drawRect(QRect(rect.x() + width // 2, rect.y() + width // 2, rect.width() - width, rect.height() - width))
+
     def paint(self, painter, option, index):
         value = index.model().data(index, Qt.DisplayRole)
         assert isinstance(value, Note), "Note instance expected, got {}: '{}'".format(value.__class__, value)
@@ -43,6 +51,9 @@ class NoteDelegate(QItemDelegate):
         pixmap = QPixmap(option.rect.size())
         self._display_widget.render(pixmap)
         painter.drawPixmap(option.rect.topLeft(), pixmap)
+
+        if option.state & QStyle.State_Selected:
+            self._draw_focus_frame(painter, option.rect, 2)
 
         painter.restore()
 
