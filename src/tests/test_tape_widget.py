@@ -4,10 +4,12 @@ from datetime import datetime, timedelta
 
 from PyQt4.QtTest import QTest
 from PyQt4.QtGui  import QApplication
+from PyQt4.QtCore import QRegExp
 
-from ..tape_widget import TapeWidget
-from ..note        import Note
-from ..note_widget import NoteWidget
+from ..tape_widget             import TapeWidget
+from ..note                    import Note
+from ..note_widget             import NoteWidget
+from ..tape_filter_proxy_model import TapeFilterProxyModel
 
 class TapeWidgetTest(unittest.TestCase):
     def setUp(self):
@@ -134,35 +136,34 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget.note(0), self.notes[0])
         self.assertEqual(self.tape_widget.note(1), self.notes[1])
 
-
-
-    """
-    def test_search_handler_should_hide_non_matching_notes(self):
-        keyword = 'B'
-
-        assert self.tape_widget.note_count() == 0
-        assert keyword in self.notes[1].body
-        assert not keyword.lower() in self.notes[0].body.lower()
-        assert not keyword.lower() in self.notes[2].body.lower()
-        assert all(keyword.lower() not in note.title.lower()                for note in self.notes[0:3])
-        assert all(keyword.lower() not in Note.join_tags(note.tags).lower() for note in self.notes[0:3])
-        assert all(keyword.lower() not in Note.join_tags(note.tags).lower() for note in self.notes[0:3])
+    def test_by_default_all_notes_should_be_visible(self):
+        assert self.tape_widget._search_box.text() == ''
 
         for note in self.notes[0:3]:
             self.tape_widget.add_note(note)
         assert self.tape_widget.note_count() == 3
 
-        self.tape_widget.show()
-        assert all(note_widget.isVisible() for note_widget in self.tape_widget._note_widgets)
+        self.assertEqual(self.tape_widget.note_count(), 3)
+        self.assertEqual(self.tape_widget._tape_filter_proxy_model.rowCount(), 3)
+        for i in range(3):
+            self.assertEqual(self.tape_widget._tape_filter_proxy_model.data(self.tape_widget._tape_filter_proxy_model.index(i, 0)).to_dict(), self.notes[i].to_dict())
 
-        self.tape_widget.search_handler(keyword)
-        assert self.tape_widget.search(keyword) == [False, True, False]
+    def test_set_filter_should_hide_non_matching_notes(self):
+        keyword = 'B'
+
+        assert not TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.notes[0])
+        assert     TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.notes[1])
+        assert not TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.notes[2])
+
+        for note in self.notes[0:3]:
+            self.tape_widget.add_note(note)
+        assert self.tape_widget.note_count() == 3
+
+        self.tape_widget.set_filter(keyword)
 
         self.assertEqual(self.tape_widget.note_count(), 3)
-        self.assertTrue(not self.tape_widget._note_widgets[0].isVisible())
-        self.assertTrue(    self.tape_widget._note_widgets[1].isVisible())
-        self.assertTrue(not self.tape_widget._note_widgets[2].isVisible())
-    """
+        self.assertEqual(self.tape_widget._tape_filter_proxy_model.rowCount(), 1)
+        self.assertEqual(self.tape_widget._tape_filter_proxy_model.data(self.tape_widget._tape_filter_proxy_model.index(0, 0)).to_dict(), self.notes[1].to_dict())
 
     def test_dump_notes_should_dump_all_notes_as_dicts(self):
         for note in self.notes:

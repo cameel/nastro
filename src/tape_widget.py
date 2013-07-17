@@ -5,8 +5,9 @@ from PyQt4.QtCore import SIGNAL, Qt
 
 from datetime import datetime
 
-from .note_delegate import NoteDelegate
-from .note          import Note
+from .note_delegate           import NoteDelegate
+from .note                    import Note
+from .tape_filter_proxy_model import TapeFilterProxyModel
 
 class TapeWidget(QWidget):
     def __init__(self, parent = None):
@@ -27,16 +28,16 @@ class TapeWidget(QWidget):
         self._main_layout.addLayout(self._button_layout)
         self._main_layout.addWidget(self._note_list_view)
 
-        self._tape_model    = QStandardItemModel()
-        self._note_delegate = NoteDelegate()
+        self._tape_model              = QStandardItemModel()
+        self._tape_filter_proxy_model = TapeFilterProxyModel()
+        self._note_delegate           = NoteDelegate()
 
+        self._tape_filter_proxy_model.setSourceModel(self._tape_model)
         self._note_list_view.setItemDelegate(self._note_delegate)
-        self._note_list_view.setModel(self._tape_model)
+        self._note_list_view.setModel(self._tape_filter_proxy_model)
 
-        self.connect(self._add_note_button, SIGNAL('clicked()'),                   self.add_note)
-        """
-        self.connect(self._search_box,      SIGNAL('textEdited(const QString &)'), self.search_handler)
-        """
+        self.connect(self._add_note_button, SIGNAL('clicked()'),                    self.add_note)
+        self.connect(self._search_box,      SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
 
     def note(self, index):
         assert 0 <= index < self._tape_model.rowCount()
@@ -84,15 +85,12 @@ class TapeWidget(QWidget):
         except StopIteration:
             return None
 
-    """
-    def search_handler(self, text):
-        mask = self.search(text)
-        for i, note_matches in enumerate(mask):
-            self._note_widgets[i].setVisible(note_matches)
-    """
-
     def clear(self):
         self._tape_model.clear()
+
+    def set_filter(self, text):
+        # NOTE: This triggers textChanged() signal which applies the filter
+        self._search_box.setText(text)
 
     def dump_notes(self):
         notes = []
