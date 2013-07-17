@@ -280,6 +280,23 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(notes[0].body,  note_body)
         self.assertEqual(notes[0].tags,  [folder_title])
 
+    def test_import_opera_notes_should_not_create_empty_tags_for_top_level_folder(self):
+        fixture = (
+            "#NOTE\n"
+            "	NAME=x\n"
+            "	CREATED=1315774570\n"
+        )
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            notes = import_opera_notes(note_file)
+
+        self.assertEqual(len(notes), 1)
+        self.assertTrue([isinstance(note, Note) for note in notes])
+
+        self.assertEqual(notes[0].tags, [])
+
     def test_import_opera_notes_should_skip_notes_inside_trash_folder(self):
         fixture = NOTE_FILE_FIXTURES[2]
 
@@ -296,7 +313,7 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(notes[0].tags,  ['F1'])
 
         self.assertEqual(notes[1].title, "N2")
-        self.assertEqual(notes[1].tags,  [''])
+        self.assertEqual(notes[1].tags,  [])
 
     def test_import_opera_notes_should_not_skip_notes_inside_trash_folder_if_requested_not_to(self):
         fixture = NOTE_FILE_FIXTURES[2]
@@ -323,7 +340,7 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(notes[3].tags,  ['F1/T1/FT1'])
 
         self.assertEqual(notes[4].title, "N2")
-        self.assertEqual(notes[4].tags,  [''])
+        self.assertEqual(notes[4].tags,  [])
 
     def test_import_opera_notes_should_not_detect_invalid_trash_folder_attribute_values(self):
         fixture = (

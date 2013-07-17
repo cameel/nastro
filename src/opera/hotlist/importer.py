@@ -52,10 +52,11 @@ def element_to_note(attributes, folder_path):
 
     (title, body) = title_body_split(attributes.get('NAME'))
 
+    tag = FOLDER_TAG_SEPARATOR.join(folder_path)
     return Note(
         title,
         body,
-        [FOLDER_TAG_SEPARATOR.join(folder_path)],
+        [tag] if tag != '' else [],
         # NOTE: Opera saves timestamps in localtime rather than UTC. This makes it impossible
         # to correctly decode it unless we're now in the same time zone.
         datetime.utcfromtimestamp(int(attributes['CREATED']))
