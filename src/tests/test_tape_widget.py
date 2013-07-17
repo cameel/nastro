@@ -16,28 +16,28 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.notes = [
             Note(
-                title     = "H+X",
-                body      = "Y",
-                tags      = ["Z"],
-                timestamp = datetime.utcnow()
+                title      = "H+X",
+                body       = "Y",
+                tags       = ["Z"],
+                created_at = datetime.utcnow()
             ),
             Note(
-                title     = "A",
-                body      = "B",
-                tags      = ["C", "PPP RRR"],
-                timestamp = datetime.utcnow()
+                title      = "A",
+                body       = "B",
+                tags       = ["C", "PPP RRR"],
+                created_at = datetime.utcnow()
             ),
             Note(
-                title     = "1",
-                body      = "2",
-                tags      = ["3", "PPP\tRRR"],
-                timestamp = datetime.utcnow()
+                title      = "1",
+                body       = "2",
+                tags       = ["3", "PPP\tRRR"],
+                created_at = datetime.utcnow()
             ),
             Note(
-                title     = "I",
-                body      = "b",
-                tags      = ["VVV", "III"],
-                timestamp = datetime.utcnow()
+                title      = "I",
+                body       = "b",
+                tags       = ["VVV", "III"],
+                created_at = datetime.utcnow()
             )
         ]
 
@@ -62,7 +62,8 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(note_widget.note.tags,  [])
 
         # ASSUMPTION: This test executes in much less than 10 seconds.
-        self.assertTrue(note_widget.note.timestamp > datetime.utcnow() - timedelta(0, 10))
+        self.assertTrue(note_widget.note.created_at > datetime.utcnow() - timedelta(0, 10))
+        self.assertEqual(note_widget.note.created_at, note_widget.note.modified_at)
 
     def test_add_note_should_add_existing_note(self):
         assert len(self.tape_widget._note_widgets) == 0
