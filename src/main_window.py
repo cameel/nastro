@@ -14,17 +14,7 @@ class MainWindow(KMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.main_panel        = QSplitter()
-        self.left_panel        = QWidget(self.main_panel)
-        self.date_picker       = KDatePicker(self.left_panel)
-        self.left_panel_layout = QVBoxLayout(self.left_panel)
-        self.left_panel_layout.addWidget(self.date_picker)
-        self.left_panel_layout.addStretch()
-
-        self.tape_widget = TapeWidget(self.main_panel)
-
-        self.main_panel.addWidget(self.left_panel)
-        self.main_panel.addWidget(self.tape_widget)
+        self.tape_widget = TapeWidget(self)
 
         file_menu      = self.menuBar().addMenu("File")
         open_action    = file_menu.addAction("&Open...")
@@ -42,8 +32,8 @@ class MainWindow(KMainWindow):
 
         self.connect(import_opera_notes_action, SIGNAL('triggered()'), self.import_opera_notes_handler)
 
-        self.resize(1200, 800)
-        self.setCentralWidget(self.main_panel)
+        self.resize(800, 800)
+        self.setCentralWidget(self.tape_widget)
 
     def save_as_handler(self):
         file_name = QFileDialog.getSaveFileName(
@@ -116,4 +106,4 @@ class MainWindow(KMainWindow):
         self.tape_widget.setParent(None)
 
         self.tape_widget = new_tape_widget
-        self.main_panel.addWidget(new_tape_widget)
+        self.setCentralWidget(new_tape_widget)
