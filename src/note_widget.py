@@ -2,6 +2,7 @@
 
 from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QPushButton, QSizePolicy, QFont
 from PyQt4.QtCore import SIGNAL
+from .utils       import utc_to_localtime
 
 class NoteWidget(QWidget):
     def __init__(self, parent = None):
@@ -66,5 +67,5 @@ class NoteWidget(QWidget):
         self._tag_editor.setText(', '.join(value.tags))
         self._body_editor.setPlainText(value.body)
         # TODO: Use system settings for date format?
-        self._timestamp_label.setText(value.timestamp.strftime("%Y-%m-%d %H:%M"))
+        self._timestamp_label.setText(utc_to_localtime(value.timestamp).strftime("%Y-%m-%d %H:%M"))
 

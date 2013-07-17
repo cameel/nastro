@@ -6,6 +6,7 @@ from datetime   import datetime
 from ..iterator     import HotlistIterator, LineType, StructuralError
 from ..importer     import import_opera_notes, line_strip, MissingNoteAttributes, InvalidAttributeValue, FOLDER_TAG_SEPARATOR
 from ....note       import Note
+from ....utils      import localtime_to_utc
 from .test_iterator import NOTE_FILE_FIXTURES
 
 def count_folder_starts(note_file_content):
@@ -111,13 +112,18 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(len(notes), 2)
         self.assertTrue([isinstance(note, Note) for note in notes])
 
+        # NOTE: Opera stores timestamps in localtime and the importer has to guess the time zone
+        # to convert it to UTC (which we're using internally). It assumes that it's the one we're
+        # using on this machine. This means that the expected timestamp depends on our geographical
+        # location. To prevent the test from failing on a different machine we have to convert it from
+        # localtime rather than just hard-code UTC value.
         self.assertEqual(notes[0].title,     "note 1")
         self.assertEqual(notes[0].body,      "")
-        self.assertEqual(notes[0].timestamp, datetime(2011, 9, 11, 22, 56, 10))
+        self.assertEqual(notes[0].timestamp, localtime_to_utc(datetime(2011, 9, 11, 22, 56, 10)))
 
         self.assertEqual(notes[1].title,     "note 2 title")
         self.assertEqual(notes[1].body,      "note body")
-        self.assertEqual(notes[1].timestamp, datetime(2011, 9, 28, 23, 20, 17))
+        self.assertEqual(notes[1].timestamp, localtime_to_utc(datetime(2011, 9, 28, 23, 20, 17)))
 
     def test_import_opera_notes_should_strip_leading_empty_lines_and_trailing_whitespace_from_note_body(self):
         fixture = (
@@ -153,7 +159,7 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(len(notes), 1)
         self.assertEqual(notes[0].title,     '')
         self.assertEqual(notes[0].body,      '')
-        self.assertEqual(notes[0].timestamp, datetime(2011, 9, 28, 23, 20, 17))
+        self.assertEqual(notes[0].timestamp, localtime_to_utc(datetime(2011, 9, 28, 23, 20, 17)))
 
     def test_import_opera_notes_should_detect_missing_timestamp(self):
         fixture = (

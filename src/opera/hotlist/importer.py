@@ -56,7 +56,9 @@ def element_to_note(attributes, folder_path):
         title,
         body,
         [FOLDER_TAG_SEPARATOR.join(folder_path)],
-        datetime.fromtimestamp(int(attributes['CREATED']))
+        # NOTE: Opera saves timestamps in localtime rather than UTC. This makes it impossible
+        # to correctly decode it unless we're now in the same time zone.
+        datetime.utcfromtimestamp(int(attributes['CREATED']))
     )
 
 def import_opera_notes(note_file, skip_trash_folder = True):
