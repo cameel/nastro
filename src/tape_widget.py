@@ -84,16 +84,6 @@ class TapeWidget(QWidget):
         except StopIteration:
             return None
 
-    def search(self, text):
-        def note_matches(lowercase_text, note):
-            for text_component in [note.title] + note.tags + [note.body]:
-                if text_component.lower().find(lowercase_text) != -1:
-                    return True
-
-            return False
-
-        return [note_matches(text.lower(), note) for note in self.notes()]
-
     """
     def search_handler(self, text):
         mask = self.search(text)
