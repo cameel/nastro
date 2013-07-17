@@ -101,11 +101,21 @@ class MainWindow(KMainWindow):
         for note_dict in raw_notes:
             notes.append(Note.from_dict(note_dict))
 
-        self.tape_widget.load_notes(notes)
+        self._replace_tape_widget(notes)
 
     def import_opera_notes(self, file_name):
         with open(file_name, 'r') as note_file:
             notes = import_opera_notes(note_file)
-        self.tape_widget.load_notes(notes)
+        self._replace_tape_widget(notes)
 
         return len(notes)
+
+    def _replace_tape_widget(self, notes):
+        new_tape_widget = TapeWidget()
+        new_tape_widget.load_notes(notes)
+
+        self.tape_widget.setParent(None)
+
+        self.tape_widget = new_tape_widget
+        self.main_panel_layout.addWidget(new_tape_widget)
+        self.tape_widget.setParent(self.main_panel)

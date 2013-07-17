@@ -31,7 +31,8 @@ class TapeWidget(QWidget):
         self._main_layout.addLayout(self._button_layout)
         self._main_layout.addWidget(self._scroll_area)
 
-        self.connect(self._add_note_button, SIGNAL('clicked()'), lambda : self.add_note())
+        self.connect(self._add_note_button, SIGNAL('clicked()'),                   self.add_note)
+        self.connect(self._search_box,      SIGNAL('textEdited(const QString &)'), self.search_handler)
 
         # NOTE: There are some caveats regarding setWidget() and show()
         # See QScrollArea.setWidget() docs.
@@ -59,13 +60,29 @@ class TapeWidget(QWidget):
 
     def remove_note(self, note):
         # TODO: Removal by index may be more efficient for large lists
-        note_widget = next(widget for widget in self._note_widgets if widget.note == note)
-
-        if note_widget != None:
+        try:
+            note_widget = next(widget for widget in self._note_widgets if widget.note == note)
             note_widget.setParent(None)
             self._note_widgets.remove(note_widget)
+        except StopIteration:
+            pass
 
         assert note not in self._note_widgets
+
+    def search(self, text):
+        def note_matches(lowercase_text, note):
+            for text_component in [note.title] + note.tags + [note.body]:
+                if text_component.lower().find(lowercase_text) != -1:
+                    return True
+
+            return False
+
+        return [note_matches(text.lower(), note_widget.note) for note_widget in self._note_widgets]
+
+    def search_handler(self, text):
+        mask = self.search(text)
+        for i, note_matches in enumerate(mask):
+            self._note_widgets[i].setVisible(note_matches)
 
     def clear(self):
         for note_widget in self._note_widgets:
