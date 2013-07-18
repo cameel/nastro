@@ -21,7 +21,11 @@ class TapeWidget(QWidget):
         self._add_note_button = QPushButton(self)
         self._add_note_button.setText("New note")
 
+        self._delete_note_button = QPushButton(self)
+        self._delete_note_button.setText("Delete note")
+
         self._button_layout.addWidget(self._add_note_button)
+        self._button_layout.addWidget(self._delete_note_button)
         self._button_layout.addStretch()
 
         self._main_layout.addWidget(self._search_box)
@@ -36,8 +40,9 @@ class TapeWidget(QWidget):
         self._note_list_view.setItemDelegate(self._note_delegate)
         self._note_list_view.setModel(self._tape_filter_proxy_model)
 
-        self.connect(self._add_note_button, SIGNAL('clicked()'),                    self.add_note)
-        self.connect(self._search_box,      SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
+        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self.add_note)
+        self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self._delete_note_handler)
+        self.connect(self._search_box,         SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
 
     def note(self, index):
         assert 0 <= index < self._tape_model.rowCount()
@@ -108,3 +113,10 @@ class TapeWidget(QWidget):
         except:
             self.clear()
             raise
+
+    def _delete_note_handler(self):
+        selected_indexes = self._note_list_view.selectedIndexes()
+        assert len(selected_indexes) <= 1
+
+        if len(selected_indexes) > 0:
+            self._tape_model.removeRow(selected_indexes[0].row())

@@ -3,7 +3,7 @@ import sys
 from datetime import datetime, timedelta
 
 from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QApplication
+from PyQt4.QtGui  import QApplication, QItemSelection, QItemSelectionModel
 from PyQt4.QtCore import QRegExp
 
 from ..tape_widget             import TapeWidget
@@ -176,3 +176,30 @@ class TapeWidgetTest(unittest.TestCase):
             # NOTE: Intentionally not checking all properties. Don't want to sync this every time one is added.
             self.assertEqual(dumped_note['title'], note.title)
             self.assertEqual(dumped_note['body'],  note.body)
+
+    def test_delete_note_handler_should_do_nothing_if_nothing_is_selected(self):
+        for note in self.notes:
+            self.tape_widget.add_note(note)
+
+        assert self.tape_widget.note_count() == len(self.notes)
+        assert len(self.tape_widget._note_list_view.selectedIndexes()) == 0
+
+        self.tape_widget._delete_note_handler()
+
+        self.assertEqual(self.tape_widget.note_count(), len(self.notes))
+
+    def test_delete_note_handler_should_delete_selected_note(self):
+        for note in self.notes:
+            self.tape_widget.add_note(note)
+
+        assert self.tape_widget.note_count() == len(self.notes)
+        assert len(self.notes) >= 2
+
+        index = self.tape_widget._tape_filter_proxy_model.index(1, 0)
+
+        self.tape_widget._note_list_view.selectionModel().select(QItemSelection(index, index), QItemSelectionModel.Select)
+        assert len(self.tape_widget._note_list_view.selectedIndexes()) == 1
+
+        self.tape_widget._delete_note_handler()
+
+        self.assertEqual(self.tape_widget.note_count(), len(self.notes) - 1)
