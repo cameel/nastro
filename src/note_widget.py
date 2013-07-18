@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QPushButton, QSizePolicy, QFont
+from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QSizePolicy, QFont
 from PyQt4.QtCore import SIGNAL
 
 from .utils import utc_to_localtime
@@ -45,15 +45,10 @@ class NoteWidget(QWidget):
         self._timestamp_layout.addWidget(self._created_at_label)
         self._timestamp_layout.addWidget(self._modified_at_label)
 
-        self._title_editor     = QLineEdit(self._title_panel)
-        self._delete_button    = QPushButton(self._title_panel)
+        self._title_editor = QLineEdit(self._title_panel)
         self._title_layout.addLayout(self._timestamp_layout)
         self._title_layout.addWidget(self._title_editor)
-        self._title_layout.addWidget(self._delete_button)
 
-        self._delete_button.setText('delete')
-
-        self.connect(self._delete_button, SIGNAL('clicked()'),                    lambda:      self.emit(SIGNAL('requestDelete()')))
         self.connect(self._body_editor,   SIGNAL('textChanged()'),                lambda:      self.touch())
         self.connect(self._tag_editor,    SIGNAL('textChanged(const QString &)'), lambda text: self.touch())
         self.connect(self._title_editor,  SIGNAL('textChanged(const QString &)'), lambda text: self.touch())
