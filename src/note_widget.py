@@ -27,7 +27,6 @@ class NoteWidget(QWidget):
         self._title_layout = QHBoxLayout(self._title_panel)
         self._tag_editor   = QLineEdit(self)
         self._body_editor  = QTextEdit(self)
-        self._body_editor.setMinimumSize(0, 250)
         self._body_editor.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
         self._body_editor.setCurrentFont(monospace_font)
 
