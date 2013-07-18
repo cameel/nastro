@@ -71,11 +71,13 @@ class NoteDelegateTest(unittest.TestCase):
 
     def test_updateEditorGeometry_should_change_editor_size_and_position(self):
         self.option.rect = QRect(11, 22, 33, 44)
+        expected_rect    = QRect(11 + 3, 22 + 3, 33 - 6, 44 - 6)
         editor           = NoteWidget()
+        editor.load_note(self.note)
 
         self.note_delegate.updateEditorGeometry(editor, self.option, self.item.index())
 
-        self.assertEqual(editor.geometry(), self.option.rect)
+        self.assertEqual(editor.geometry(), expected_rect)
 
     def test_sizeHint_should_return_the_height_of_a_standard_note_widget(self):
         note_widget = NoteWidget()

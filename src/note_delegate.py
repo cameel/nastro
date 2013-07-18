@@ -58,7 +58,9 @@ class NoteDelegate(QItemDelegate):
         painter.restore()
 
     def updateEditorGeometry(self, editor, option, index):
-        editor.setGeometry(option.rect)
+        # FIXME: Why do I have to make the editor 3 pixels smaller on each side to make it have the same size
+        # as the one I draw in paint()?
+        editor.setGeometry(QRect(option.rect.x() + 3, option.rect.y() + 3, option.rect.width() - 6, option.rect.height() - 6))
 
     def sizeHint(self, option, index):
         value = index.model().data(index, Qt.DisplayRole)
