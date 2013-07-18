@@ -75,12 +75,13 @@ class NoteWidget(QWidget):
     def touch(self):
         self._note_modified_at = datetime.utcnow()
 
-    def _format_timestamp(self, timestamp):
+    @classmethod
+    def format_timestamp(self, timestamp):
         assert timestamp != None
 
         # TODO: Use system settings for date format?
         return utc_to_localtime(timestamp).strftime("%Y-%m-%d %H:%M")
 
     def refresh_timestamps(self):
-        self._created_at_label.setText(self._format_timestamp(self._note_created_at))
-        self._modified_at_label.setText(self._format_timestamp(self._note_modified_at))
+        self._created_at_label.setText(self.format_timestamp(self._note_created_at))
+        self._modified_at_label.setText(self.format_timestamp(self._note_modified_at)) 

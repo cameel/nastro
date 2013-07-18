@@ -168,15 +168,15 @@ class NoteWidgetTest(unittest.TestCase):
     def test_format_timestamp_should_convert_a_timestamp_into_a_readable_string_repesentation(self):
         timestamp = datetime(2000, 12, 31)
 
-        self.assertEqual(self.note_widget._format_timestamp(localtime_to_utc(timestamp)), "2000-12-31 00:00")
+        self.assertEqual(self.note_widget.format_timestamp(localtime_to_utc(timestamp)), "2000-12-31 00:00")
 
     def test_refresh_timestamps_should_update_timestamp_labels(self):
         self.note_widget._note_created_at  = datetime(2000, 12, 31)
         self.note_widget._note_modified_at = datetime(2000, 12, 31)
-        assert self.note_widget._created_at_label.text()  != self.note_widget._format_timestamp(self.note_widget._note_created_at)
-        assert self.note_widget._modified_at_label.text() != self.note_widget._format_timestamp(self.note_widget._note_modified_at)
+        assert self.note_widget._created_at_label.text()  != self.note_widget.format_timestamp(self.note_widget._note_created_at)
+        assert self.note_widget._modified_at_label.text() != self.note_widget.format_timestamp(self.note_widget._note_modified_at)
 
         self.note_widget.refresh_timestamps()
 
-        self.assertEqual(self.note_widget._created_at_label.text(),  self.note_widget._format_timestamp(self.note_widget._note_created_at))
-        self.assertEqual(self.note_widget._modified_at_label.text(), self.note_widget._format_timestamp(self.note_widget._note_modified_at))
+        self.assertEqual(self.note_widget._created_at_label.text(),  self.note_widget.format_timestamp(self.note_widget._note_created_at))
+        self.assertEqual(self.note_widget._modified_at_label.text(), self.note_widget.format_timestamp(self.note_widget._note_modified_at))
