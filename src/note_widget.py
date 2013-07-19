@@ -5,8 +5,8 @@ from datetime import datetime
 from PyQt4.QtGui  import QWidget, QFrame, QVBoxLayout, QHBoxLayout, QLabel, QFont, QPalette
 from PyQt4.QtCore import SIGNAL, Qt
 
-from .note       import Note
-from .note_edit  import NoteEdit
+from .utils import utc_to_localtime
+from .note  import Note
 
 class NoteWidget(QFrame):
     def __init__(self, parent = None):
@@ -82,5 +82,12 @@ class NoteWidget(QFrame):
         self._title_label.setText(note.title)
         self._body_label.setText(note.body)
         self._tag_label.setText(Note.join_tags(note.tags))
-        self._created_at_label.setText(NoteEdit.format_timestamp(note.created_at))
-        self._modified_at_label.setText(NoteEdit.format_timestamp(note.modified_at))
+        self._created_at_label.setText(self.format_timestamp(note.created_at))
+        self._modified_at_label.setText(self.format_timestamp(note.modified_at))
+
+    @classmethod
+    def format_timestamp(self, timestamp):
+        assert timestamp != None
+
+        # TODO: Use system settings for date format?
+        return utc_to_localtime(timestamp).strftime("%Y-%m-%d %H:%M")
