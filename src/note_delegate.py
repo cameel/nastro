@@ -1,6 +1,6 @@
 """ A Qt delegate for models dealing with Note objects """
 
-from PyQt4.QtGui  import QItemDelegate, QStyle, QPixmap, QPen
+from PyQt4.QtGui  import QItemDelegate, QStyle, QPixmap, QPen, QPalette
 from PyQt4.QtCore import Qt, QSize, QPoint, QRect
 
 from datetime import datetime
@@ -16,7 +16,15 @@ class NoteDelegate(QItemDelegate):
         self._display_widget = NoteWidget()
 
     def createEditor(self, parent, option, index):
-        return NoteWidget(parent)
+        widget = NoteWidget(parent)
+
+        palette = QPalette(widget.palette())
+        palette.setColor(QPalette.Background, Qt.white)
+
+        widget.setAutoFillBackground(True)
+        widget.setPalette(palette)
+
+        return widget
 
     def setEditorData(self, editor, index):
         value = index.model().data(index, Qt.EditRole)
