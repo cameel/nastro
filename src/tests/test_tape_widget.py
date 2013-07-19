@@ -280,3 +280,18 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget.note_count(), len(self.notes) - 2)
         self.assertTrue(self.notes[1].to_dict() not in self.tape_widget.dump_notes())
         self.assertTrue(self.notes[2].to_dict() not in self.tape_widget.dump_notes())
+
+    def test_new_note_handler_should_create_a_note_and_focus_the_tape_on_it(self):
+        assert len(self.notes) >= 2
+        self.prepare_tape()
+
+        self.tape_widget.select_note(1)
+        assert len(self.tape_widget.selected_note_positions()) == 1
+
+        num_notes_before = self.tape_widget.note_count()
+
+        self.tape_widget._new_note_handler()
+
+        self.assertEqual(self.tape_widget.note_count(), num_notes_before + 1)
+        self.assertEqual(self.tape_widget.selected_note_positions(), [self.tape_widget.note_count() - 1])
+        self.assertEqual(self.tape_widget.get_filter(), '')

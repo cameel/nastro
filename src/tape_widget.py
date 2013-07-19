@@ -44,7 +44,7 @@ class TapeWidget(QWidget):
         self._note_list_view.setItemDelegate(self._note_delegate)
         self._note_list_view.setModel(self._tape_filter_proxy_model)
 
-        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self.add_note)
+        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self._new_note_handler)
         self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self._delete_note_handler)
         self.connect(self._search_box,         SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
 
@@ -155,3 +155,14 @@ class TapeWidget(QWidget):
         # past the deleted one shift by one and we'd have to account for that otherwise.
         for position in positions:
             self._tape_model.removeRow(position)
+
+    def _new_note_handler(self):
+        self.add_note()
+
+        new_note_position = self._tape_filter_proxy_model.rowCount() - 1
+        new_note_index    = self._tape_filter_proxy_model.index(new_note_position, 0)
+
+        self.set_filter('')
+        self.clear_selection()
+        self.select_note(new_note_position)
+        self._note_list_view.scrollTo(new_note_index)
