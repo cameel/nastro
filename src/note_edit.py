@@ -31,7 +31,6 @@ class NoteEdit(QWidget):
         self._body_editor.setCurrentFont(monospace_font)
 
         self._main_layout.addWidget(self._title_panel)
-        self._main_layout.addWidget(self._tag_editor)
         self._main_layout.addWidget(self._body_editor)
         self._main_layout.addWidget(self._tag_editor)
 
