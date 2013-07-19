@@ -44,3 +44,21 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.window.tape_widget.note_count(), 1)
         self.assertEqual(self.window.tape_widget.note(0), new_note)
         self.assertTrue(self.window.centralWidget() == self.window.tape_widget)
+
+    def test_new_handler_should_create_new_empty_tape(self):
+        note = Note(
+            title      = "X",
+            body       = "Y",
+            tags       = ["Z"],
+            created_at = datetime.utcnow()
+        )
+
+        self.window.tape_widget.add_note(note)
+        assert self.window.tape_widget.note_count() == 1
+
+        self.window.tape_widget.set_filter("test")
+
+        self.window.new_handler()
+
+        self.assertEqual(self.window.tape_widget.note_count(), 0)
+        self.assertEqual(self.window.tape_widget.get_filter(), '')
