@@ -56,6 +56,7 @@ class TapeWidgetTest(unittest.TestCase):
             self.tape_widget.add_note(self.notes[i])
 
         assert self.tape_widget.note_count() == len(index_sequence)
+        assert len(self.tape_widget.selected_note_positions()) == 0
 
     def test_note_should_return_note_at_specified_index(self):
         self.prepare_tape()
@@ -187,10 +188,69 @@ class TapeWidgetTest(unittest.TestCase):
             self.assertEqual(dumped_note['title'], note.title)
             self.assertEqual(dumped_note['body'],  note.body)
 
+    def test_selected_note_positions_should_return_positions_of_selected_notes(self):
+        assert len(self.notes) >= 4
+        self.prepare_tape()
+
+        start_index = self.tape_widget._tape_filter_proxy_model.index(1, 0)
+        end_index   = self.tape_widget._tape_filter_proxy_model.index(2, 0)
+        self.tape_widget._note_list_view.selectionModel().select(
+            QItemSelection(start_index, end_index),
+            QItemSelectionModel.Select
+        )
+
+        self.assertEqual(self.tape_widget.selected_note_positions(), [1, 2])
+
+    def test_by_default_no_note_should_be_selected(self):
+        self.prepare_tape()
+
+        self.assertEqual(self.tape_widget.selected_note_positions(), [])
+
+    def test_select_note_should_select_a_note(self):
+        assert len(self.notes) >= 2
+        self.prepare_tape()
+
+        self.tape_widget.select_note(1)
+
+        self.assertEqual(self.tape_widget.selected_note_positions(), [1])
+
+    def test_select_note_should_not_deselect_previously_selected_note(self):
+        assert len(self.notes) >= 3
+        self.prepare_tape()
+
+        self.tape_widget.select_note(1)
+        self.tape_widget.select_note(2)
+
+        self.assertEqual(self.tape_widget.selected_note_positions(), [1, 2])
+
+    def test_deselect_note_should_deselect_a_note(self):
+        assert len(self.notes) >= 3
+        self.prepare_tape()
+
+        self.tape_widget.select_note(1)
+        self.tape_widget.select_note(2)
+        assert self.tape_widget.selected_note_positions() == [1, 2]
+
+        self.tape_widget.deselect_note(2)
+
+        self.assertEqual(self.tape_widget.selected_note_positions(), [1])
+
+    def test_clear_selection_should_make_all_notes_deselected(self):
+        assert len(self.notes) >= 3
+        self.prepare_tape()
+
+        self.tape_widget.select_note(1)
+        self.tape_widget.select_note(2)
+        assert self.tape_widget.selected_note_positions() == [1, 2]
+
+        self.tape_widget.clear_selection()
+
+        self.assertEqual(self.tape_widget.selected_note_positions(), [])
+
     def test_delete_note_handler_should_do_nothing_if_nothing_is_selected(self):
         self.prepare_tape()
 
-        assert len(self.tape_widget._note_list_view.selectedIndexes()) == 0
+        assert len(self.tape_widget.selected_note_positions()) == 0
 
         self.tape_widget._delete_note_handler()
 
@@ -200,10 +260,8 @@ class TapeWidgetTest(unittest.TestCase):
         assert len(self.notes) >= 2
         self.prepare_tape()
 
-        index = self.tape_widget._tape_filter_proxy_model.index(1, 0)
-
-        self.tape_widget._note_list_view.selectionModel().select(QItemSelection(index, index), QItemSelectionModel.Select)
-        assert len(self.tape_widget._note_list_view.selectedIndexes()) == 1
+        self.tape_widget.select_note(1)
+        assert len(self.tape_widget.selected_note_positions()) == 1
 
         self.tape_widget._delete_note_handler()
 
@@ -213,13 +271,9 @@ class TapeWidgetTest(unittest.TestCase):
         assert len(self.notes) >= 2
         self.prepare_tape()
 
-        start_index = self.tape_widget._tape_filter_proxy_model.index(1, 0)
-        end_index   = self.tape_widget._tape_filter_proxy_model.index(2, 0)
-        self.tape_widget._note_list_view.selectionModel().select(
-            QItemSelection(start_index, end_index),
-            QItemSelectionModel.Select
-        )
-        assert sorted(index.row() for index in self.tape_widget._note_list_view.selectedIndexes()) == [1, 2]
+        self.tape_widget.select_note(1)
+        self.tape_widget.select_note(2)
+        assert self.tape_widget.selected_note_positions() == [1, 2]
 
         self.tape_widget._delete_note_handler()
 
