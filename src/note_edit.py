@@ -23,29 +23,15 @@ class NoteEdit(QWidget):
         timestamp_font = QFont()
         timestamp_font.setPointSize(7)
 
-        self._title_panel  = QWidget(self)
-        self._title_layout = QHBoxLayout(self._title_panel)
+        self._title_editor = QLineEdit(self)
         self._tag_editor   = QLineEdit(self)
         self._body_editor  = QTextEdit(self)
         self._body_editor.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
         self._body_editor.setCurrentFont(monospace_font)
 
-        self._main_layout.addWidget(self._title_panel)
+        self._main_layout.addWidget(self._title_editor)
         self._main_layout.addWidget(self._body_editor)
         self._main_layout.addWidget(self._tag_editor)
-
-        self._created_at_label  = QLabel(self._title_panel)
-        self._modified_at_label = QLabel(self._title_panel)
-        self._created_at_label.setFont(timestamp_font)
-        self._modified_at_label.setFont(timestamp_font)
-
-        self._timestamp_layout = QVBoxLayout()
-        self._timestamp_layout.addWidget(self._created_at_label)
-        self._timestamp_layout.addWidget(self._modified_at_label)
-
-        self._title_editor = QLineEdit(self._title_panel)
-        self._title_layout.addLayout(self._timestamp_layout)
-        self._title_layout.addWidget(self._title_editor)
 
         self.connect(self._body_editor,   SIGNAL('textChanged()'),                lambda:      self.touch())
         self.connect(self._tag_editor,    SIGNAL('textChanged(const QString &)'), lambda text: self.touch())
@@ -55,12 +41,11 @@ class NoteEdit(QWidget):
         self._title_editor.setText(note.title)
         self._body_editor.setPlainText(note.body)
         self._tag_editor.setText(Note.join_tags(note.tags))
-        self._note_created_at  = note.created_at
-        self._note_modified_at = note.modified_at
 
         # NOTE: Set timestamps last because setText() calls trigger textChanged signals
         # that cause modified_at to be updated.
-        self.refresh_timestamps()
+        self._note_created_at  = note.created_at
+        self._note_modified_at = note.modified_at
 
     def dump_note(self):
         return Note(
@@ -80,7 +65,3 @@ class NoteEdit(QWidget):
 
         # TODO: Use system settings for date format?
         return utc_to_localtime(timestamp).strftime("%Y-%m-%d %H:%M")
-
-    def refresh_timestamps(self):
-        self._created_at_label.setText(self.format_timestamp(self._note_created_at))
-        self._modified_at_label.setText(self.format_timestamp(self._note_modified_at)) 
