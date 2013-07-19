@@ -8,7 +8,7 @@ from PyQt4.QtCore import QRegExp
 
 from ..tape_widget             import TapeWidget
 from ..note                    import Note
-from ..note_widget             import NoteWidget
+from ..note_edit               import NoteEdit
 from ..tape_filter_proxy_model import TapeFilterProxyModel
 
 class TapeWidgetTest(unittest.TestCase):

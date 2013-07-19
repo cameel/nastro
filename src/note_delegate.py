@@ -5,18 +5,18 @@ from PyQt4.QtCore import Qt, QSize, QPoint, QRect
 
 from datetime import datetime
 
-from .note_widget import NoteWidget
-from .note        import Note
+from .note_edit import NoteEdit
+from .note      import Note
 
 class NoteDelegate(QItemDelegate):
     def __init__(self, parent = None):
         super().__init__(parent)
 
         # A widget painted in display mode. This is NOT the editor widget.
-        self._display_widget = NoteWidget()
+        self._display_widget = NoteEdit()
 
     def createEditor(self, parent, option, index):
-        widget = NoteWidget(parent)
+        widget = NoteEdit(parent)
 
         palette = QPalette(widget.palette())
         palette.setColor(QPalette.Background, Qt.white)

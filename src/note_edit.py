@@ -8,7 +8,7 @@ from PyQt4.QtCore import SIGNAL
 from .utils import utc_to_localtime
 from .note  import Note
 
-class NoteWidget(QWidget):
+class NoteEdit(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
         self._note_created_at  = datetime.utcnow()
