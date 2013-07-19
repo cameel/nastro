@@ -19,6 +19,7 @@ class TapeWidget(QWidget):
 
         self._note_list_view = QListView()
         self._note_list_view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self._note_list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         self._add_note_button = QPushButton(self)
         self._add_note_button.setText("New note")
@@ -121,7 +122,8 @@ class TapeWidget(QWidget):
 
     def _delete_note_handler(self):
         selected_indexes = self._note_list_view.selectedIndexes()
-        assert len(selected_indexes) <= 1
 
-        if len(selected_indexes) > 0:
-            self._tape_model.removeRow(selected_indexes[0].row())
+        # NOTE: The list must be iterated in reversed order because positions of all elements
+        # past the deleted one shift by one and we'd have to account for that otherwise.
+        for i in sorted((index.row() for index in selected_indexes), reverse = True):
+            self._tape_model.removeRow(i)

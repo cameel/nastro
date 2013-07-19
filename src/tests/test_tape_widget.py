@@ -208,3 +208,21 @@ class TapeWidgetTest(unittest.TestCase):
         self.tape_widget._delete_note_handler()
 
         self.assertEqual(self.tape_widget.note_count(), len(self.notes) - 1)
+
+    def test_delete_note_handler_should_handle_deleting_multiple_notes(self):
+        assert len(self.notes) >= 2
+        self.prepare_tape()
+
+        start_index = self.tape_widget._tape_filter_proxy_model.index(1, 0)
+        end_index   = self.tape_widget._tape_filter_proxy_model.index(2, 0)
+        self.tape_widget._note_list_view.selectionModel().select(
+            QItemSelection(start_index, end_index),
+            QItemSelectionModel.Select
+        )
+        assert sorted(index.row() for index in self.tape_widget._note_list_view.selectedIndexes()) == [1, 2]
+
+        self.tape_widget._delete_note_handler()
+
+        self.assertEqual(self.tape_widget.note_count(), len(self.notes) - 2)
+        self.assertTrue(self.notes[1].to_dict() not in self.tape_widget.dump_notes())
+        self.assertTrue(self.notes[2].to_dict() not in self.tape_widget.dump_notes())
