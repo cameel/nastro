@@ -137,7 +137,7 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget.note(1), self.notes[1])
 
     def test_by_default_all_notes_should_be_visible(self):
-        assert self.tape_widget._search_box.text() == ''
+        assert self.tape_widget.get_filter() == ''
 
         for note in self.notes[0:3]:
             self.tape_widget.add_note(note)
@@ -147,6 +147,23 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget._tape_filter_proxy_model.rowCount(), 3)
         for i in range(3):
             self.assertEqual(self.tape_widget._tape_filter_proxy_model.data(self.tape_widget._tape_filter_proxy_model.index(i, 0)).to_dict(), self.notes[i].to_dict())
+
+    def test_get_filter_should_return_search_filter(self):
+        keyword = "a keyword"
+        self.tape_widget._search_box.setText(keyword)
+
+        self.assertEqual(self.tape_widget.get_filter(), keyword)
+        self.assertEqual(self.tape_widget.get_filter(), self.tape_widget._search_box.text())
+        self.assertEqual(self.tape_widget._tape_filter_proxy_model.filterRegExp().patternSyntax(), QRegExp.FixedString)
+        self.assertEqual(self.tape_widget._tape_filter_proxy_model.filterRegExp().pattern(), keyword)
+
+    def test_set_filter_should_set_filter_string(self):
+        keyword = 'B'
+        assert self.tape_widget.get_filter() != keyword
+
+        self.tape_widget.set_filter(keyword)
+
+        self.assertEqual(self.tape_widget.get_filter(), keyword)
 
     def test_set_filter_should_hide_non_matching_notes(self):
         keyword = 'B'
