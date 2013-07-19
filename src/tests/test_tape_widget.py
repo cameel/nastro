@@ -48,9 +48,17 @@ class TapeWidgetTest(unittest.TestCase):
         # class before creating a new one and PyQt does not like having two instances of QApplication?
         self.application = None
 
+    def prepare_tape(self, index_sequence = None):
+        if index_sequence == None:
+            index_sequence = range(len(self.notes))
+
+        for i in index_sequence:
+            self.tape_widget.add_note(self.notes[i])
+
+        assert self.tape_widget.note_count() == len(index_sequence)
+
     def test_note_should_return_note_at_specified_index(self):
-        for note in self.notes:
-            self.tape_widget.add_note(note)
+        self.prepare_tape()
 
         for (i, note) in enumerate(self.notes):
             self.assertEqual(self.tape_widget.note(i), note)
@@ -58,8 +66,7 @@ class TapeWidgetTest(unittest.TestCase):
     def test_note_count_should_return_the_number_of_notes(self):
         self.assertEqual(self.tape_widget.note_count(), 0)
 
-        for note in self.notes:
-            self.tape_widget.add_note(note)
+        self.prepare_tape()
 
         self.assertEqual(self.tape_widget.note_count(), len(self.notes))
 
@@ -67,8 +74,7 @@ class TapeWidgetTest(unittest.TestCase):
         with self.assertRaises(StopIteration):
             next(self.tape_widget.notes())
 
-        for note in self.notes:
-            self.tape_widget.add_note(note)
+        self.prepare_tape()
 
         for (i, note) in enumerate(self.tape_widget.notes()):
             self.assertEqual(note, self.tape_widget.note(i))
@@ -111,11 +117,7 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget.note(2), self.notes[1])
 
     def test_remove_note_should_remove_existing_note_from_the_tape(self):
-        assert self.tape_widget.note_count() == 0
-
-        for note in self.notes[0:3]:
-            self.tape_widget.add_note(note)
-        assert self.tape_widget.note_count() == 3
+        self.prepare_tape(range(3))
 
         self.tape_widget.remove_note(self.notes[1])
 
@@ -124,11 +126,7 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget.note(1), self.notes[2])
 
     def test_remove_note_should_do_nothing_if_note_not_found(self):
-        assert self.tape_widget.note_count() == 0
-
-        for note in self.notes[0:2]:
-            self.tape_widget.add_note(note)
-        assert self.tape_widget.note_count() == 2
+        self.prepare_tape(range(2))
 
         self.tape_widget.remove_note(self.notes[2])
 
@@ -139,9 +137,7 @@ class TapeWidgetTest(unittest.TestCase):
     def test_by_default_all_notes_should_be_visible(self):
         assert self.tape_widget.get_filter() == ''
 
-        for note in self.notes[0:3]:
-            self.tape_widget.add_note(note)
-        assert self.tape_widget.note_count() == 3
+        self.prepare_tape(range(3))
 
         self.assertEqual(self.tape_widget.note_count(), 3)
         self.assertEqual(self.tape_widget._tape_filter_proxy_model.rowCount(), 3)
@@ -172,9 +168,7 @@ class TapeWidgetTest(unittest.TestCase):
         assert     TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.notes[1])
         assert not TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.notes[2])
 
-        for note in self.notes[0:3]:
-            self.tape_widget.add_note(note)
-        assert self.tape_widget.note_count() == 3
+        self.prepare_tape(range(3))
 
         self.tape_widget.set_filter(keyword)
 
@@ -183,8 +177,7 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget._tape_filter_proxy_model.data(self.tape_widget._tape_filter_proxy_model.index(0, 0)).to_dict(), self.notes[1].to_dict())
 
     def test_dump_notes_should_dump_all_notes_as_dicts(self):
-        for note in self.notes:
-            self.tape_widget.add_note(note)
+        self.prepare_tape()
 
         dump = self.tape_widget.dump_notes()
 
@@ -195,10 +188,8 @@ class TapeWidgetTest(unittest.TestCase):
             self.assertEqual(dumped_note['body'],  note.body)
 
     def test_delete_note_handler_should_do_nothing_if_nothing_is_selected(self):
-        for note in self.notes:
-            self.tape_widget.add_note(note)
+        self.prepare_tape()
 
-        assert self.tape_widget.note_count() == len(self.notes)
         assert len(self.tape_widget._note_list_view.selectedIndexes()) == 0
 
         self.tape_widget._delete_note_handler()
@@ -206,11 +197,8 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget.note_count(), len(self.notes))
 
     def test_delete_note_handler_should_delete_selected_note(self):
-        for note in self.notes:
-            self.tape_widget.add_note(note)
-
-        assert self.tape_widget.note_count() == len(self.notes)
         assert len(self.notes) >= 2
+        self.prepare_tape()
 
         index = self.tape_widget._tape_filter_proxy_model.index(1, 0)
 
