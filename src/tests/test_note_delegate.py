@@ -8,6 +8,7 @@ from PyQt4.QtCore import Qt, QRect
 
 from ..note          import Note
 from ..note_edit     import NoteEdit
+from ..note_widget   import NoteWidget
 from ..note_delegate import NoteDelegate
 
 class NoteDelegateTest(unittest.TestCase):
@@ -79,11 +80,12 @@ class NoteDelegateTest(unittest.TestCase):
 
         self.assertEqual(editor.geometry(), expected_rect)
 
-    def test_sizeHint_should_return_the_height_of_a_standard_note_edit(self):
-        note_edit = NoteEdit()
+    def test_sizeHint_should_return_the_height_of_a_standard_note_widget(self):
+        note_widget = NoteWidget()
+        note_widget.load_note(self.note)
 
         size_hint = self.note_delegate.sizeHint(self.option, self.item.index())
 
         # NOTE: Preferred height is be the same in an empty and non-empty widget.
         # Preferred width may change depending on the content.
-        self.assertEqual(size_hint.height(), note_edit.sizeHint().height())
+        self.assertEqual(size_hint.height(), note_widget.sizeHint().height())
