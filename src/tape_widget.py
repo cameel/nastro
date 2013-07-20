@@ -18,9 +18,9 @@ class TapeWidget(QWidget):
         self._search_box     = QLineEdit(self)
         self._button_layout  = QHBoxLayout()
 
-        self._note_list_view = QListView()
-        self._note_list_view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        self._note_list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self._view = QListView()
+        self._view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self._view.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         self._add_note_button = QPushButton(self)
         self._add_note_button.setText("New note")
@@ -34,15 +34,15 @@ class TapeWidget(QWidget):
 
         self._main_layout.addWidget(self._search_box)
         self._main_layout.addLayout(self._button_layout)
-        self._main_layout.addWidget(self._note_list_view)
+        self._main_layout.addWidget(self._view)
 
         self._tape_model              = QStandardItemModel()
         self._tape_filter_proxy_model = TapeFilterProxyModel()
         self._note_delegate           = NoteDelegate()
 
         self._tape_filter_proxy_model.setSourceModel(self._tape_model)
-        self._note_list_view.setItemDelegate(self._note_delegate)
-        self._note_list_view.setModel(self._tape_filter_proxy_model)
+        self._view.setItemDelegate(self._note_delegate)
+        self._view.setModel(self._tape_filter_proxy_model)
 
         self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self._new_note_handler)
         self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self._delete_note_handler)
@@ -122,7 +122,7 @@ class TapeWidget(QWidget):
             raise
 
     def selected_note_positions(self):
-        selected_indexes = self._note_list_view.selectedIndexes()
+        selected_indexes = self._view.selectedIndexes()
 
         result = []
         for index in selected_indexes:
@@ -132,20 +132,20 @@ class TapeWidget(QWidget):
 
     def select_note(self, position):
         index = self._tape_filter_proxy_model.index(position, 0)
-        self._note_list_view.selectionModel().select(
+        self._view.selectionModel().select(
             QItemSelection(index, index),
             QItemSelectionModel.Select
         )
 
     def deselect_note(self, position):
         index = self._tape_filter_proxy_model.index(position, 0)
-        self._note_list_view.selectionModel().select(
+        self._view.selectionModel().select(
             QItemSelection(index, index),
             QItemSelectionModel.Deselect
         )
 
     def clear_selection(self):
-        self._note_list_view.selectionModel().clear()
+        self._view.selectionModel().clear()
 
     def _delete_note_handler(self):
         positions = sorted(self.selected_note_positions(), reverse = True)
@@ -165,4 +165,4 @@ class TapeWidget(QWidget):
         self.set_filter('')
         self.clear_selection()
         self.select_note(new_note_position)
-        self._note_list_view.scrollTo(new_note_index)
+        self._view.scrollTo(new_note_index)

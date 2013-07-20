@@ -194,7 +194,7 @@ class TapeWidgetTest(unittest.TestCase):
 
         start_index = self.tape_widget._tape_filter_proxy_model.index(1, 0)
         end_index   = self.tape_widget._tape_filter_proxy_model.index(2, 0)
-        self.tape_widget._note_list_view.selectionModel().select(
+        self.tape_widget._view.selectionModel().select(
             QItemSelection(start_index, end_index),
             QItemSelectionModel.Select
         )
