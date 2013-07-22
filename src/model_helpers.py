@@ -68,3 +68,29 @@ def subtree_items(root):
 
 def all_items(model):
     return islice(subtree_items(model.invisibleRootItem()), 1, None)
+
+def remove_items(model, indexes):
+    """ Removes multiple model items specified by indexes. """
+
+    assert all(model.itemFromIndex(index) != None for index in indexes)
+    assert all(index.isValid() for index in indexes)
+
+    # NOTE: Deleting a row shifts indexes of all subsequent rows. Also, deleting a row deletes all descendants
+    # and trying to delete one of these descendants later will either delete the wrong thing or crash the application.
+    # For that reason we must order the items according to the nesting level (deeper nested first) and row order
+    # (last rows first).
+    sorted_indexes = sorted(indexes, reverse = True, key = lambda index: (level(index), index.row()))
+
+    for index in sorted_indexes:
+        assert index.isValid()
+
+        # NOTE: We prefer takeRow() to removeRow() because the latter makes the model release the memory associated
+        # with the item. It breaks the common expectation in Python that an object is alive as long as a reference to it
+        # is stored somewhere. Using takeRow() lets Python's garbage collector take care of releasing the object if needed.
+        if index.parent() == QModelIndex():
+            parent = model
+        else:
+            parent = model.itemFromIndex(index.parent())
+
+        assert index.row() < parent.rowCount()
+        parent.takeRow(index.row())
