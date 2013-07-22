@@ -57,33 +57,34 @@ class NoteDelegate(QItemDelegate):
         value = index.model().data(index, Qt.DisplayRole)
         assert isinstance(value, Note), "Note instance expected, got {}: '{}'".format(value.__class__, value)
 
-        painter.save()
+        if option.rect.width() > 0 and option.rect.height() > 0:
+            painter.save()
 
-        # FIXME: It would be more efficient to create the widget in __init__() and then just
-        # replace the note with load_note() but it does not work. Its labels retain don't update
-        # their height immediately after setText(), probably because they're using signals to
-        # communicate with the layout and these signals are processed asynchronously by Qt event loop.
-        # As a result, the widget ignores resize() call and remains at the size corresponding to the
-        # previous note - the look of the note is different depending on which other note was painted before.
-        display_widget = NoteWidget()
-        display_widget.load_note(value)
-        display_widget.resize(option.rect.size())
+            # FIXME: It would be more efficient to create the widget in __init__() and then just
+            # replace the note with load_note() but it does not work. Its labels retain don't update
+            # their height immediately after setText(), probably because they're using signals to
+            # communicate with the layout and these signals are processed asynchronously by Qt event loop.
+            # As a result, the widget ignores resize() call and remains at the size corresponding to the
+            # previous note - the look of the note is different depending on which other note was painted before.
+            display_widget = NoteWidget()
+            display_widget.load_note(value)
+            display_widget.resize(option.rect.size())
 
-        # If the widget refuses to change its size, it might indicate a layout problem (see note above).
-        assert display_widget.size() == option.rect.size(), "Wanted to resize widget to {}x{} but it insists on {}x{}".format(
-            option.rect.size().width(),    option.rect.size().height(),
-            display_widget.size().width(), display_widget.size().height()
-        )
+            # If the widget refuses to change its size, it might indicate a layout problem (see note above).
+            assert display_widget.size() == option.rect.size(), "Wanted to resize widget to {}x{} but it insists on {}x{}".format(
+                option.rect.size().width(),    option.rect.size().height(),
+                display_widget.size().width(), display_widget.size().height()
+            )
 
-        # FIXME: Draw the widget directly, without the intermediate pixmap
-        pixmap = QPixmap(option.rect.size())
-        display_widget.render(pixmap)
-        painter.drawPixmap(option.rect.topLeft(), pixmap)
+            # FIXME: Draw the widget directly, without the intermediate pixmap
+            pixmap = QPixmap(option.rect.size())
+            display_widget.render(pixmap)
+            painter.drawPixmap(option.rect.topLeft(), pixmap)
 
-        if option.state & QStyle.State_Selected:
-            self._draw_focus_frame(painter, option.rect, 2)
+            if option.state & QStyle.State_Selected:
+                self._draw_focus_frame(painter, option.rect, 2)
 
-        painter.restore()
+            painter.restore()
 
     def updateEditorGeometry(self, editor, option, index):
         # FIXME: Why do I have to make the editor 3 pixels smaller on each side to make it have the same size
