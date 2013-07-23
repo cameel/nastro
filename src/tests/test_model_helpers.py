@@ -3,7 +3,7 @@ import unittest
 from PyQt4.QtTest import QTest
 from PyQt4.QtGui  import QStandardItemModel, QStandardItem
 
-from ..model_helpers import level
+from ..model_helpers import level, tree_path
 
 class ModelHelpersTest(unittest.TestCase):
     def setUp(self):
@@ -89,3 +89,41 @@ class ModelHelpersTest(unittest.TestCase):
     def test_item_level_should_return_0_for_invisible_root_item(self):
         root_item = self.model.invisibleRootItem()
         self.assertEqual(level(root_item), 0)
+
+    def test_tree_path_should_return_the_row_numbers_of_the_item_and_all_ancestors(self):
+        self.assertEqual(tree_path(self.item_0),                     [0])
+        self.assertEqual(tree_path(self.item_0_0),                [0, 0])
+        self.assertEqual(tree_path(self.item_0_0_0),           [0, 0, 0])
+        self.assertEqual(tree_path(self.item_0_0_0_0),      [0, 0, 0, 0])
+        self.assertEqual(tree_path(self.item_1),                     [1])
+        self.assertEqual(tree_path(self.item_1_0),                [0, 1])
+        self.assertEqual(tree_path(self.item_1_0_0),           [0, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_1),           [1, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_2),           [2, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_2_0),      [0, 2, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_2_0_0), [0, 0, 2, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_3),           [3, 0, 1])
+        self.assertEqual(tree_path(self.item_1_1),                [1, 1])
+        self.assertEqual(tree_path(self.item_1_1_0),           [0, 1, 1])
+        self.assertEqual(tree_path(self.item_2),                     [2])
+        self.assertEqual(tree_path(self.item_2_0),                [0, 2])
+        self.assertEqual(tree_path(self.item_3),                     [3])
+
+    def test_tree_path_should_work_with_model_indexes(self):
+        self.assertEqual(tree_path(self.item_0.index()),                     [0])
+        self.assertEqual(tree_path(self.item_0_0.index()),                [0, 0])
+        self.assertEqual(tree_path(self.item_0_0_0.index()),           [0, 0, 0])
+        self.assertEqual(tree_path(self.item_0_0_0_0.index()),      [0, 0, 0, 0])
+        self.assertEqual(tree_path(self.item_1.index()),                     [1])
+        self.assertEqual(tree_path(self.item_1_0.index()),                [0, 1])
+        self.assertEqual(tree_path(self.item_1_0_0.index()),           [0, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_1.index()),           [1, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_2.index()),           [2, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_2_0.index()),      [0, 2, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_2_0_0.index()), [0, 0, 2, 0, 1])
+        self.assertEqual(tree_path(self.item_1_0_3.index()),           [3, 0, 1])
+        self.assertEqual(tree_path(self.item_1_1.index()),                [1, 1])
+        self.assertEqual(tree_path(self.item_1_1_0.index()),           [0, 1, 1])
+        self.assertEqual(tree_path(self.item_2.index()),                     [2])
+        self.assertEqual(tree_path(self.item_2_0.index()),                [0, 2])
+        self.assertEqual(tree_path(self.item_3.index()),                     [3])

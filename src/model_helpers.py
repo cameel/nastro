@@ -19,3 +19,19 @@ def level(item):
         level += 1
 
     return level
+
+def tree_path(item):
+    """ Returns a list of row numers pertaining to the item and all its ancestors on the
+        path to the root.
+
+        Works for both model items and model indexes. Should work for anything that has
+        parent() and row() methods and is organized like a tree. """
+
+    assert item not in [None, QModelIndex()]
+
+    path = [item.row()]
+    while item.parent() not in [None, QModelIndex()]:
+        item = item.parent()
+        path.append(item.row())
+
+    return path
