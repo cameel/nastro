@@ -212,6 +212,42 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.tape_widget.selected_note_positions(), [1, 2])
 
+    def test_selected_indexes_should_return_model_indexes_for_selected_items(self):
+        self.prepare_tape()
+
+        start_index = self.tape_widget.proxy_model().index(1, 0)
+        end_index   = self.tape_widget.proxy_model().index(2, 0)
+
+        self.tape_widget._view.selectionModel().select(
+            QItemSelection(start_index, end_index),
+            QItemSelectionModel.Select
+        )
+
+        result = self.tape_widget.selected_indexes()
+
+        self.assertEqual(len(self.tape_widget._view.selectedIndexes()), 2)
+        self.assertTrue(all(self.tape_widget.model().itemFromIndex(index) != None for index in result))
+        self.assertTrue(any(index.row() == 1 for index in result))
+        self.assertTrue(any(index.row() == 2 for index in result))
+
+    def test_selected_proxy_indexes_should_return_proxy_model_indexes_for_selected_items(self):
+        self.prepare_tape()
+
+        start_index = self.tape_widget.proxy_model().index(1, 0)
+        end_index   = self.tape_widget.proxy_model().index(2, 0)
+
+        self.tape_widget._view.selectionModel().select(
+            QItemSelection(start_index, end_index),
+            QItemSelectionModel.Select
+        )
+
+        result = self.tape_widget.selected_proxy_indexes()
+
+        self.assertEqual(len(self.tape_widget._view.selectedIndexes()), 2)
+        self.assertTrue(all(self.tape_widget.proxy_model().mapToSource(index) != None for index in result))
+        self.assertTrue(any(index.row() == 1 for index in result))
+        self.assertTrue(any(index.row() == 2 for index in result))
+
     def test_by_default_no_note_should_be_selected(self):
         self.prepare_tape()
 

@@ -146,6 +146,12 @@ class TapeWidget(QWidget):
 
         return result
 
+    def selected_proxy_indexes(self):
+        return self._view.selectedIndexes()
+
+    def selected_indexes(self):
+        return [self._tape_filter_proxy_model.mapToSource(proxy_index) for proxy_index in self.selected_proxy_indexes()]
+
     def select_note(self, position):
         index = self._tape_filter_proxy_model.index(position, 0)
         self._view.selectionModel().select(
