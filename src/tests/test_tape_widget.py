@@ -123,14 +123,31 @@ class TapeWidgetTest(unittest.TestCase):
         self.tape_widget.set_note_selection(index, True)
         assert self.tape_widget.selected_proxy_indexes() == [index]
 
-        num_notes_before = len(list(self.tape_widget.notes()))
-
         self.tape_widget.add_and_focus_note()
 
-        self.assertEqual(len(list(self.tape_widget.notes())), num_notes_before + 1)
+        self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 1)
         self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 1)
         self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].row(), len(list(self.tape_widget.notes())) - 1)
         self.assertEqual(self.tape_widget.get_filter(), '')
+
+    def test_add_and_focus_note_should_work_even_if_the_new_note_does_not_match_the_search_filter(self):
+        assert len(self.notes) >= 2
+        self.prepare_tape()
+
+        keyword = "a filter not likely to match a new note"
+
+        self.tape_widget.set_filter(keyword)
+        assert not TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.tape_widget.create_empty_note())
+
+        self.tape_widget.add_and_focus_note()
+
+        # This test is meant to detect a situation in which the search filter is cleared after (not before)
+        # taking the index of a new note to select it. If the code is buggy Qt will probably just print something
+        # to the console rather than cause an exception to be raised. If we're lucky, the note won't be selected
+        # and the test will fail but I don't think we can count on that.
+        self.assertEqual(self.tape_widget.get_filter(), '')
+        self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 1)
+        self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].row(), len(list(self.tape_widget.notes())) - 1)
 
     def test_remove_notes_should_remove_multiple_notes_from_the_tape(self):
         self.prepare_tape(range(4))

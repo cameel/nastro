@@ -93,10 +93,15 @@ class TapeWidget(QWidget):
     def add_and_focus_note(self):
         self.add_note()
 
+        # NOTE: It's likely that the new note does not match the filter and won't not be present
+        # in the proxy model. We want to select it and focus on it so the filter must be cleared.
+        # And it must be cleared before taking the index in the proxy because changing the filter
+        # may change the set of notes present in the proxy and invalidate the index.
+        self.set_filter('')
+
         new_note_position    = self._tape_filter_proxy_model.rowCount() - 1
         new_note_proxy_index = self._tape_filter_proxy_model.index(new_note_position, 0)
 
-        self.set_filter('')
         self.clear_selection()
         self.set_note_selection(new_note_proxy_index, True)
         self._view.scrollTo(new_note_proxy_index)
