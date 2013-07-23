@@ -46,7 +46,7 @@ class TapeWidget(QWidget):
         self._view.setModel(self._tape_filter_proxy_model)
 
         self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self.add_and_focus_note)
-        self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self._delete_note_handler)
+        self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self.delete_selected_notes)
         self.connect(self._search_box,         SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
 
     def model(self):
@@ -154,7 +154,7 @@ class TapeWidget(QWidget):
     def clear_selection(self):
         self._view.selectionModel().clear()
 
-    def _delete_note_handler(self):
+    def delete_selected_notes(self):
         self.remove_notes(self.selected_indexes())
 
 

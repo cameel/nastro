@@ -309,16 +309,16 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.tape_widget.selected_proxy_indexes(), [])
 
-    def test_delete_note_handler_should_do_nothing_if_nothing_is_selected(self):
+    def test_delete_selected_notes_should_do_nothing_if_nothing_is_selected(self):
         self.prepare_tape()
 
         assert len(self.tape_widget.selected_proxy_indexes()) == 0
 
-        self.tape_widget._delete_note_handler()
+        self.tape_widget.delete_selected_notes()
 
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes))
 
-    def test_delete_note_handler_should_delete_selected_note(self):
+    def test_delete_selected_notes_should_delete_selected_note(self):
         assert len(self.notes) >= 2
         self.prepare_tape()
 
@@ -326,11 +326,11 @@ class TapeWidgetTest(unittest.TestCase):
         self.tape_widget.set_note_selection(index, True)
         assert self.tape_widget.selected_proxy_indexes() == [index]
 
-        self.tape_widget._delete_note_handler()
+        self.tape_widget.delete_selected_notes()
 
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) - 1)
 
-    def test_delete_note_handler_should_handle_deleting_multiple_notes(self):
+    def test_delete_selected_notes_should_handle_deleting_multiple_notes(self):
         assert len(self.notes) >= 2
         self.prepare_tape()
 
@@ -342,7 +342,7 @@ class TapeWidgetTest(unittest.TestCase):
         assert index_1 in self.tape_widget.selected_proxy_indexes()
         assert index_2 in self.tape_widget.selected_proxy_indexes()
 
-        self.tape_widget._delete_note_handler()
+        self.tape_widget.delete_selected_notes()
 
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) - 2)
         self.assertTrue(self.notes[1].to_dict() not in self.tape_widget.dump_notes())
