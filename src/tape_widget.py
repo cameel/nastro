@@ -166,6 +166,15 @@ class TapeWidget(QWidget):
             QItemSelectionModel.Deselect
         )
 
+    def set_note_selection(self, proxy_index, select):
+        assert proxy_index != None and proxy_index.isValid()
+        assert self._tape_model.itemFromIndex(self._tape_filter_proxy_model.mapToSource(proxy_index)) != None
+
+        self._view.selectionModel().select(
+            QItemSelection(proxy_index, proxy_index),
+            QItemSelectionModel.Select if select else QItemSelectionModel.Deselect
+        )
+
     def clear_selection(self):
         self._view.selectionModel().clear()
 

@@ -282,6 +282,45 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.assertEqual(self.tape_widget.selected_note_positions(), [1])
 
+    def test_set_note_selection_should_select_a_note(self):
+        assert len(self.notes) >= 2
+        self.prepare_tape()
+
+        index = self.tape_widget.proxy_model().index(1, 0)
+        self.tape_widget.set_note_selection(index, True)
+
+        self.assertEqual(self.tape_widget.selected_proxy_indexes(), [index])
+
+    def test_set_note_selection_should_not_deselect_previously_selected_note(self):
+        assert len(self.notes) >= 3
+        self.prepare_tape()
+
+        index_1 = self.tape_widget.proxy_model().index(1, 0)
+        index_2 = self.tape_widget.proxy_model().index(2, 0)
+        self.tape_widget.set_note_selection(index_1, True)
+        self.tape_widget.set_note_selection(index_2, True)
+
+        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 2)
+        self.assertTrue(index_1 in self.tape_widget.selected_proxy_indexes())
+        self.assertTrue(index_2 in self.tape_widget.selected_proxy_indexes())
+
+    def test_set_note_selection_should_deselect_a_note(self):
+        assert len(self.notes) >= 3
+        self.prepare_tape()
+
+        index_1 = self.tape_widget.proxy_model().index(1, 0)
+        index_2 = self.tape_widget.proxy_model().index(2, 0)
+        self.tape_widget.set_note_selection(index_1, True)
+        self.tape_widget.set_note_selection(index_2, True)
+
+        assert len(self.tape_widget.selected_proxy_indexes()), 2
+        assert index_1 in self.tape_widget.selected_proxy_indexes()
+        assert index_2 in self.tape_widget.selected_proxy_indexes()
+
+        self.tape_widget.set_note_selection(index_2, False)
+
+        self.assertEqual(self.tape_widget.selected_proxy_indexes(), [index_1])
+
     def test_clear_selection_should_make_all_notes_deselected(self):
         assert len(self.notes) >= 3
         self.prepare_tape()
