@@ -71,9 +71,9 @@ class TapeWidget(QWidget):
             assert isinstance(item.data(Qt.EditRole), Note)
             yield item.data(Qt.EditRole)
 
-    def create_empty_note(self):
+    def create_empty_note(self, note_number):
         return Note(
-            title       = "Note {}".format(self._tape_model.rowCount() + 1),
+            title       = "Note {}".format(note_number),
             body        = "",
             tags        = [],
             created_at  = datetime.utcnow()
@@ -84,7 +84,7 @@ class TapeWidget(QWidget):
         if note != None:
             assert note not in self.notes()
         else:
-            note = self.create_empty_note()
+            note = self.create_empty_note(self._tape_model.rowCount() + 1)
 
         root_item = self._tape_model.invisibleRootItem()
         item = QStandardItem()

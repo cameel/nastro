@@ -137,7 +137,7 @@ class TapeWidgetTest(unittest.TestCase):
         keyword = "a filter not likely to match a new note"
 
         self.tape_widget.set_filter(keyword)
-        assert not TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.tape_widget.create_empty_note())
+        assert not TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.tape_widget.create_empty_note(0))
 
         self.tape_widget.add_and_focus_note()
 
