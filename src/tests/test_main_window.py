@@ -4,6 +4,7 @@ from datetime import datetime
 
 from PyQt4.QtTest import QTest
 from PyQt4.QtGui  import QApplication
+from PyQt4.QtCore import Qt
 
 from ..main_window import MainWindow
 from ..tape_widget import TapeWidget
@@ -27,8 +28,8 @@ class MainWindowTest(unittest.TestCase):
 
         old_tape_widget.add_note()
         old_tape_widget.add_note()
-        old_note1 = old_tape_widget.note(0)
-        old_note2 = old_tape_widget.note(1)
+        old_note1 = old_tape_widget.model().item(0).data(Qt.EditRole)
+        old_note2 = old_tape_widget.model().item(1).data(Qt.EditRole)
 
         new_note = Note(
             title      = "X",
@@ -41,8 +42,8 @@ class MainWindowTest(unittest.TestCase):
 
         self.assertTrue(isinstance(self.window.tape_widget, TapeWidget))
         self.assertNotEqual(self.window.tape_widget, old_tape_widget)
-        self.assertEqual(self.window.tape_widget.note_count(), 1)
-        self.assertEqual(self.window.tape_widget.note(0), new_note)
+        self.assertEqual(len(list(self.window.tape_widget.notes())), 1)
+        self.assertEqual(self.window.tape_widget.model().item(0).data(Qt.EditRole), new_note)
         self.assertTrue(self.window.centralWidget() == self.window.tape_widget)
 
     def test_new_handler_should_create_new_empty_tape(self):
@@ -54,11 +55,11 @@ class MainWindowTest(unittest.TestCase):
         )
 
         self.window.tape_widget.add_note(note)
-        assert self.window.tape_widget.note_count() == 1
+        assert len(list(self.window.tape_widget.notes())) == 1
 
         self.window.tape_widget.set_filter("test")
 
         self.window.new_handler()
 
-        self.assertEqual(self.window.tape_widget.note_count(), 0)
+        self.assertEqual(len(list(self.window.tape_widget.notes())), 0)
         self.assertEqual(self.window.tape_widget.get_filter(), '')

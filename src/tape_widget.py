@@ -65,17 +65,6 @@ class TapeWidget(QWidget):
 
         return self._tape_filter_proxy_model
 
-    def note(self, position):
-        assert 0 <= position < self._tape_model.rowCount()
-
-        note = self._tape_model.item(position).data(Qt.EditRole)
-        assert isinstance(note, Note)
-
-        return note
-
-    def note_count(self):
-        return self._tape_model.rowCount()
-
     def notes(self):
         for i in range(self._tape_model.rowCount()):
             note = self._tape_model.item(i).data(Qt.EditRole)
@@ -85,7 +74,7 @@ class TapeWidget(QWidget):
 
     def add_note(self, note = None):
         if note != None:
-            assert self._find_note(note) == None
+            assert note not in self.notes()
         else:
             note = Note(
                 title       = "Note {}".format(self._tape_model.rowCount() + 1),
@@ -98,18 +87,6 @@ class TapeWidget(QWidget):
         item = QStandardItem()
         item.setData(note, Qt.EditRole)
         root_item.appendRow(item)
-
-    def remove_note(self, note):
-        # TODO: Removal by index may be more efficient for large lists
-        note_position = self._find_note(note)
-        if note_position != None:
-            self._tape_model.takeRow(note_position)
-
-    def _find_note(self, note_to_find):
-        try:
-            return next(i for (i, note) in enumerate(self.notes()) if note == note_to_find)
-        except StopIteration:
-            return None
 
     def remove_notes(self, indexes):
         remove_items(self._tape_model, indexes)
@@ -141,34 +118,11 @@ class TapeWidget(QWidget):
             self.clear()
             raise
 
-    def selected_note_positions(self):
-        selected_indexes = self._view.selectedIndexes()
-
-        result = []
-        for index in selected_indexes:
-            result.append(index.row())
-
-        return result
-
     def selected_proxy_indexes(self):
         return self._view.selectedIndexes()
 
     def selected_indexes(self):
         return [self._tape_filter_proxy_model.mapToSource(proxy_index) for proxy_index in self.selected_proxy_indexes()]
-
-    def select_note(self, position):
-        index = self._tape_filter_proxy_model.index(position, 0)
-        self._view.selectionModel().select(
-            QItemSelection(index, index),
-            QItemSelectionModel.Select
-        )
-
-    def deselect_note(self, position):
-        index = self._tape_filter_proxy_model.index(position, 0)
-        self._view.selectionModel().select(
-            QItemSelection(index, index),
-            QItemSelectionModel.Deselect
-        )
 
     def set_note_selection(self, proxy_index, select):
         assert proxy_index != None and proxy_index.isValid()
@@ -183,21 +137,15 @@ class TapeWidget(QWidget):
         self._view.selectionModel().clear()
 
     def _delete_note_handler(self):
-        positions = sorted(self.selected_note_positions(), reverse = True)
-        assert positions == sorted(set(positions), reverse = True), "There are duplicates"
-
-        # NOTE: The list must be iterated in reversed order because positions of all elements
-        # past the deleted one shift by one and we'd have to account for that otherwise.
-        for position in positions:
-            self._tape_model.removeRow(position)
+        self.remove_notes(self.selected_indexes())
 
     def _new_note_handler(self):
         self.add_note()
 
-        new_note_position = self._tape_filter_proxy_model.rowCount() - 1
-        new_note_index    = self._tape_filter_proxy_model.index(new_note_position, 0)
+        new_note_position    = self._tape_filter_proxy_model.rowCount() - 1
+        new_note_proxy_index = self._tape_filter_proxy_model.index(new_note_position, 0)
 
         self.set_filter('')
         self.clear_selection()
-        self.select_note(new_note_position)
-        self._view.scrollTo(new_note_index)
+        self.set_note_selection(new_note_proxy_index, True)
+        self._view.scrollTo(new_note_proxy_index)
