@@ -3,8 +3,8 @@ import sys
 from datetime import datetime, timedelta
 
 from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QApplication, QItemSelection, QItemSelectionModel
-from PyQt4.QtCore import QRegExp
+from PyQt4.QtGui  import QApplication, QItemSelection, QItemSelectionModel, QAbstractProxyModel
+from PyQt4.QtCore import QRegExp, QAbstractItemModel
 
 from ..tape_widget             import TapeWidget
 from ..note                    import Note
@@ -57,6 +57,17 @@ class TapeWidgetTest(unittest.TestCase):
 
         assert self.tape_widget.note_count() == len(index_sequence)
         assert len(self.tape_widget.selected_note_positions()) == 0
+
+    def test_model_should_return_the_undelying_model(self):
+        model = self.tape_widget.model()
+
+        self.assertTrue(isinstance(model, QAbstractItemModel))
+
+    def test_proxy_model_should_return_the_filtered_model_that_acts_as_a_proxy_for_the_actual_model(self):
+        proxy_model = self.tape_widget.proxy_model()
+
+        self.assertTrue(isinstance(proxy_model, QAbstractProxyModel))
+        self.assertEqual(proxy_model.sourceModel(), self.tape_widget.model())
 
     def test_note_should_return_note_at_specified_index(self):
         self.prepare_tape()

@@ -48,6 +48,22 @@ class TapeWidget(QWidget):
         self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self._delete_note_handler)
         self.connect(self._search_box,         SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
 
+    def model(self):
+        """ Returns the model that contains all notes managed by the tape.
+
+            The model should be treated as read-only. You can only modify it indirectly through
+            the methods provided by TapeWidget. """
+
+        return self._tape_model
+
+    def proxy_model(self):
+        """ Returns the model that contains notes matching current filter.
+
+            The model should be treated as read-only. You can only modify it indirectly through
+            the methods provided by TapeWidget. """
+
+        return self._tape_filter_proxy_model
+
     def note(self, position):
         assert 0 <= position < self._tape_model.rowCount()
 
