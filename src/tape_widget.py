@@ -45,7 +45,7 @@ class TapeWidget(QWidget):
         self._view.setItemDelegate(self._note_delegate)
         self._view.setModel(self._tape_filter_proxy_model)
 
-        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self._new_note_handler)
+        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self.add_and_focus_note)
         self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self._delete_note_handler)
         self.connect(self._search_box,         SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
 
@@ -86,6 +86,17 @@ class TapeWidget(QWidget):
         item = QStandardItem()
         item.setData(note, Qt.EditRole)
         root_item.appendRow(item)
+
+    def add_and_focus_note(self):
+        self.add_note()
+
+        new_note_position    = self._tape_filter_proxy_model.rowCount() - 1
+        new_note_proxy_index = self._tape_filter_proxy_model.index(new_note_position, 0)
+
+        self.set_filter('')
+        self.clear_selection()
+        self.set_note_selection(new_note_proxy_index, True)
+        self._view.scrollTo(new_note_proxy_index)
 
     def remove_notes(self, indexes):
         remove_items(self._tape_model, indexes)
@@ -138,13 +149,5 @@ class TapeWidget(QWidget):
     def _delete_note_handler(self):
         self.remove_notes(self.selected_indexes())
 
-    def _new_note_handler(self):
-        self.add_note()
 
-        new_note_position    = self._tape_filter_proxy_model.rowCount() - 1
-        new_note_proxy_index = self._tape_filter_proxy_model.index(new_note_position, 0)
 
-        self.set_filter('')
-        self.clear_selection()
-        self.set_note_selection(new_note_proxy_index, True)
-        self._view.scrollTo(new_note_proxy_index)

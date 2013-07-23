@@ -115,6 +115,23 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget.model().item(0).data(Qt.EditRole), self.notes[0])
         self.assertEqual(self.tape_widget.model().item(2).data(Qt.EditRole), self.notes[1])
 
+    def test_add_and_focus_note_should_create_a_note_and_focus_the_tape_on_it(self):
+        assert len(self.notes) >= 2
+        self.prepare_tape()
+
+        index = self.tape_widget.proxy_model().index(1, 0)
+        self.tape_widget.set_note_selection(index, True)
+        assert self.tape_widget.selected_proxy_indexes() == [index]
+
+        num_notes_before = len(list(self.tape_widget.notes()))
+
+        self.tape_widget.add_and_focus_note()
+
+        self.assertEqual(len(list(self.tape_widget.notes())), num_notes_before + 1)
+        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 1)
+        self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].row(), len(list(self.tape_widget.notes())) - 1)
+        self.assertEqual(self.tape_widget.get_filter(), '')
+
     def test_remove_notes_should_remove_multiple_notes_from_the_tape(self):
         self.prepare_tape(range(4))
 
@@ -313,20 +330,3 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) - 2)
         self.assertTrue(self.notes[1].to_dict() not in self.tape_widget.dump_notes())
         self.assertTrue(self.notes[2].to_dict() not in self.tape_widget.dump_notes())
-
-    def test_new_note_handler_should_create_a_note_and_focus_the_tape_on_it(self):
-        assert len(self.notes) >= 2
-        self.prepare_tape()
-
-        index = self.tape_widget.proxy_model().index(1, 0)
-        self.tape_widget.set_note_selection(index, True)
-        assert self.tape_widget.selected_proxy_indexes() == [index]
-
-        num_notes_before = len(list(self.tape_widget.notes()))
-
-        self.tape_widget._new_note_handler()
-
-        self.assertEqual(len(list(self.tape_widget.notes())), num_notes_before + 1)
-        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 1)
-        self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].row(), len(list(self.tape_widget.notes())) - 1)
-        self.assertEqual(self.tape_widget.get_filter(), '')
