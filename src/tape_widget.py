@@ -22,6 +22,7 @@ class TapeWidget(QWidget):
         self._view = QTreeView()
         self._view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self._view.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self._view.setHeaderHidden(True)
 
         self._add_note_button = QPushButton(self)
         self._add_note_button.setText("New note")
