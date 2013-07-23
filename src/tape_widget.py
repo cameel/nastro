@@ -79,20 +79,39 @@ class TapeWidget(QWidget):
             created_at  = datetime.utcnow()
         )
 
+    def add_note(self, note = None, parent_index = None):
+        # NOTE: Remember to use indexes from _tape_model, not _tape_filter_proxy_model here
+        assert parent_index == None or self._tape_model.itemFromIndex(parent_index) != None and parent_index.isValid()
 
-    def add_note(self, note = None):
+        root_item = self._tape_model.invisibleRootItem()
+        if parent_index == None:
+            parent_item = root_item
+        else:
+            parent_item = self._tape_model.itemFromIndex(parent_index)
+
         if note != None:
             assert note not in self.notes()
         else:
-            note = self.create_empty_note(self._tape_model.rowCount() + 1)
+            note = self.create_empty_note(parent_item.rowCount() + 1)
 
-        root_item = self._tape_model.invisibleRootItem()
         item = QStandardItem()
         item.setData(note, Qt.EditRole)
-        root_item.appendRow(item)
+        parent_item.appendRow(item)
 
-    def add_and_focus_note(self):
-        self.add_note()
+    def add_and_focus_note(self, parent_proxy_index = None):
+        if parent_proxy_index != None:
+            parent_index = self._tape_filter_proxy_model.mapToSource(parent_proxy_index)
+        else:
+            parent_index = None
+
+        self.add_note(parent_index = parent_index)
+
+        if parent_proxy_index != None:
+            self._view.expand(parent_proxy_index)
+
+            parent_item = self._tape_model.itemFromIndex(parent_index)
+        else:
+            parent_item = self._tape_model.invisibleRootItem()
 
         # NOTE: It's likely that the new note does not match the filter and won't not be present
         # in the proxy model. We want to select it and focus on it so the filter must be cleared.
@@ -100,8 +119,8 @@ class TapeWidget(QWidget):
         # may change the set of notes present in the proxy and invalidate the index.
         self.set_filter('')
 
-        new_note_position    = self._tape_filter_proxy_model.rowCount() - 1
-        new_note_proxy_index = self._tape_filter_proxy_model.index(new_note_position, 0)
+        new_note_index       = parent_item.child(parent_item.rowCount() - 1).index()
+        new_note_proxy_index = self._tape_filter_proxy_model.mapFromSource(new_note_index)
 
         self.clear_selection()
         self.set_note_selection(new_note_proxy_index, True)
