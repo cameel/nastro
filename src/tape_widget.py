@@ -9,6 +9,7 @@ from datetime import datetime
 from .note_delegate           import NoteDelegate
 from .note                    import Note
 from .tape_filter_proxy_model import TapeFilterProxyModel
+from .model_helpers           import remove_items
 
 class TapeWidget(QWidget):
     def __init__(self, parent = None):
@@ -109,6 +110,9 @@ class TapeWidget(QWidget):
             return next(i for (i, note) in enumerate(self.notes()) if note == note_to_find)
         except StopIteration:
             return None
+
+    def remove_notes(self, indexes):
+        remove_items(self._tape_model, indexes)
 
     def clear(self):
         self._tape_model.clear()

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from PyQt4.QtTest import QTest
 from PyQt4.QtGui  import QApplication, QItemSelection, QItemSelectionModel, QAbstractProxyModel
-from PyQt4.QtCore import QRegExp, QAbstractItemModel
+from PyQt4.QtCore import Qt, QRegExp, QAbstractItemModel
 
 from ..tape_widget             import TapeWidget
 from ..note                    import Note
@@ -145,6 +145,17 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget.note_count(), 2)
         self.assertEqual(self.tape_widget.note(0), self.notes[0])
         self.assertEqual(self.tape_widget.note(1), self.notes[1])
+
+    def test_remove_notes_should_remove_multiple_notes_from_the_tape(self):
+        self.prepare_tape(range(4))
+
+        index_1 = self.tape_widget.model().index(1, 0)
+        index_2 = self.tape_widget.model().index(2, 0)
+        self.tape_widget.remove_notes([index_2, index_1])
+
+        self.assertEqual(self.tape_widget.model().rowCount(), 2)
+        self.assertEqual(self.tape_widget.model().item(0, 0).data(Qt.EditRole), self.notes[0])
+        self.assertEqual(self.tape_widget.model().item(1, 0).data(Qt.EditRole), self.notes[3])
 
     def test_by_default_all_notes_should_be_visible(self):
         assert self.tape_widget.get_filter() == ''
