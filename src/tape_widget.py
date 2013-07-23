@@ -1,6 +1,6 @@
 """ The UI widget that represents a scrollable tape composed of notes """
 
-from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QListView, QAbstractItemView
+from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QTreeView, QAbstractItemView
 from PyQt4.QtGui  import QStandardItem, QStandardItemModel, QItemSelection, QItemSelectionModel
 from PyQt4.QtCore import SIGNAL, Qt
 
@@ -19,7 +19,7 @@ class TapeWidget(QWidget):
         self._search_box     = QLineEdit(self)
         self._button_layout  = QHBoxLayout()
 
-        self._view = QListView()
+        self._view = QTreeView()
         self._view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self._view.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
