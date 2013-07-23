@@ -1,3 +1,5 @@
+from itertools import islice
+
 from PyQt4.QtCore import QModelIndex
 
 def level(item):
@@ -35,3 +37,34 @@ def tree_path(item):
         path.append(item.row())
 
     return path
+
+def subtree_items(root):
+    model = root.model()
+    item  = root
+    while True:
+        yield item
+
+        if item.rowCount() > 0:
+            item = item.child(0)
+        else:
+            while item.parent() not in [root, None] and item.row() >= item.parent().rowCount() - 1:
+                assert item.parent() != QModelIndex(), "This function operaties on items, not indexes"
+                item = item.parent()
+
+            # This is a workaround for an old bug in Qt that causes the parent() of top-level
+            # items of QStandardItemModel to return None rather than invisibleRootItem().
+            # This was supposedly fixed a year ago but I'm experiencing it with python-pyqt4 4.10.2
+            # and qt4 4.8.5 on Arch Linux.
+            # See https://bugreports.qt-project.org/browse/QTBUG-18785
+            if item.parent() == None:
+                parent = root
+            else:
+                parent = item.parent()
+
+            if item.row() >= parent.rowCount() - 1:
+                break
+
+            item = parent.child(item.row() + 1)
+
+def all_items(model):
+    return islice(subtree_items(model.invisibleRootItem()), 1, None)

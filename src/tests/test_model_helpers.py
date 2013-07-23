@@ -3,7 +3,7 @@ import unittest
 from PyQt4.QtTest import QTest
 from PyQt4.QtGui  import QStandardItemModel, QStandardItem
 
-from ..model_helpers import level, tree_path
+from ..model_helpers import level, tree_path, subtree_items, all_items
 
 class ModelHelpersTest(unittest.TestCase):
     def setUp(self):
@@ -127,3 +127,50 @@ class ModelHelpersTest(unittest.TestCase):
         self.assertEqual(tree_path(self.item_2.index()),                     [2])
         self.assertEqual(tree_path(self.item_2_0.index()),                [0, 2])
         self.assertEqual(tree_path(self.item_3.index()),                     [3])
+
+    def test_subtree_items_should_iterate_over_all_subtree_items_inorder(self):
+        expected_order = [
+            self.item_1,
+            self.item_1_0,
+            self.item_1_0_0,
+            self.item_1_0_1,
+            self.item_1_0_2,
+            self.item_1_0_2_0,
+            self.item_1_0_2_0_0,
+            self.item_1_0_3,
+            self.item_1_1,
+            self.item_1_1_0
+        ]
+
+        result = []
+        for item in subtree_items(self.item_1):
+            result.append(item)
+
+        self.assertEqual(result, expected_order)
+
+    def test_all_items_should_iterate_over_all_model_items_inorder(self):
+        expected_order = [
+            self.item_0,
+            self.item_0_0,
+            self.item_0_0_0,
+            self.item_0_0_0_0,
+            self.item_1,
+            self.item_1_0,
+            self.item_1_0_0,
+            self.item_1_0_1,
+            self.item_1_0_2,
+            self.item_1_0_2_0,
+            self.item_1_0_2_0_0,
+            self.item_1_0_3,
+            self.item_1_1,
+            self.item_1_1_0,
+            self.item_2,
+            self.item_2_0,
+            self.item_3
+        ]
+
+        result = []
+        for item in all_items(self.model):
+            result.append(item)
+
+        self.assertEqual(result, expected_order)
