@@ -1,8 +1,8 @@
 """ The UI widget that represents a scrollable tape composed of notes """
 
-from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QTreeView, QAbstractItemView, QMessageBox
-from PyQt4.QtGui  import QStandardItem, QStandardItemModel, QItemSelection, QItemSelectionModel
-from PyQt4.QtCore import SIGNAL, Qt, QModelIndex
+from PyQt5.QtWidgets import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QTreeView, QAbstractItemView, QMessageBox
+from PyQt5.QtGui     import QStandardItem, QStandardItemModel
+from PyQt5.QtCore    import Qt, QModelIndex, QItemSelection, QItemSelectionModel
 
 from datetime import datetime
 
@@ -54,11 +54,11 @@ class TapeWidget(QWidget):
         self._view.setItemDelegate(self._note_delegate)
         self._view.setModel(self._tape_filter_proxy_model)
 
-        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self.add_and_focus_note)
-        self.connect(self._add_sibling_button, SIGNAL('clicked()'),                    self._new_sibling_handler)
-        self.connect(self._add_child_button,   SIGNAL('clicked()'),                    self._new_child_handler)
-        self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self.delete_selected_notes)
-        self.connect(self._search_box,         SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
+        self._add_note_button.clicked.connect(self.add_and_focus_note)
+        self._add_sibling_button.clicked.connect(self._new_sibling_handler)
+        self._add_child_button.clicked.connect(self._new_child_handler)
+        self._delete_note_button.clicked.connect(self.delete_selected_notes)
+        self._search_box.textChanged.connect(self._tape_filter_proxy_model.setFilterFixedString)
 
     def model(self):
         """ Returns the model that contains all notes managed by the tape.

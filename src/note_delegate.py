@@ -1,7 +1,8 @@
 """ A Qt delegate for models dealing with Note objects """
 
-from PyQt4.QtGui  import QItemDelegate, QStyle, QPixmap, QPen, QPalette
-from PyQt4.QtCore import SIGNAL, Qt, QSize, QPoint, QRect
+from PyQt5.QtWidgets import QItemDelegate, QStyle
+from PyQt5.QtGui     import QPixmap, QPen, QPalette
+from PyQt5.QtCore    import Qt, QSize, QPoint, QRect
 
 from datetime import datetime
 
@@ -43,7 +44,7 @@ class NoteDelegate(QItemDelegate):
             # NOTE: sizeHintChanged() is quite heavy if there are a lot of notes becase it makes
             # some views (most notably QListView) call sizeHint() on every model item.
             # We want to emit it only if the size actually changed.
-            self.emit(SIGNAL("sizeHintChanged(const QModelIndex &)"), index)
+            self.sizeHintChanged.emit(index)
 
     def _draw_focus_frame(self, painter, rect, width):
         pen = QPen()

@@ -2,10 +2,10 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QApplication
+from PyQt5.QtTest    import QTest
+from PyQt5.QtWidgets import QApplication
 
-from ..note        import Note
+from ..note      import Note
 from ..note_edit import NoteEdit
 
 class NoteEditTest(unittest.TestCase):

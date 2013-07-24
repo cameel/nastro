@@ -2,8 +2,9 @@
 
 from datetime import datetime
 
-from PyQt4.QtGui  import QWidget, QFrame, QVBoxLayout, QHBoxLayout, QLabel, QFont, QPalette
-from PyQt4.QtCore import SIGNAL, Qt
+from PyQt5.QtWidgets import QWidget, QFrame, QVBoxLayout, QHBoxLayout, QLabel
+from PyQt5.QtGui     import QFont, QPalette
+from PyQt5.QtCore    import Qt
 
 from .utils import utc_to_localtime
 from .note  import Note

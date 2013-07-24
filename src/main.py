@@ -3,8 +3,8 @@
 
 """ Entry point of the application """
 
-from PyQt4.QtGui  import QApplication, QMessageBox
-from PyQt4.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtCore    import QTimer
 
 import sys
 import os

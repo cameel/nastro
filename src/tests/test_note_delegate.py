@@ -2,9 +2,10 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QApplication, QStandardItemModel, QStyleOptionViewItem, QStandardItem, QPainter, QPixmap
-from PyQt4.QtCore import Qt, QRect
+from PyQt5.QtTest    import QTest
+from PyQt5.QtWidgets import QApplication, QStyleOptionViewItem
+from PyQt5.QtGui     import QStandardItemModel, QStandardItem, QPixmap, QPainter
+from PyQt5.QtCore    import Qt, QRect
 
 from ..note          import Note
 from ..note_edit     import NoteEdit

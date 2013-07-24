@@ -2,9 +2,9 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QApplication
-from PyQt4.QtCore import Qt
+from PyQt5.QtTest    import QTest
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore    import Qt
 
 from ..main_window import MainWindow
 from ..tape_widget import TapeWidget

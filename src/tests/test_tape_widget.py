@@ -2,9 +2,9 @@ import unittest
 import sys
 from datetime import datetime, timedelta
 
-from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QApplication, QItemSelection, QItemSelectionModel, QAbstractProxyModel
-from PyQt4.QtCore import Qt, QRegExp, QAbstractItemModel
+from PyQt5.QtTest    import QTest
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore    import Qt, QRegExp, QAbstractItemModel, QItemSelection, QItemSelectionModel, QAbstractProxyModel
 
 from ..tape_widget             import TapeWidget
 from ..note                    import Note

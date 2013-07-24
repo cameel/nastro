@@ -1,6 +1,6 @@
 """ The main UI component of the application. Controls the whole window """
 
-from PyQt4.QtGui import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
 
 import simplejson
 
@@ -25,12 +25,12 @@ class MainWindow(QMainWindow):
 
         import_opera_notes_action = import_menu.addAction("&Opera Notes...")
 
-        self.connect(new_action,     SIGNAL('triggered()'), self.new_handler)
-        self.connect(open_action,    SIGNAL('triggered()'), self.open_handler)
-        self.connect(save_as_action, SIGNAL('triggered()'), self.save_as_handler)
-        self.connect(exit_action,    SIGNAL('triggered()'), self.close)
+        new_action.triggered.connect(self.new_handler)
+        open_action.triggered.connect(self.open_handler)
+        save_as_action.triggered.connect(self.save_as_handler)
+        exit_action.triggered.connect(self.close)
 
-        self.connect(import_opera_notes_action, SIGNAL('triggered()'), self.import_opera_notes_handler)
+        import_opera_notes_action.triggered.connect(self.import_opera_notes_handler)
 
         self.resize(800, 800)
         self.setCentralWidget(self.tape_widget)
