@@ -211,7 +211,7 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.prepare_tape(range(3))
 
-        self.assertEqual(len(list(self.tape_widget.notes())), 3)
+        self. assertEqual(len(list(self.tape_widget.notes())), 3)
         self.assertEqual(self.tape_widget._tape_filter_proxy_model.rowCount(), 3)
         for i in range(3):
             self.assertEqual(self.tape_widget._tape_filter_proxy_model.data(self.tape_widget._tape_filter_proxy_model.index(i, 0)).to_dict(), self.notes[i].to_dict())
@@ -393,3 +393,116 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) - 2)
         self.assertTrue(self.notes[1].to_dict() not in self.tape_widget.dump_notes())
         self.assertTrue(self.notes[2].to_dict() not in self.tape_widget.dump_notes())
+
+    def test_new_sibling_handler_should_add_top_level_note_if_nothing_selected(self):
+        assert len(self.notes) >= 2
+        self.prepare_tape()
+
+        self.tape_widget._new_sibling_handler()
+
+        self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 1)
+        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 1)
+        self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].row(), len(self.notes))
+        self.assertEqual(self.tape_widget.get_filter(), '')
+
+    def test_new_sibling_handler_should_add_top_level_note_if_another_top_level_note_selected(self):
+        assert len(self.notes) >= 2
+        self.prepare_tape()
+
+        index = self.tape_widget.proxy_model().index(1, 0)
+        self.tape_widget.set_note_selection(index, True)
+        assert self.tape_widget.selected_proxy_indexes() == [index]
+
+        self.tape_widget._new_sibling_handler()
+
+        self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 1)
+        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 1)
+        self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].row(), len(self.notes))
+        self.assertEqual(self.tape_widget.get_filter(), '')
+
+    def test_new_sibling_handler_should_add_top_level_note_if_more_than_one_note_selected(self):
+        assert len(self.notes) >= 2
+        self.prepare_tape()
+
+        index_1 = self.tape_widget.proxy_model().index(1, 0)
+        index_2 = self.tape_widget.proxy_model().index(2, 0)
+        self.tape_widget.set_note_selection(index_1, True)
+        self.tape_widget.set_note_selection(index_2, True)
+        assert len(self.tape_widget.selected_proxy_indexes()) == 2
+        assert index_1 in self.tape_widget.selected_proxy_indexes()
+        assert index_2 in self.tape_widget.selected_proxy_indexes()
+
+        self.tape_widget._new_sibling_handler()
+
+        self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 1)
+        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 1)
+        self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].row(), len(self.notes))
+        self.assertEqual(self.tape_widget.get_filter(), '')
+
+    def test_new_sibling_handler_should_append_new_child_if_lower_level_note_selected(self):
+        assert len(self.notes) >= 3
+        self.prepare_tape()
+
+        parent_note = self.tape_widget.create_empty_note(888)
+        self.tape_widget.add_note(parent_note, self.tape_widget.model().item(2).index())
+
+        parent_index = self.tape_widget.proxy_model().mapFromSource(self.tape_widget.model().item(2).child(0).index())
+        self.tape_widget.set_note_selection(parent_index, True)
+        assert self.tape_widget.selected_proxy_indexes() == [parent_index]
+
+        self.tape_widget._new_sibling_handler()
+
+        self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 2)
+        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 1)
+        self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].parent(), parent_index.parent())
+        self.assertNotEqual(self.tape_widget.selected_proxy_indexes()[0], parent_index)
+        self.assertEqual(self.tape_widget.get_filter(), '')
+
+    def test_add_child_to_selected_element_should_add_child_if_one_parent_selected(self):
+        assert len(self.notes) >= 3
+        self.prepare_tape()
+
+        parent_note = self.tape_widget.create_empty_note(888)
+        self.tape_widget.add_note(parent_note, self.tape_widget.model().item(2).index())
+
+        parent_index = self.tape_widget.proxy_model().mapFromSource(self.tape_widget.model().item(2).child(0).index())
+        self.tape_widget.set_note_selection(parent_index, True)
+        assert self.tape_widget.selected_proxy_indexes() == [parent_index]
+
+        added = self.tape_widget.add_child_to_selected_element()
+
+        self.assertEqual(added, True)
+        self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 2)
+        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 1)
+        self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].parent(), parent_index)
+        self.assertEqual(self.tape_widget.get_filter(), '')
+
+    def test_add_child_to_selected_element_should_not_add_anything_if_nothing_selected(self):
+        assert len(self.notes) >= 3
+        self.prepare_tape()
+
+        added = self.tape_widget.add_child_to_selected_element()
+
+        self.assertEqual(added, False)
+        self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes))
+        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 0)
+        self.assertEqual(self.tape_widget.get_filter(), '')
+
+    def test_add_child_to_selected_element_should_not_add_anything_and_leave_selection_intact_if_more_than_one_note_selected(self):
+        assert len(self.notes) >= 3
+        self.prepare_tape()
+
+        index_1 = self.tape_widget.proxy_model().index(1, 0)
+        index_2 = self.tape_widget.proxy_model().index(2, 0)
+        self.tape_widget.set_note_selection(index_1, True)
+        self.tape_widget.set_note_selection(index_2, True)
+        assert len(self.tape_widget.selected_proxy_indexes()) == 2
+        assert index_1 in self.tape_widget.selected_proxy_indexes()
+        assert index_2 in self.tape_widget.selected_proxy_indexes()
+
+        added = self.tape_widget.add_child_to_selected_element()
+
+        self.assertEqual(added, False)
+        self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes))
+        self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 2)
+        self.assertEqual(self.tape_widget.get_filter(), '')

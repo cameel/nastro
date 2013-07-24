@@ -1,8 +1,8 @@
 """ The UI widget that represents a scrollable tape composed of notes """
 
-from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QTreeView, QAbstractItemView
+from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QTreeView, QAbstractItemView, QMessageBox
 from PyQt4.QtGui  import QStandardItem, QStandardItemModel, QItemSelection, QItemSelectionModel
-from PyQt4.QtCore import SIGNAL, Qt
+from PyQt4.QtCore import SIGNAL, Qt, QModelIndex
 
 from datetime import datetime
 
@@ -27,10 +27,18 @@ class TapeWidget(QWidget):
         self._add_note_button = QPushButton(self)
         self._add_note_button.setText("New note")
 
+        self._add_child_button = QPushButton(self)
+        self._add_child_button.setText("New child")
+
+        self._add_sibling_button = QPushButton(self)
+        self._add_sibling_button.setText("New sibling")
+
         self._delete_note_button = QPushButton(self)
         self._delete_note_button.setText("Delete note")
 
         self._button_layout.addWidget(self._add_note_button)
+        self._button_layout.addWidget(self._add_sibling_button)
+        self._button_layout.addWidget(self._add_child_button)
         self._button_layout.addWidget(self._delete_note_button)
         self._button_layout.addStretch()
 
@@ -47,6 +55,8 @@ class TapeWidget(QWidget):
         self._view.setModel(self._tape_filter_proxy_model)
 
         self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self.add_and_focus_note)
+        self.connect(self._add_sibling_button, SIGNAL('clicked()'),                    self._new_sibling_handler)
+        self.connect(self._add_child_button,   SIGNAL('clicked()'),                    self._new_child_handler)
         self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self.delete_selected_notes)
         self.connect(self._search_box,         SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
 
@@ -177,5 +187,26 @@ class TapeWidget(QWidget):
     def delete_selected_notes(self):
         self.remove_notes(self.selected_indexes())
 
+    def _new_sibling_handler(self):
+        selected_proxy_indexes = self._view.selectedIndexes()
+        if len(selected_proxy_indexes) > 1:
+            self.clear_selection()
+            selected_proxy_indexes = []
 
+        if len(selected_proxy_indexes) == 0 or selected_proxy_indexes[0].parent() == QModelIndex():
+            self.add_and_focus_note()
+        else:
+            self.add_and_focus_note(selected_proxy_indexes[0].parent())
 
+    def add_child_to_selected_element(self):
+        selected_proxy_indexes = self._view.selectedIndexes()
+        if len(selected_proxy_indexes) != 1:
+            return False
+        else:
+            self.add_and_focus_note(selected_proxy_indexes[0])
+            return True
+
+    def _new_child_handler(self):
+        added = self.add_child_to_selected_element()
+        if not added:
+            QMessageBox.warning(self, "Can't add note", "To be able to add a new child note select exactly one parent")
