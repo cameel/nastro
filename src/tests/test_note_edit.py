@@ -2,15 +2,14 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt5.QtTest    import QTest
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtTest import QTest
 
-from ..note      import Note
-from ..note_edit import NoteEdit
+from .dummy_application import application
+from ..note             import Note
+from ..note_edit        import NoteEdit
 
 class NoteEditTest(unittest.TestCase):
     def setUp(self):
-        self.application = QApplication(sys.argv)
         self.note_edit = NoteEdit()
 
         self.note = Note(
@@ -19,9 +18,6 @@ class NoteEditTest(unittest.TestCase):
             tags       = ["C", "D"],
             created_at = datetime.utcnow()
         )
-
-    def tearDown(self):
-        self.application = None
 
     def test_load_note_should_load_note_data_into_editor_widgets(self):
         assert self.note_edit._title_editor.text()       != self.note.title
