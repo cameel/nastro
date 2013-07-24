@@ -54,7 +54,7 @@ class TapeWidget(QWidget):
         self._view.setItemDelegate(self._note_delegate)
         self._view.setModel(self._tape_filter_proxy_model)
 
-        self._add_note_button.clicked.connect(self.add_and_focus_note)
+        self._add_note_button.clicked.connect(lambda checked: self.add_and_focus_note())
         self._add_sibling_button.clicked.connect(self._new_sibling_handler)
         self._add_child_button.clicked.connect(self._new_child_handler)
         self._delete_note_button.clicked.connect(self.delete_selected_notes)
