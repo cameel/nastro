@@ -46,8 +46,8 @@ class MainWindow(QMainWindow):
             "JSON files (*.json)"
         )
 
-        if file_name != '':
-            self.save_note_file_as(file_name)
+        if file_name[0] != '':
+            self.save_note_file_as(file_name[0])
 
     def open_handler(self):
         file_name = QFileDialog.getOpenFileName(
@@ -57,8 +57,8 @@ class MainWindow(QMainWindow):
             "JSON files (*.json)"
         )
 
-        if file_name != '':
-            self.open_note_file(file_name)
+        if file_name[0] != '':
+            self.open_note_file(file_name[0])
 
     def import_opera_notes_handler(self):
         file_name = QFileDialog.getOpenFileName(
@@ -68,8 +68,8 @@ class MainWindow(QMainWindow):
             "Opera Hotlist (*.adr)"
         )
 
-        if file_name != '':
-            num_notes = self.import_opera_notes(file_name)
+        if file_name[0] != '':
+            num_notes = self.import_opera_notes(file_name[0])
             QMessageBox.information(self, "Success", "Successfully imported {} notes".format(num_notes))
 
     def save_note_file_as(self, file_name):
