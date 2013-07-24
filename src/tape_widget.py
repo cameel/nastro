@@ -1,6 +1,7 @@
 """ The UI widget that represents a scrollable tape composed of notes """
 
-from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QStandardItem, QStandardItemModel, QListView, QAbstractItemView
+from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QListView, QAbstractItemView
+from PyQt4.QtGui  import QStandardItem, QStandardItemModel, QItemSelection, QItemSelectionModel
 from PyQt4.QtCore import SIGNAL, Qt
 
 from datetime import datetime
@@ -19,6 +20,7 @@ class TapeWidget(QWidget):
 
         self._note_list_view = QListView()
         self._note_list_view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self._note_list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
         self._add_note_button = QPushButton(self)
         self._add_note_button.setText("New note")
@@ -42,14 +44,14 @@ class TapeWidget(QWidget):
         self._note_list_view.setItemDelegate(self._note_delegate)
         self._note_list_view.setModel(self._tape_filter_proxy_model)
 
-        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self.add_note)
+        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self._new_note_handler)
         self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self._delete_note_handler)
         self.connect(self._search_box,         SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
 
-    def note(self, index):
-        assert 0 <= index < self._tape_model.rowCount()
+    def note(self, position):
+        assert 0 <= position < self._tape_model.rowCount()
 
-        note = self._tape_model.item(index).data(Qt.EditRole)
+        note = self._tape_model.item(position).data(Qt.EditRole)
         assert isinstance(note, Note)
 
         return note
@@ -119,9 +121,48 @@ class TapeWidget(QWidget):
             self.clear()
             raise
 
-    def _delete_note_handler(self):
+    def selected_note_positions(self):
         selected_indexes = self._note_list_view.selectedIndexes()
-        assert len(selected_indexes) <= 1
 
-        if len(selected_indexes) > 0:
-            self._tape_model.removeRow(selected_indexes[0].row())
+        result = []
+        for index in selected_indexes:
+            result.append(index.row())
+
+        return result
+
+    def select_note(self, position):
+        index = self._tape_filter_proxy_model.index(position, 0)
+        self._note_list_view.selectionModel().select(
+            QItemSelection(index, index),
+            QItemSelectionModel.Select
+        )
+
+    def deselect_note(self, position):
+        index = self._tape_filter_proxy_model.index(position, 0)
+        self._note_list_view.selectionModel().select(
+            QItemSelection(index, index),
+            QItemSelectionModel.Deselect
+        )
+
+    def clear_selection(self):
+        self._note_list_view.selectionModel().clear()
+
+    def _delete_note_handler(self):
+        positions = sorted(self.selected_note_positions(), reverse = True)
+        assert positions == sorted(set(positions), reverse = True), "There are duplicates"
+
+        # NOTE: The list must be iterated in reversed order because positions of all elements
+        # past the deleted one shift by one and we'd have to account for that otherwise.
+        for position in positions:
+            self._tape_model.removeRow(position)
+
+    def _new_note_handler(self):
+        self.add_note()
+
+        new_note_position = self._tape_filter_proxy_model.rowCount() - 1
+        new_note_index    = self._tape_filter_proxy_model.index(new_note_position, 0)
+
+        self.set_filter('')
+        self.clear_selection()
+        self.select_note(new_note_position)
+        self._note_list_view.scrollTo(new_note_index)
