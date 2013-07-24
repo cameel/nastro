@@ -11,7 +11,9 @@ class InvalidTagCharacter(Exception):
 class Note:
     TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-    def __init__(self, title, body, tags, created_at, modified_at = None):
+    def __init__(self, title = '', body = '', tags = [], created_at = datetime.utcnow(), modified_at = None):
+        assert created_at != None
+
         self.title       = title
         self.body        = body
         self.tags        = tags
@@ -45,6 +47,14 @@ class Note:
             created_at  = datetime.strptime(note_dict['created_at'],  cls.TIMESTAMP_FORMAT),
             modified_at = datetime.strptime(note_dict['modified_at'], cls.TIMESTAMP_FORMAT)
         )
+
+    @classmethod
+    def split_tags(cls, text):
+        return sorted(set([tag.strip() for tag in text.split(',') if tag.strip() != '']))
+
+    @classmethod
+    def join_tags(cls, tags):
+        return ', '.join(tags)
 
     def __repr__(self):
         return 'Note' + repr(self.to_dict())

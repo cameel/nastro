@@ -27,8 +27,8 @@ class TapeWidgetTest(unittest.TestCase):
 
         old_tape_widget.add_note()
         old_tape_widget.add_note()
-        old_note1 = old_tape_widget._note_widgets[0].note
-        old_note2 = old_tape_widget._note_widgets[1].note
+        old_note1 = old_tape_widget.note(0)
+        old_note2 = old_tape_widget.note(1)
 
         new_note = Note(
             title      = "X",
@@ -41,6 +41,6 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.assertTrue(isinstance(self.window.tape_widget, TapeWidget))
         self.assertNotEqual(self.window.tape_widget, old_tape_widget)
-        self.assertEqual(len(self.window.tape_widget._note_widgets), 1)
-        self.assertEqual(self.window.tape_widget._note_widgets[0].note, new_note)
+        self.assertEqual(self.window.tape_widget.note_count(), 1)
+        self.assertEqual(self.window.tape_widget.note(0), new_note)
         self.assertTrue(self.window.centralWidget() == self.window.tape_widget)
