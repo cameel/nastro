@@ -17,6 +17,7 @@ class MainWindow(KMainWindow):
         self.tape_widget = TapeWidget(self)
 
         file_menu      = self.menuBar().addMenu("File")
+        new_action     = file_menu.addAction("&New")
         open_action    = file_menu.addAction("&Open...")
         save_as_action = file_menu.addAction("&Save as...")
         file_menu.addSeparator()
@@ -26,14 +27,18 @@ class MainWindow(KMainWindow):
 
         import_opera_notes_action = import_menu.addAction("&Opera Notes...")
 
-        self.connect(exit_action,    SIGNAL('triggered()'), self.close)
+        self.connect(new_action,     SIGNAL('triggered()'), self.new_handler)
         self.connect(open_action,    SIGNAL('triggered()'), self.open_handler)
         self.connect(save_as_action, SIGNAL('triggered()'), self.save_as_handler)
+        self.connect(exit_action,    SIGNAL('triggered()'), self.close)
 
         self.connect(import_opera_notes_action, SIGNAL('triggered()'), self.import_opera_notes_handler)
 
         self.resize(800, 800)
         self.setCentralWidget(self.tape_widget)
+
+    def new_handler(self):
+        self._replace_tape_widget([])
 
     def save_as_handler(self):
         file_name = QFileDialog.getSaveFileName(
