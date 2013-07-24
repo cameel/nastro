@@ -1,8 +1,6 @@
 """ The main UI component of the application. Controls the whole window """
 
-from PyKDE4.kdeui import KMainWindow
-from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
-from PyQt4.QtCore import SIGNAL
+from PyQt4.QtGui import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
 
 import simplejson
 
@@ -10,7 +8,7 @@ from .tape_widget            import TapeWidget
 from .note                   import Note
 from .opera.hotlist.importer import import_opera_notes
 
-class MainWindow(KMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
