@@ -9,7 +9,7 @@ from ..main_window import MainWindow
 from ..tape_widget import TapeWidget
 from ..note        import Note
 
-class TapeWidgetTest(unittest.TestCase):
+class MainWindowTest(unittest.TestCase):
     def setUp(self):
         self.application = QApplication(sys.argv)
         self.window      = MainWindow()
