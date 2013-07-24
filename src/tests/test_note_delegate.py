@@ -7,6 +7,7 @@ from PyQt4.QtGui  import QApplication, QStandardItemModel, QStyleOptionViewItem,
 from PyQt4.QtCore import Qt, QRect
 
 from ..note          import Note
+from ..note_edit     import NoteEdit
 from ..note_widget   import NoteWidget
 from ..note_delegate import NoteDelegate
 
@@ -33,13 +34,13 @@ class NoteDelegateTest(unittest.TestCase):
     def tearDown(self):
         self.application = None
 
-    def test_createEditor_should_create_note_widget(self):
+    def test_createEditor_should_create_note_edit(self):
         editor = self.note_delegate.createEditor(None, self.option, self.item.index())
 
-        self.assertTrue(isinstance(editor, NoteWidget))
+        self.assertTrue(isinstance(editor, NoteEdit))
 
     def test_setEditorData_should_copy_data_from_note_to_editor(self):
-        editor = NoteWidget()
+        editor = NoteEdit()
         assert editor.dump_note().to_dict() != self.note.to_dict()
 
         self.note_delegate.setEditorData(editor, self.item.index())
@@ -58,7 +59,7 @@ class NoteDelegateTest(unittest.TestCase):
         )
         assert new_note.to_dict() != self.note.to_dict()
 
-        editor = NoteWidget()
+        editor = NoteEdit()
         editor.load_note(new_note)
 
         self.note_delegate.setModelData(editor, self.model, self.item.index())
@@ -72,7 +73,7 @@ class NoteDelegateTest(unittest.TestCase):
     def test_updateEditorGeometry_should_change_editor_size_and_position(self):
         self.option.rect = QRect(11, 22, 33, 44)
         expected_rect    = QRect(11 + 3, 22 + 3, 33 - 6, 44 - 6)
-        editor           = NoteWidget()
+        editor           = NoteEdit()
         editor.load_note(self.note)
 
         self.note_delegate.updateEditorGeometry(editor, self.option, self.item.index())
@@ -81,6 +82,7 @@ class NoteDelegateTest(unittest.TestCase):
 
     def test_sizeHint_should_return_the_height_of_a_standard_note_widget(self):
         note_widget = NoteWidget()
+        note_widget.load_note(self.note)
 
         size_hint = self.note_delegate.sizeHint(self.option, self.item.index())
 
