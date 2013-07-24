@@ -1,6 +1,6 @@
 """ The main UI component of the application. Controls the whole window """
 
-from PyKDE4.kdeui import KMainWindow, KDatePicker
+from PyKDE4.kdeui import KMainWindow
 from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
 from PyQt4.QtCore import SIGNAL
 
