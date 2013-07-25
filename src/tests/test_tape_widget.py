@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 
 from PyQt5.QtTest    import QTest
 from PyQt5.QtCore    import Qt, QRegExp, QAbstractItemModel, QItemSelection, QItemSelectionModel, QAbstractProxyModel
+from PyQt5.QtGui     import QStandardItemModel, QStandardItem
 
 from .dummy_application        import application
 from ..tape_widget             import TapeWidget
@@ -51,6 +52,21 @@ class TapeWidgetTest(unittest.TestCase):
 
         assert self.tape_widget._tape_model.rowCount() == len(index_sequence)
         assert len(self.tape_widget._view.selectedIndexes()) == 0
+
+    def test_set_model_replace_the_model_with_a_new_one(self):
+        new_model = QStandardItemModel()
+        item      = QStandardItem()
+        item.setData(self.notes[0], Qt.EditRole)
+        new_model.appendRow(item)
+
+        assert self.tape_widget.model().rowCount() == 0
+
+        self.tape_widget.set_model(new_model)
+
+        self.assertEqual(self.tape_widget.model(), new_model)
+        self.assertEqual(self.tape_widget.proxy_model().sourceModel(), new_model)
+        self.assertEqual(self.tape_widget.model().rowCount(), 1)
+        self.assertEqual(self.tape_widget.model().item(0, 0), item)
 
     def test_model_should_return_the_undelying_model(self):
         model = self.tape_widget.model()

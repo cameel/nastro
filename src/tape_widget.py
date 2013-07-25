@@ -46,11 +46,11 @@ class TapeWidget(QWidget):
         self._main_layout.addLayout(self._button_layout)
         self._main_layout.addWidget(self._view)
 
-        self._tape_model              = QStandardItemModel()
         self._tape_filter_proxy_model = TapeFilterProxyModel()
         self._note_delegate           = NoteDelegate()
 
-        self._tape_filter_proxy_model.setSourceModel(self._tape_model)
+        self._tape_model = QStandardItemModel()
+        self.set_model(self._tape_model)
         self._view.setItemDelegate(self._note_delegate)
         self._view.setModel(self._tape_filter_proxy_model)
 
@@ -75,6 +75,12 @@ class TapeWidget(QWidget):
             the methods provided by TapeWidget. """
 
         return self._tape_filter_proxy_model
+
+    def set_model(self, model):
+        # NOTE: If there's an exception in setSourceModel(), we can hope that the source model
+        # remains unchanged. That's why we assing to _tape_model only if that instruction succeeds.
+        self._tape_filter_proxy_model.setSourceModel(model)
+        self._tape_model = model
 
     def notes(self):
         for item in all_items(self._tape_model):
