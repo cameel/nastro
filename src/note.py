@@ -25,10 +25,8 @@ class Note:
             'title':       self.title,
             'body':        self.body,
             'tags':        self.tags,
-            # NOTE: isoformat() is supposedly faster but it's output is harder
-            # to parse as the microsecond part is omitted if it's 0.
-            'created_at':  self.created_at.strftime(self.TIMESTAMP_FORMAT),
-            'modified_at': self.modified_at.strftime(self.TIMESTAMP_FORMAT)
+            'created_at':  self.serialize_timestamp(self.created_at),
+            'modified_at': self.serialize_timestamp(self.modified_at)
         }
 
     @classmethod
@@ -44,8 +42,8 @@ class Note:
             title       = note_dict['title'],
             body        = note_dict['body'],
             tags        = note_dict['tags'],
-            created_at  = datetime.strptime(note_dict['created_at'],  cls.TIMESTAMP_FORMAT),
-            modified_at = datetime.strptime(note_dict['modified_at'], cls.TIMESTAMP_FORMAT)
+            created_at  = cls.deserialize_timestamp(note_dict['created_at']),
+            modified_at = cls.deserialize_timestamp(note_dict['modified_at'])
         )
 
     @classmethod
@@ -55,6 +53,16 @@ class Note:
     @classmethod
     def join_tags(cls, tags):
         return ', '.join(tags)
+
+    @classmethod
+    def serialize_timestamp(cls, timestamp):
+        # NOTE: isoformat() is supposedly faster but its output is harder
+        # to parse as the microsecond part is omitted if it's 0.
+        return timestamp.strftime(cls.TIMESTAMP_FORMAT)
+
+    @classmethod
+    def deserialize_timestamp(cls, serialized_timestamp):
+        return datetime.strptime(serialized_timestamp, cls.TIMESTAMP_FORMAT)
 
     def __repr__(self):
         return 'Note' + repr(self.to_dict())

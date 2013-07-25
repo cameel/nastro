@@ -157,3 +157,38 @@ class NoteTest(unittest.TestCase):
         self.assertEqual(Note.join_tags([' abc def ', 'ghi']),    ' abc def , ghi')
         self.assertEqual(Note.join_tags(['\tabc\tdef\t', 'ghi']), '\tabc\tdef\t, ghi')
         self.assertEqual(Note.join_tags(['\nabc\ndef\n', 'ghi']), '\nabc\ndef\n, ghi')
+
+    def test_serialize_timestamp_should_convert_datetime_to_unambiguous_string_representation(self):
+        self.assertEqual(Note.serialize_timestamp(datetime(2013, 7, 26, 13, 37, 11, 123456)), "2013-07-26T13:37:11.123456")
+
+    def test_deserialize_timestamp_should_convert_serialized_datetime_back_into_timestamp(self):
+        self.assertEqual(Note.deserialize_timestamp("2013-07-26T13:37:11.123456"), datetime(2013, 7, 26, 13, 37, 11, 123456))
+        self.assertEqual(Note.deserialize_timestamp("2013-7-26T1:37:11.123456"),   datetime(2013, 7, 26, 1, 37, 11, 123456))
+
+    def test_deserialize_timestamp_should_raise_an_exception_if_string_does_not_represent_a_timestamp(self):
+        with self.assertRaises(Exception):
+            Note.deserialize_timestamp("")
+
+        with self.assertRaises(Exception):
+            Note.deserialize_timestamp("2013-07-26")
+
+        with self.assertRaises(Exception):
+            Note.deserialize_timestamp("13:37:11.123456")
+
+        with self.assertRaises(Exception):
+            Note.deserialize_timestamp("2013-07-26 13:37:11.123456")
+
+        with self.assertRaises(Exception):
+            Note.deserialize_timestamp("2013 - 07-26T13:37:11.123456")
+
+        with self.assertRaises(Exception):
+            Note.deserialize_timestamp("date")
+
+        with self.assertRaises(Exception):
+            Note.deserialize_timestamp("2013-00-26 13:37:11.123456")
+
+        with self.assertRaises(Exception):
+            Note.deserialize_timestamp("02013-7-026T013:037:011.0123456")
+
+        with self.assertRaises(Exception):
+            Note.deserialize_timestamp("      2013-07-26T13:37:11.123456      ")
