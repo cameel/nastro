@@ -11,6 +11,7 @@ from ..tape_widget             import TapeWidget
 from ..note                    import Note
 from ..note_edit               import NoteEdit
 from ..tape_filter_proxy_model import TapeFilterProxyModel
+from ..note_model_helpers      import all_notes, assign_note_ids
 
 class TapeWidgetTest(unittest.TestCase):
     def setUp(self):
@@ -263,17 +264,6 @@ class TapeWidgetTest(unittest.TestCase):
         self.assertEqual(self.tape_widget._tape_filter_proxy_model.rowCount(), 1)
         self.assertEqual(self.tape_widget._tape_filter_proxy_model.data(self.tape_widget._tape_filter_proxy_model.index(0, 0)).to_dict(), self.notes[1].to_dict())
 
-    def test_dump_notes_should_dump_all_notes_as_dicts(self):
-        self.prepare_tape()
-
-        dump = self.tape_widget.dump_notes()
-
-        self.assertEqual(len(dump), len(self.notes))
-        for (dumped_note, note) in zip(dump, self.notes):
-            # NOTE: Intentionally not checking all properties. Don't want to sync this every time one is added.
-            self.assertEqual(dumped_note['title'], note.title)
-            self.assertEqual(dumped_note['body'],  note.body)
-
     def test_selected_indexes_should_return_model_indexes_for_selected_items(self):
         self.prepare_tape()
 
@@ -394,6 +384,7 @@ class TapeWidgetTest(unittest.TestCase):
     def test_delete_selected_notes_should_handle_deleting_multiple_notes(self):
         assert len(self.notes) >= 2
         self.prepare_tape()
+        assign_note_ids(self.tape_widget.model())
 
         index_1 = self.tape_widget.proxy_model().index(1, 0)
         index_2 = self.tape_widget.proxy_model().index(2, 0)
@@ -406,8 +397,12 @@ class TapeWidgetTest(unittest.TestCase):
         self.tape_widget.delete_selected_notes()
 
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) - 2)
-        self.assertTrue(self.notes[1].to_dict() not in self.tape_widget.dump_notes())
-        self.assertTrue(self.notes[2].to_dict() not in self.tape_widget.dump_notes())
+
+        note_ids = [note.id for note in all_notes(self.tape_widget.model())]
+        assert all(id != None for id in note_ids)
+
+        self.assertTrue(self.notes[1].id not in note_ids)
+        self.assertTrue(self.notes[2].id not in note_ids)
 
     def test_new_sibling_handler_should_add_top_level_note_if_nothing_selected(self):
         assert len(self.notes) >= 2

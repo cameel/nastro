@@ -154,13 +154,6 @@ class TapeWidget(QWidget):
     def get_filter(self):
         return self._search_box.text()
 
-    def dump_notes(self):
-        notes = []
-        for note in self.notes():
-            notes.append(note.to_dict())
-
-        return notes
-
     def selected_proxy_indexes(self):
         return self._view.selectedIndexes()
 
