@@ -53,9 +53,7 @@ def subtree_items(root):
 
             # This is a workaround for an old bug in Qt that causes the parent() of top-level
             # items of QStandardItemModel to return None rather than invisibleRootItem().
-            # This was supposedly fixed a year ago but I'm experiencing it with python-pyqt4 4.10.2
-            # and qt4 4.8.5 on Arch Linux.
-            # See https://bugreports.qt-project.org/browse/QTBUG-18785
+            # See a comment in note_model_helpers.dump_notes() for more info.
             if item.parent() == None:
                 parent = root
             else:
