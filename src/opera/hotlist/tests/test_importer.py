@@ -4,7 +4,8 @@ from contextlib import closing
 from datetime   import datetime
 
 from ..iterator     import HotlistIterator, LineType, StructuralError
-from ..importer     import import_opera_notes, line_strip, MissingNoteAttributes, InvalidAttributeValue, FOLDER_TAG_SEPARATOR
+from ..importer     import import_opera_notes, line_strip, tree_validating_iterator, trash_aware_hotlist_iterator
+from ..importer     import MissingNoteAttributes, InvalidAttributeValue, FOLDER_TAG_SEPARATOR
 from ....note       import Note
 from ....utils      import localtime_to_utc
 from .test_iterator import NOTE_FILE_FIXTURES
@@ -100,6 +101,117 @@ class HotlistImporterTest(unittest.TestCase):
         stripped_text = line_strip(text)
 
         self.assertEqual(stripped_text, '')
+
+    def test_tree_validating_iterator_should_enumerate_elements_from_a_well_formed_file(self):
+        fixture = NOTE_FILE_FIXTURES[0]
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            input_elements = list(HotlistIterator(note_file))
+
+        output_tuples = list(tree_validating_iterator(input_elements))
+
+        self.assertEqual(len(output_tuples), len(input_elements))
+        self.assertEqual([element for element, level in output_tuples], input_elements)
+        self.assertEqual([level   for element, level in output_tuples], [0, 1, 2, 2, 2, 1, 0])
+
+    def test_tree_validating_iterator_should_detect_folder_end_without_matching_folder(self):
+        fixture = NOTE_FILE_FIXTURES[1] + '-\n'
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) < count_folder_ends(fixture)
+
+        with self.assertRaises(StructuralError):
+            with closing(StringIO(fixture)) as note_file:
+                list(tree_validating_iterator(HotlistIterator(note_file)))
+
+    def test_tree_validating_iterator_should_detect_folder_without_matching_end(self):
+        fixture = NOTE_FILE_FIXTURES[1][0:-2]
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) > count_folder_ends(fixture)
+
+        with self.assertRaises(StructuralError):
+            with closing(StringIO(fixture)) as note_file:
+                list(tree_validating_iterator(HotlistIterator(note_file)))
+
+    def test_trash_aware_hotlist_iterator_should_enumerate_elements_from_a_well_formed_file(self):
+        fixture = NOTE_FILE_FIXTURES[0]
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+
+        with closing(StringIO(fixture)) as note_file:
+            input_tuples = list(tree_validating_iterator(HotlistIterator(note_file)))
+            assert len(input_tuples) == 7
+
+        output_tuples = list(trash_aware_hotlist_iterator(input_tuples))
+
+        self.assertEqual(len(output_tuples), len(input_tuples))
+        self.assertEqual([(element, level) for element, level, in_trash_folder in output_tuples], input_tuples)
+        self.assertEqual([in_trash_folder  for element, level, in_trash_folder in output_tuples], [False, False, False, False, False, False, False])
+
+    def test_trash_aware_hotlist_iterator_should_mark_notes_inside_trash_folder(self):
+        fixture = NOTE_FILE_FIXTURES[2]
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) == count_folder_ends(fixture)
+
+        with closing(StringIO(fixture)) as note_file:
+            input_tuples = list(tree_validating_iterator(HotlistIterator(note_file)))
+
+        output_tuples = list(trash_aware_hotlist_iterator(input_tuples))
+
+        self.assertEqual(len(output_tuples), len(input_tuples))
+        self.assertEqual([(element, level)  for element, level, in_trash_folder in output_tuples], input_tuples)
+        self.assertEqual(
+            [in_trash_folder for element, level, in_trash_folder in output_tuples],
+            [False, False, True, True, True, True, True, True, True, True, True, False, False]
+        )
+
+    def test_trash_aware_hotlist_iterator_should_detect_invalid_trash_folder_attribute_values(self):
+        fixture = (
+            "#FOLDER\n"
+            "	ID=1\n"
+            "	NAME=T1\n"
+            "	CREATED=1301917631\n"
+            "	TRASH FOLDER=NEIN\n"
+            "-\n"
+        )
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) == count_folder_ends(fixture)
+
+        with closing(StringIO(fixture)) as note_file:
+            input_tuples = list(tree_validating_iterator(HotlistIterator(note_file)))
+
+        with self.assertRaises(InvalidAttributeValue):
+            list(trash_aware_hotlist_iterator(input_tuples))
+
+    def test_trash_aware_hotlist_iterator_should_detect_nested_trash_folders(self):
+        fixture = (
+            "#FOLDER\n"
+            "	ID=1\n"
+            "	NAME=T1\n"
+            "	CREATED=1301917631\n"
+            "	TRASH FOLDER=YES\n"
+            "#FOLDER\n"
+            "	ID=2\n"
+            "	NAME=T2\n"
+            "	CREATED=1301917631\n"
+            "	TRASH FOLDER=YES\n"
+            "-\n"
+            "-\n"
+        )
+
+        assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
+        assert count_folder_starts(fixture) == count_folder_ends(fixture)
+
+        with closing(StringIO(fixture)) as note_file:
+            input_tuples = list(tree_validating_iterator(HotlistIterator(note_file)))
+
+        with self.assertRaises(StructuralError):
+            list(trash_aware_hotlist_iterator(input_tuples))
 
     def test_import_opera_notes_should_import_a_well_formed_file(self):
         fixture = NOTE_FILE_FIXTURES[0]
