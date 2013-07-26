@@ -127,7 +127,7 @@ def import_opera_notes(note_file, skip_trash_folder = True):
 
                 if element_name == 'NOTE' or body != '':
                     note = element_to_note(attributes, folder_stack)
-                    if note != None:
-                        notes.append(note)
+                    assert note != None
+                    notes.append(note)
 
     return notes
