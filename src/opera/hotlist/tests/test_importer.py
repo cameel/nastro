@@ -3,12 +3,13 @@ from io         import StringIO
 from contextlib import closing
 from datetime   import datetime
 
-from ..iterator     import HotlistIterator, LineType, StructuralError
-from ..importer     import import_opera_notes, line_strip, tree_validating_iterator, trash_aware_hotlist_iterator
-from ..importer     import MissingNoteAttributes, InvalidAttributeValue, FOLDER_TAG_SEPARATOR
-from ....note       import Note
-from ....utils      import localtime_to_utc
-from .test_iterator import NOTE_FILE_FIXTURES
+from ..iterator             import HotlistIterator, LineType, StructuralError
+from ..importer             import import_opera_notes, line_strip, tree_validating_iterator, trash_aware_hotlist_iterator
+from ..importer             import MissingNoteAttributes, InvalidAttributeValue, FOLDER_TAG_SEPARATOR
+from ....note               import Note
+from ....utils              import localtime_to_utc
+from ....note_model_helpers import all_notes
+from .test_iterator         import NOTE_FILE_FIXTURES
 
 def count_folder_starts(note_file_content):
     num_folder_starts = 0
@@ -219,9 +220,11 @@ class HotlistImporterTest(unittest.TestCase):
         assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
-            notes = import_opera_notes(note_file)
+            model = import_opera_notes(note_file)
+            notes = list(all_notes(model))
 
-        self.assertEqual(len(notes), 2)
+        self.assertEqual(model.rowCount(), 2)
+        self.assertEqual(len(notes),       2)
         self.assertTrue([isinstance(note, Note) for note in notes])
 
         # NOTE: Opera stores timestamps in localtime and the importer has to guess the time zone
@@ -252,9 +255,11 @@ class HotlistImporterTest(unittest.TestCase):
         assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
-            notes = import_opera_notes(note_file)
+            model = import_opera_notes(note_file)
+            notes = list(all_notes(model))
 
-        self.assertEqual(len(notes), 1)
+        self.assertEqual(model.rowCount(), 1)
+        self.assertEqual(len(notes),       1)
         self.assertEqual(notes[0].title, "note title")
         self.assertEqual(notes[0].body,  "   note body")
 
@@ -268,9 +273,11 @@ class HotlistImporterTest(unittest.TestCase):
         assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
-            notes = import_opera_notes(note_file)
+            model = import_opera_notes(note_file)
+            notes = list(all_notes(model))
 
-        self.assertEqual(len(notes), 1)
+        self.assertEqual(model.rowCount(), 1)
+        self.assertEqual(len(notes),       1)
         self.assertEqual(notes[0].title,       '')
         self.assertEqual(notes[0].body,        '')
         self.assertEqual(notes[0].created_at,  localtime_to_utc(datetime(2011, 9, 28, 23, 20, 17)))
@@ -307,8 +314,10 @@ class HotlistImporterTest(unittest.TestCase):
         assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
-            notes = import_opera_notes(note_file)
+            model = import_opera_notes(note_file)
+            notes = list(all_notes(model))
 
+        self.assertEqual(model.rowCount(), 2)
         self.assertEqual(len(notes), 2)
         self.assertTrue([isinstance(note, Note) for note in notes])
 
@@ -334,9 +343,11 @@ class HotlistImporterTest(unittest.TestCase):
         assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
-            notes = import_opera_notes(note_file)
+            model = import_opera_notes(note_file)
+            notes = list(all_notes(model))
 
-        self.assertEqual(len(notes), 3)
+        self.assertEqual(model.rowCount(), 3)
+        self.assertEqual(len(notes),       3)
         self.assertTrue([isinstance(note, Note) for note in notes])
 
         self.assertEqual(notes[0].title, "F1")
@@ -386,9 +397,11 @@ class HotlistImporterTest(unittest.TestCase):
         assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
-            notes = import_opera_notes(note_file)
+            model = import_opera_notes(note_file)
+            notes = list(all_notes(model))
 
-        self.assertEqual(len(notes), 1)
+        self.assertEqual(model.rowCount(), 1)
+        self.assertEqual(len(notes),       1)
         self.assertTrue([isinstance(note, Note) for note in notes])
 
         self.assertEqual(notes[0].title, note_title)
@@ -405,9 +418,11 @@ class HotlistImporterTest(unittest.TestCase):
         assert all([HotlistIterator.parse_hotlist_line(line)['type'] != None for line in fixture.splitlines()])
 
         with closing(StringIO(fixture)) as note_file:
-            notes = import_opera_notes(note_file)
+            model = import_opera_notes(note_file)
+            notes = list(all_notes(model))
 
-        self.assertEqual(len(notes), 1)
+        self.assertEqual(model.rowCount(), 1)
+        self.assertEqual(len(notes),       1)
         self.assertTrue([isinstance(note, Note) for note in notes])
 
         self.assertEqual(notes[0].tags, [])
@@ -419,9 +434,11 @@ class HotlistImporterTest(unittest.TestCase):
         assert count_folder_starts(fixture) == count_folder_ends(fixture)
 
         with closing(StringIO(fixture)) as note_file:
-            notes = import_opera_notes(note_file, skip_trash_folder = True)
+            model = import_opera_notes(note_file, skip_trash_folder = True)
+            notes = list(all_notes(model))
 
-        self.assertEqual(len(notes), 2)
+        self.assertEqual(model.rowCount(), 2)
+        self.assertEqual(len(notes),       2)
         self.assertTrue([isinstance(note, Note) for note in notes])
 
         self.assertEqual(notes[0].title, "N1")
@@ -437,9 +454,11 @@ class HotlistImporterTest(unittest.TestCase):
         assert count_folder_starts(fixture) == count_folder_ends(fixture)
 
         with closing(StringIO(fixture)) as note_file:
-            notes = import_opera_notes(note_file, skip_trash_folder = False)
+            model = import_opera_notes(note_file, skip_trash_folder = False)
+            notes = list(all_notes(model))
 
-        self.assertEqual(len(notes), 5)
+        self.assertEqual(model.rowCount(), 5)
+        self.assertEqual(len(notes),       5)
         self.assertTrue([isinstance(note, Note) for note in notes])
 
         self.assertEqual(notes[0].title, "N1")

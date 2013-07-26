@@ -97,18 +97,12 @@ class MainWindow(QMainWindow):
 
     def import_opera_notes(self, file_name):
         with open(file_name, 'r') as note_file:
-            notes = import_opera_notes(note_file)
-
-        new_model = QStandardItemModel()
-        root_item = new_model.invisibleRootItem()
-        for note in notes:
-            item = QStandardItem()
-            item.setData(note, Qt.EditRole)
-            new_model.appendRow(item)
+            new_model = import_opera_notes(note_file)
 
         self._replace_tape_widget(new_model)
 
-        return len(notes)
+        # TODO: It would be more efficient to get the number of notes directly from import_opera_notes()
+        return len(list(self.tape_widget.notes()))
 
     def _replace_tape_widget(self, new_model):
         new_tape_widget = TapeWidget()

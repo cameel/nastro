@@ -2,6 +2,9 @@
 
 from datetime import datetime
 
+from PyQt5.QtGui  import QStandardItem, QStandardItemModel
+from PyQt5.QtCore import Qt
+
 from ...note   import Note, InvalidTagCharacter
 from .iterator import HotlistIterator, ParseError, StructuralError
 
@@ -109,7 +112,7 @@ def trash_aware_hotlist_iterator(tree_validating_iterator):
 def import_opera_notes(note_file, skip_trash_folder = True):
     iterator = trash_aware_hotlist_iterator(tree_validating_iterator(HotlistIterator(note_file)))
 
-    notes        = []
+    model        = QStandardItemModel()
     folder_stack = []
     for (element, level, in_trash_folder) in iterator:
         if not (in_trash_folder and skip_trash_folder):
@@ -128,6 +131,10 @@ def import_opera_notes(note_file, skip_trash_folder = True):
                 if element_name == 'NOTE' or body != '':
                     note = element_to_note(attributes, folder_stack)
                     assert note != None
-                    notes.append(note)
 
-    return notes
+                    item = QStandardItem()
+                    item.setData(note, Qt.EditRole)
+
+                    model.appendRow(item)
+
+    return model
