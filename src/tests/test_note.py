@@ -10,7 +10,8 @@ class NoteTest(unittest.TestCase):
             body        = "Y",
             tags        = ["a", "b", "c"],
             created_at  = datetime(2013, 6, 16),
-            modified_at = datetime(2013, 7, 16)
+            modified_at = datetime(2013, 7, 16),
+            id          = 666
         )
 
         self.assertEqual(note.title,       "X")
@@ -18,6 +19,7 @@ class NoteTest(unittest.TestCase):
         self.assertEqual(note.tags,        ["a", "b", "c"])
         self.assertEqual(note.created_at,  datetime(2013, 6, 16))
         self.assertEqual(note.modified_at, datetime(2013, 7, 16))
+        self.assertEqual(note.id,          666)
 
     def test_init_should_initialize_note_with_defaults(self):
         note = Note()
@@ -25,6 +27,7 @@ class NoteTest(unittest.TestCase):
         self.assertEqual(note.title, '')
         self.assertEqual(note.body,  '')
         self.assertEqual(note.tags,  [])
+        self.assertEqual(note.id,    None)
 
         # TODO: Use mocks for datetime to test created_at and modified_at
 
@@ -45,7 +48,8 @@ class NoteTest(unittest.TestCase):
             'body':        "Y",
             'tags':        ["a", "b", "c"],
             'created_at':  "2013-06-16T00:00:00.000000",
-            'modified_at': "2013-07-16T00:00:00.000000"
+            'modified_at': "2013-07-16T00:00:00.000000",
+            'id':          None
         })
 
         self.assertTrue(isinstance(note, Note))
@@ -61,7 +65,8 @@ class NoteTest(unittest.TestCase):
             'title':       "X",
             'tags':        ["a", "b", "c"],
             'created_at':  "2013-06-16T00:00:00.000000",
-            'modified_at': "2013-07-16T00:00:00.000000"
+            'modified_at': "2013-07-16T00:00:00.000000",
+            'id':          None
         }
 
         try:
@@ -82,7 +87,8 @@ class NoteTest(unittest.TestCase):
             'tags':        ["a", "b", "c"],
             'created_at':  "2013-06-16T00:00:00.000000",
             'modified_at': "2013-07-16T00:00:00.000000",
-            'foo':         'bar'
+            'foo':         'bar',
+            'id':          None
         })
 
         self.assertTrue(isinstance(note, Note))
@@ -100,7 +106,8 @@ class NoteTest(unittest.TestCase):
                 'body':        "Y",
                 'tags':        ["a", "b", "c,d,e"],
                 'created_at':  "2013-06-16T00:00:00.000000",
-                'modified_at': "2013-07-16T00:00:00.000000"
+                'modified_at': "2013-07-16T00:00:00.000000",
+                'id':          None
             })
 
     def test_split_tags_should_split_a_string_into_a_list_of_tags(self):

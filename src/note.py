@@ -11,14 +11,16 @@ class InvalidTagCharacter(Exception):
 class Note:
     TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-    def __init__(self, title = '', body = '', tags = [], created_at = datetime.utcnow(), modified_at = None):
+    def __init__(self, title = '', body = '', tags = [], created_at = datetime.utcnow(), modified_at = None, id = None):
         assert created_at != None
+        assert not isinstance(id, str)
 
         self.title       = title
         self.body        = body
         self.tags        = tags
         self.created_at  = created_at
         self.modified_at = modified_at if modified_at != None else created_at
+        self.id          = id
 
     def to_dict(self):
         return {
@@ -26,12 +28,14 @@ class Note:
             'body':        self.body,
             'tags':        self.tags,
             'created_at':  self.serialize_timestamp(self.created_at),
-            'modified_at': self.serialize_timestamp(self.modified_at)
+            'modified_at': self.serialize_timestamp(self.modified_at),
+            'id':          self.id
         }
 
     @classmethod
     def from_dict(cls, note_dict):
-        missing_properties = set(['title', 'body', 'tags', 'created_at', 'modified_at']) - set(note_dict.keys())
+
+        missing_properties = set(['title', 'body', 'tags', 'created_at', 'modified_at', 'id']) - set(note_dict.keys())
         if len(missing_properties) > 0:
             raise MissingProperties("Not all required note properties are present")
 
@@ -43,7 +47,8 @@ class Note:
             body        = note_dict['body'],
             tags        = note_dict['tags'],
             created_at  = cls.deserialize_timestamp(note_dict['created_at']),
-            modified_at = cls.deserialize_timestamp(note_dict['modified_at'])
+            modified_at = cls.deserialize_timestamp(note_dict['modified_at']),
+            id          = note_dict['id']
         )
 
     @classmethod

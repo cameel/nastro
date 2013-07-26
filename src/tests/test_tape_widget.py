@@ -88,6 +88,11 @@ class TapeWidgetTest(unittest.TestCase):
         for (i, note) in enumerate(self.tape_widget.notes()):
             self.assertEqual(note, self.tape_widget.model().item(i).data(Qt.EditRole))
 
+    def test_create_empty_note_should_not_assign_id(self):
+        note = self.tape_widget.create_empty_note(666)
+
+        self.assertEqual(note.id, None)
+
     def test_add_note_should_create_a_new_note(self):
         assert len(list(self.tape_widget.notes())) == 0
 
