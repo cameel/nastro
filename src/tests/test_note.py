@@ -56,46 +56,24 @@ class NoteTest(unittest.TestCase):
         self.assertEqual(note.modified_at, datetime(2013, 7, 16))
 
     def test_from_dict_should_detect_missing_properties(self):
-        with self.assertRaises(MissingProperties):
-            note = Note.from_dict({
-                'body':        "Y",
-                'tags':        ["a", "b", "c"],
-                'created_at':  "2013-06-16T00:00:00.000000",
-                'modified_at': "2013-07-16T00:00:00.000000"
-            })
+        note_dict = {
+            'body':        "Y",
+            'title':       "X",
+            'tags':        ["a", "b", "c"],
+            'created_at':  "2013-06-16T00:00:00.000000",
+            'modified_at': "2013-07-16T00:00:00.000000"
+        }
 
-        with self.assertRaises(MissingProperties):
-            note = Note.from_dict({
-                'title':       "X",
-                'tags':        ["a", "b", "c"],
-                'created_at':  "2013-06-16T00:00:00.000000",
-                'modified_at': "2013-07-16T00:00:00.000000"
-            })
+        try:
+            Note.from_dict(note_dict)
+        except MissingProperties:
+            assert False, "A property is missing from the original dict. The test is flawed."
 
-        with self.assertRaises(MissingProperties):
-            note = Note.from_dict({
-                'title':       "X",
-                'body':        "Y",
-                'created_at':  "2013-06-16T00:00:00.000000",
-                'modified_at': "2013-07-16T00:00:00.000000"
-            })
+        for missing_property in note_dict.keys():
+            filtered_note_dict = {property: note_dict[property] for property in note_dict if property != missing_property}
 
-        with self.assertRaises(MissingProperties):
-            note = Note.from_dict({
-                'title':       "X",
-                'body':        "Y",
-                'tags':        ["a", "b", "c"],
-                'modified_at': "2013-07-16T00:00:00.000000"
-            })
-
-
-        with self.assertRaises(MissingProperties):
-            note = Note.from_dict({
-                'title':       "X",
-                'body':        "Y",
-                'tags':        ["a", "b", "c"],
-                'created_at':  "2013-06-16T00:00:00.000000"
-            })
+            with self.assertRaises(MissingProperties):
+                note = Note.from_dict(filtered_note_dict)
 
     def test_from_dict_should_ignore_extra_properties(self):
         note = Note.from_dict({
