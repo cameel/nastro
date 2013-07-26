@@ -9,7 +9,8 @@ from datetime import datetime
 from .note_delegate           import NoteDelegate
 from .note                    import Note
 from .tape_filter_proxy_model import TapeFilterProxyModel
-from .model_helpers           import remove_items, all_items
+from .model_helpers           import remove_items
+from .note_model_helpers      import all_notes
 
 class TapeWidget(QWidget):
     def __init__(self, parent = None):
@@ -83,9 +84,7 @@ class TapeWidget(QWidget):
         self._tape_model = model
 
     def notes(self):
-        for item in all_items(self._tape_model):
-            assert isinstance(item.data(Qt.EditRole), Note)
-            yield item.data(Qt.EditRole)
+        return all_notes(self._tape_model)
 
     def create_empty_note(self, note_number):
         return Note(

@@ -10,3 +10,8 @@ def item_to_note(item):
 
 def item_to_id(item):
     return item_to_note(item).id
+
+def all_notes(model):
+    for item in all_items(model):
+        assert isinstance(item.data(Qt.EditRole), Note)
+        yield item.data(Qt.EditRole)
