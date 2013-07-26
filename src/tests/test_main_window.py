@@ -2,8 +2,9 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt5.QtTest    import QTest
-from PyQt5.QtCore    import Qt
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui  import QStandardItem, QStandardItemModel
 
 from .dummy_application import application
 from ..main_window      import MainWindow
@@ -32,11 +33,17 @@ class MainWindowTest(unittest.TestCase):
             created_at = datetime.utcnow()
         )
 
-        self.window._replace_tape_widget([new_note])
+        new_model = QStandardItemModel()
+        new_item  = QStandardItem()
+        new_item.setData(new_note, Qt.EditRole)
+        new_model.appendRow(new_item)
+
+        self.window._replace_tape_widget(new_model)
 
         self.assertTrue(isinstance(self.window.tape_widget, TapeWidget))
         self.assertNotEqual(self.window.tape_widget, old_tape_widget)
         self.assertEqual(len(list(self.window.tape_widget.notes())), 1)
+        self.assertEqual(self.window.tape_widget.model(), new_model)
         self.assertEqual(self.window.tape_widget.model().item(0).data(Qt.EditRole), new_note)
         self.assertTrue(self.window.centralWidget() == self.window.tape_widget)
 
@@ -48,6 +55,8 @@ class MainWindowTest(unittest.TestCase):
             created_at = datetime.utcnow()
         )
 
+        model_before = self.window.tape_widget.model()
+
         self.window.tape_widget.add_note(note)
         assert len(list(self.window.tape_widget.notes())) == 1
 
@@ -56,4 +65,5 @@ class MainWindowTest(unittest.TestCase):
         self.window.new_handler()
 
         self.assertEqual(len(list(self.window.tape_widget.notes())), 0)
+        self.assertNotEqual(self.window.tape_widget.model(), model_before)
         self.assertEqual(self.window.tape_widget.get_filter(), '')

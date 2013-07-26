@@ -161,16 +161,6 @@ class TapeWidget(QWidget):
 
         return notes
 
-    def load_notes(self, notes):
-        self.clear()
-
-        try:
-            for note in notes:
-                self.add_note(note)
-        except:
-            self.clear()
-            raise
-
     def selected_proxy_indexes(self):
         return self._view.selectedIndexes()
 
