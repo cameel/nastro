@@ -8,8 +8,6 @@ from PyQt5.QtCore import Qt
 from ...note   import Note, InvalidTagCharacter
 from .iterator import HotlistIterator, ParseError, StructuralError
 
-FOLDER_TAG_SEPARATOR = '/'
-
 class MissingNoteAttributes(ParseError): pass
 class InvalidAttributeValue(ParseError): pass
 
@@ -42,7 +40,7 @@ def title_body_split(name_attribute):
     else:
         return ('', '')
 
-def element_to_note(attributes, folder_path):
+def element_to_note(attributes):
     required_note_attributes = ['CREATED']
 
     missing_attributes = [attribute_name for attribute_name in required_note_attributes if not attribute_name in attributes]
@@ -52,11 +50,10 @@ def element_to_note(attributes, folder_path):
 
     (title, body) = title_body_split(attributes.get('NAME'))
 
-    tag = FOLDER_TAG_SEPARATOR.join(folder_path)
     return Note(
         title      = title,
         body       = body,
-        tags       = [tag] if tag != '' else [],
+        tags       = [],
         # NOTE: Opera saves timestamps in localtime rather than UTC. This makes it impossible
         # to correctly decode it unless we're now in the same time zone.
         created_at = datetime.utcfromtimestamp(int(attributes['CREATED']))
@@ -112,29 +109,26 @@ def trash_aware_hotlist_iterator(tree_validating_iterator):
 def import_opera_notes(note_file, skip_trash_folder = True):
     iterator = trash_aware_hotlist_iterator(tree_validating_iterator(HotlistIterator(note_file)))
 
-    model        = QStandardItemModel()
-    folder_stack = []
+    model      = QStandardItemModel()
+    item_stack = [model]
     for (element, level, in_trash_folder) in iterator:
         if not (in_trash_folder and skip_trash_folder):
             if element == 'end':
-                folder_stack.pop()
+                item_stack.pop()
             else:
                 element_name, attributes = element
 
-                body = ''
-                if element_name == 'FOLDER':
-                    # NOTE: If there are two folders with identical names (or differing only with whitespace),
-                    # they won't be unambiguously discernible by tags after import.
-                    (title, body) = title_body_split(attributes.get('NAME'))
-                    folder_stack.append(title)
-
-                if element_name == 'NOTE' or body != '':
-                    note = element_to_note(attributes, folder_stack)
+                if element_name in ['NOTE', 'FOLDER']:
+                    note = element_to_note(attributes)
                     assert note != None
 
                     item = QStandardItem()
                     item.setData(note, Qt.EditRole)
 
-                    model.appendRow(item)
+                    assert len(item_stack) > 0
+                    item_stack[-1].appendRow(item)
+
+                    if element_name == 'FOLDER':
+                        item_stack.append(item)
 
     return model
