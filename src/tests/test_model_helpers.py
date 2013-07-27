@@ -6,53 +6,33 @@ from PyQt5.QtGui  import QStandardItemModel, QStandardItem
 from ..model_helpers import level, tree_path, subtree_items, all_items, remove_items
 
 class ModelHelpersTest(unittest.TestCase):
+    def create_item_and_append(self, parent_item):
+        item = QStandardItem()
+        parent_item.appendRow(item)
+        return item
+
     def setUp(self):
         self.model = QStandardItemModel()
 
         root_item = self.model.invisibleRootItem()
-        self.item_0 = QStandardItem()
-        root_item.appendRow(self.item_0)
-        self.item_1 = QStandardItem()
-        root_item.appendRow(self.item_1)
-        self.item_2 = QStandardItem()
-        root_item.appendRow(self.item_2)
-        self.item_3 = QStandardItem()
-        root_item.appendRow(self.item_3)
 
-        self.item_0_0 = QStandardItem()
-        self.item_0.appendRow(self.item_0_0)
-
-        self.item_0_0_0 = QStandardItem()
-        self.item_0_0.appendRow(self.item_0_0_0)
-
-        self.item_0_0_0_0 = QStandardItem()
-        self.item_0_0_0.appendRow(self.item_0_0_0_0)
-
-        self.item_1_0 = QStandardItem()
-        self.item_1.appendRow(self.item_1_0)
-        self.item_1_1 = QStandardItem()
-        self.item_1.appendRow(self.item_1_1)
-
-        self.item_1_0_0 = QStandardItem()
-        self.item_1_0.appendRow(self.item_1_0_0)
-        self.item_1_0_1 = QStandardItem()
-        self.item_1_0.appendRow(self.item_1_0_1)
-        self.item_1_0_2 = QStandardItem()
-        self.item_1_0.appendRow(self.item_1_0_2)
-        self.item_1_0_3 = QStandardItem()
-        self.item_1_0.appendRow(self.item_1_0_3)
-
-        self.item_1_0_2_0 = QStandardItem()
-        self.item_1_0_2.appendRow(self.item_1_0_2_0)
-
-        self.item_1_0_2_0_0 = QStandardItem()
-        self.item_1_0_2_0.appendRow(self.item_1_0_2_0_0)
-
-        self.item_1_1_0 = QStandardItem()
-        self.item_1_1.appendRow(self.item_1_1_0)
-
-        self.item_2_0 = QStandardItem()
-        self.item_2.appendRow(self.item_2_0)
+        self.item_0         = self.create_item_and_append(root_item)
+        self.item_0_0       = self.create_item_and_append(self.item_0)
+        self.item_0_0_0     = self.create_item_and_append(self.item_0_0)
+        self.item_0_0_0_0   = self.create_item_and_append(self.item_0_0_0)
+        self.item_1         = self.create_item_and_append(root_item)
+        self.item_1_0       = self.create_item_and_append(self.item_1)
+        self.item_1_0_0     = self.create_item_and_append(self.item_1_0)
+        self.item_1_0_1     = self.create_item_and_append(self.item_1_0)
+        self.item_1_0_2     = self.create_item_and_append(self.item_1_0)
+        self.item_1_0_2_0   = self.create_item_and_append(self.item_1_0_2)
+        self.item_1_0_2_0_0 = self.create_item_and_append(self.item_1_0_2_0)
+        self.item_1_0_3     = self.create_item_and_append(self.item_1_0)
+        self.item_1_1       = self.create_item_and_append(self.item_1)
+        self.item_1_1_0     = self.create_item_and_append(self.item_1_1)
+        self.item_2         = self.create_item_and_append(root_item)
+        self.item_2_0       = self.create_item_and_append(self.item_2)
+        self.item_3         = self.create_item_and_append(root_item)
 
     def test_level_should_return_the_level_at_which_an_item_pointed_at_by_index_is_nested_in_the_model(self):
         self.assertEqual(level(self.item_0), 0)
