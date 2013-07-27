@@ -42,6 +42,23 @@ class NoteTest(unittest.TestCase):
         assert note.created_at == datetime(2013, 6, 16)
         self.assertEqual(note.modified_at, note.created_at)
 
+    def test_to_dict_should_put_all_note_attributes_in_a_dict_containing_only_primitive_types_and_structures_composed_of_them(self):
+        note_dict = Note(
+            title       = "X",
+            body        = "Y",
+            tags        = ["a", "b", "c"],
+            created_at  = datetime(2013, 6, 16),
+            modified_at = datetime(2013, 7, 16),
+            id          = 666
+        ).to_dict()
+
+        self.assertEqual(note_dict['title'],       "X")
+        self.assertEqual(note_dict['body'],        "Y")
+        self.assertEqual(note_dict['tags'],        ["a", "b", "c"])
+        self.assertEqual(note_dict['created_at'],  "2013-06-16T00:00:00.000000")
+        self.assertEqual(note_dict['modified_at'], "2013-07-16T00:00:00.000000")
+        self.assertEqual(note_dict['id'],          666)
+
     def test_from_dict_should_return_note_objects(self):
         note = Note.from_dict({
             'title':       "X",
