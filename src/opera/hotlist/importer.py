@@ -7,11 +7,8 @@ from .iterator import HotlistIterator, ParseError, StructuralError
 
 FOLDER_TAG_SEPARATOR = '/'
 
-class MissingNoteAttributes(ParseError):
-    pass
-
-class InvalidAttributeValue(ParseError):
-    pass
+class MissingNoteAttributes(ParseError): pass
+class InvalidAttributeValue(ParseError): pass
 
 def line_strip(text):
     """Strips leading empty lines and all trailing whitespace from the text"""

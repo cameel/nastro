@@ -2,11 +2,8 @@
 
 from datetime import datetime
 
-class MissingProperties(Exception):
-    pass
-
-class InvalidTagCharacter(Exception):
-    pass
+class MissingProperties(Exception):   pass
+class InvalidTagCharacter(Exception): pass
 
 class Note:
     TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
