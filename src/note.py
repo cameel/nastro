@@ -37,7 +37,7 @@ class Note:
 
         missing_properties = set(['title', 'body', 'tags', 'created_at', 'modified_at', 'id']) - set(note_dict.keys())
         if len(missing_properties) > 0:
-            raise MissingProperties("Not all required note properties are present")
+            raise MissingProperties("Some required properties are missing: {}".format(missing_properties))
 
         if any(',' in tag for tag in note_dict['tags']):
             raise InvalidTagCharacter("Commas (,) are not allowed in tags")
