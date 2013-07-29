@@ -457,7 +457,7 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(notes[4].title, "N2")
         self.assertEqual(notes[4].tags,  [])
 
-    def test_import_opera_notes_should_not_detect_invalid_trash_folder_attribute_values(self):
+    def test_import_opera_notes_should_detect_invalid_trash_folder_attribute_values(self):
         fixture = (
             "#FOLDER\n"
             "	ID=1\n"
