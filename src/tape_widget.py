@@ -86,6 +86,9 @@ class TapeWidget(QWidget):
     def notes(self):
         return all_notes(self._tape_model)
 
+    def assign_ids(self):
+        assign_note_ids(self._tape_model)
+
     def create_empty_note(self, note_number):
         return Note(
             title       = "Note {}".format(note_number),

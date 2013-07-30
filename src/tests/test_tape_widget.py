@@ -11,7 +11,7 @@ from ..tape_widget             import TapeWidget
 from ..note                    import Note
 from ..note_edit               import NoteEdit
 from ..tape_filter_proxy_model import TapeFilterProxyModel
-from ..note_model_helpers      import all_notes, assign_note_ids
+from ..note_model_helpers      import all_notes
 
 class TapeWidgetTest(unittest.TestCase):
     def setUp(self):
@@ -93,6 +93,14 @@ class TapeWidgetTest(unittest.TestCase):
         note = self.tape_widget.create_empty_note(666)
 
         self.assertEqual(note.id, None)
+
+    def test_assign_ids_should_assign_note_ids(self):
+        self.prepare_tape()
+        assert [note.id == None for note in self.tape_widget.notes()]
+
+        self.tape_widget.assign_ids()
+
+        self.assertTrue(all([note.id != None for note in self.tape_widget.notes()]))
 
     def test_add_note_should_create_a_new_note(self):
         assert len(list(self.tape_widget.notes())) == 0
@@ -384,7 +392,7 @@ class TapeWidgetTest(unittest.TestCase):
     def test_delete_selected_notes_should_handle_deleting_multiple_notes(self):
         assert len(self.notes) >= 2
         self.prepare_tape()
-        assign_note_ids(self.tape_widget.model())
+        self.tape_widget.assign_ids()
 
         index_1 = self.tape_widget.proxy_model().index(1, 0)
         index_2 = self.tape_widget.proxy_model().index(2, 0)
