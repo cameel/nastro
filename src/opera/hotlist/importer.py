@@ -1,6 +1,7 @@
 """ Tools for importing data from Opera """
 
-from datetime import datetime
+from datetime    import datetime
+from collections import deque
 
 from PyQt5.QtGui  import QStandardItem, QStandardItemModel
 from PyQt5.QtCore import Qt
@@ -110,7 +111,7 @@ def import_opera_notes(note_file, skip_trash_folder = True):
     iterator = trash_aware_hotlist_iterator(tree_validating_iterator(HotlistIterator(note_file)))
 
     model      = QStandardItemModel()
-    item_stack = [model]
+    item_stack = deque([model])
     for (element, level, in_trash_folder) in iterator:
         if not (in_trash_folder and skip_trash_folder):
             if element == 'end':
