@@ -9,8 +9,8 @@ from datetime import datetime
 from .note_delegate           import NoteDelegate
 from .note                    import Note
 from .tape_filter_proxy_model import TapeFilterProxyModel
-from .model_helpers           import remove_items
-from .note_model_helpers      import all_notes
+from .model_helpers           import all_items, remove_items
+from .note_model_helpers      import item_to_id, all_notes, assign_note_ids
 
 class TapeWidget(QWidget):
     def __init__(self, parent = None):
@@ -78,6 +78,11 @@ class TapeWidget(QWidget):
         return self._tape_filter_proxy_model
 
     def set_model(self, model):
+        assert (
+            len(set([item_to_id(item) for item in all_items(model) if item_to_id(item) != None])) ==
+            len(    [item_to_id(item) for item in all_items(model) if item_to_id(item) != None])
+        )
+
         # NOTE: If there's an exception in setSourceModel(), we can hope that the source model
         # remains unchanged. That's why we assing to _tape_model only if that instruction succeeds.
         self._tape_filter_proxy_model.setSourceModel(model)

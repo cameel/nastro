@@ -29,6 +29,11 @@ def all_notes(model):
         yield item.data(Qt.EditRole)
 
 def assign_note_ids(model):
+    assert (
+        len(set([item_to_id(item) for item in all_items(model) if item_to_id(item) != None])) ==
+        len(    [item_to_id(item) for item in all_items(model) if item_to_id(item) != None])
+    )
+
     max_id        = 0
     num_empty_ids = 0
     for note in all_notes(model):
@@ -47,6 +52,11 @@ def assign_note_ids(model):
     return num_empty_ids
 
 def dump_notes(model):
+    assert (
+        len(set([item_to_id(item) for item in all_items(model) if item_to_id(item) != None])) ==
+        len(    [item_to_id(item) for item in all_items(model) if item_to_id(item) != None])
+    )
+
     assign_note_ids(model)
 
     raw_notes = []
