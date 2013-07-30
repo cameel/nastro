@@ -340,7 +340,7 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(notes[2].tags,  ['F1/T1'])
 
         self.assertEqual(notes[3].title, "NT3")
-        self.assertEqual(notes[3].tags,  ['F1/T1/FT1'])
+        self.assertEqual(notes[3].tags,  ['F1/T1/FT2'])
 
         self.assertEqual(notes[4].title, "N2")
         self.assertEqual(notes[4].tags,  [])

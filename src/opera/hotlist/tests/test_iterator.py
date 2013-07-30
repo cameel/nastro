@@ -105,7 +105,7 @@ NOTE_FILE_FIXTURES = [
         "-\n"
         "#FOLDER\n"
         "	ID=7\n"
-        "	NAME=FT1\n"
+        "	NAME=FT2\n"
         "	CREATED=1301917631\n"
         "#NOTE\n"
         "	ID=8\n"
