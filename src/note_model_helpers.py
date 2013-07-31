@@ -3,7 +3,7 @@ from PyQt5.QtGui  import QStandardItem, QStandardItemModel
 
 from collections import deque
 
-from .note          import Note, MissingProperties
+from .note          import Note, MissingProperties, WrongAttributeType
 from .model_helpers import all_items
 
 class EmptyNoteId(MissingProperties):          pass
@@ -94,6 +94,14 @@ def load_notes(raw_notes):
             raise MissingParentId("parent_id attribute is missing for note {}".format(note.id))
         if not 'prev_sibling_id' in note_dict:
             raise MissingPrevSiblingId("prev_sibling_id attribute is missing for note {}".format(note.id))
+        for attribute in ['parent_id', 'prev_sibling_id']:
+            if not attribute in note_dict:
+                raise MissingPrevSiblingId("Attribute '{}' is missing for note {}".format(attribute, note.id))
+
+            if type(note_dict[attribute]) not in [int, type(None)]:
+                raise WrongAttributeType("Expected the type of attribute {} to be one of {}; got {}".format(
+                    attribute, [int, type(None)], type(note_dict[attribute])
+                ))
 
         item = QStandardItem()
         item.setData(note, Qt.EditRole)

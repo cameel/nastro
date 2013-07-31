@@ -1,11 +1,12 @@
 import unittest
-from datetime import datetime
+from datetime    import datetime
+from collections import deque
 
 from PyQt5.QtTest import QTest
 from PyQt5.QtGui  import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
 
-from ..note               import Note
+from ..note               import Note, WrongAttributeType
 from ..model_helpers      import all_items
 from ..note_model_helpers import item_to_note, item_to_id, all_notes, assign_note_ids, dump_notes, load_notes
 from ..note_model_helpers import EmptyNoteId, MissingParentId, MissingPrevSiblingId, MissingNote, SiblingCycle, ParentCycle, InconsistentParentIds, ConflictingSiblingIds
@@ -458,3 +459,45 @@ class NoteModelHelpersTest(unittest.TestCase):
 
         note_id = lambda note_dict: note_dict['id']
         self.assertEqual(sorted(serialized_notes_after, key = note_id), sorted(serialized_notes_before, key = note_id))
+
+    def test_load_notes_should_detect_wrong_attribute_types(self):
+        note_dict = {
+            'title':           "X",
+            'body':            "Y",
+            'tags':            ["a", "b", "c"],
+            'created_at':      "2013-06-16T00:00:00.000000",
+            'modified_at':     "2013-07-16T00:00:00.000000",
+            'id':              1,
+            'parent_id':       None,
+            'prev_sibling_id': None
+        }
+
+        # ASSUMPTION: This does not raise exceptions
+        load_notes([note_dict])
+
+        wrong_type_samples = [
+            ('title',           1),
+            ('body',            1),
+            ('tags',            ("a", "b", "c")),
+            ('tags',            ()),
+            ('tags',            {}),
+            ('tags',            set()),
+            ('tags',            deque(["a", "b", "c"])),
+            ('tags',            [1, 2, 3]),
+            ('created_at',      1234567890),
+            ('created_at',      datetime(2013, 1, 1)),
+            ('modified_at',     1234567890),
+            ('modified_at',     datetime(2013, 1, 1)),
+            ('id',              "10"),
+            ('id',              []),
+            ('parent_id',       "10"),
+            ('parent_id',       []),
+            ('prev_sibling_id', "10"),
+            ('prev_sibling_id', [])
+        ]
+
+        for tested_attribute, wrong_value in wrong_type_samples:
+            filtered_note_dict = {attribute: note_dict[attribute] if attribute != tested_attribute else wrong_value for attribute in note_dict}
+
+            with self.assertRaises(WrongAttributeType):
+                load_notes([filtered_note_dict])

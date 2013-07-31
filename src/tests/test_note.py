@@ -1,7 +1,8 @@
 import unittest
-from datetime import datetime
+from datetime    import datetime
+from collections import deque
 
-from ..note import Note, InvalidTagCharacter, MissingProperties
+from ..note import Note, InvalidTagCharacter, MissingProperties, WrongAttributeType
 
 class NoteTest(unittest.TestCase):
     def test_init_should_initialize_note(self):
@@ -126,6 +127,42 @@ class NoteTest(unittest.TestCase):
                 'modified_at': "2013-07-16T00:00:00.000000",
                 'id':          None
             })
+
+    def test_from_dict_should_detect_wrong_attribute_types(self):
+        note_dict = {
+            'title':       "X",
+            'body':        "Y",
+            'tags':        ["a", "b", "c"],
+            'created_at':  "2013-06-16T00:00:00.000000",
+            'modified_at': "2013-07-16T00:00:00.000000",
+            'id':          1
+        }
+
+        # ASSUMPTION: This does not raise exceptions
+        Note.from_dict(note_dict)
+
+        wrong_type_samples = [
+            ('title',       1),
+            ('body',        1),
+            ('tags',        ("a", "b", "c")),
+            ('tags',        ()),
+            ('tags',        {}),
+            ('tags',        set()),
+            ('tags',        deque(["a", "b", "c"])),
+            ('tags',        [1, 2, 3]),
+            ('created_at',  1234567890),
+            ('created_at',  datetime(2013, 1, 1)),
+            ('modified_at', 1234567890),
+            ('modified_at', datetime(2013, 1, 1)),
+            ('id',          "10"),
+            ('id',          [])
+        ]
+
+        for tested_attribute, wrong_value in wrong_type_samples:
+            filtered_note_dict = {attribute: note_dict[attribute] if attribute != tested_attribute else wrong_value for attribute in note_dict}
+
+            with self.assertRaises(WrongAttributeType):
+                Note.from_dict(filtered_note_dict)
 
     def test_split_tags_should_split_a_string_into_a_list_of_tags(self):
         self.assertEqual(Note.split_tags(''),                 [])
