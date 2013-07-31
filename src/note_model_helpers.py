@@ -17,7 +17,6 @@ class ConflictingSiblingIds(Exception):        pass
 
 def item_to_note(item):
     note = item.data(Qt.EditRole)
-    assert isinstance(note, Note)
     return note
 
 def item_to_id(item):
