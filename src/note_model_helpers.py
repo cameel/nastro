@@ -25,8 +25,8 @@ def item_to_id(item):
 
 def all_notes(model):
     for item in all_items(model):
-        assert isinstance(item.data(Qt.EditRole), Note)
-        yield item.data(Qt.EditRole)
+        assert isinstance(item_to_note(item), Note)
+        yield item_to_note(item)
 
 def assign_note_ids(model):
     assert (
@@ -61,7 +61,7 @@ def dump_notes(model):
 
     raw_notes = []
     for item in all_items(model):
-        note = item.data(Qt.EditRole)
+        note = item_to_note(item)
         assert note.id != None
 
         note_dict = note.to_dict()
@@ -74,10 +74,10 @@ def dump_notes(model):
         # See https://bugreports.qt-project.org/browse/QTBUG-18785
         if item.parent() in [None, model.invisibleRootItem()]:
             note_dict['parent_id']       = None
-            note_dict['prev_sibling_id'] = model.item(item.row() - 1).data(Qt.EditRole).id if item.row() > 0 else None
+            note_dict['prev_sibling_id'] = item_to_note(model.item(item.row() - 1)).id if item.row() > 0 else None
         else:
-            note_dict['parent_id']       = item.parent().data(Qt.EditRole).id
-            note_dict['prev_sibling_id'] = item.parent().child(item.row() - 1).data(Qt.EditRole).id if item.row() > 0 else None
+            note_dict['parent_id']       = item_to_note(item.parent()).id
+            note_dict['prev_sibling_id'] = item_to_note(item.parent().child(item.row() - 1)).id if item.row() > 0 else None
 
         raw_notes.append(note_dict)
 

@@ -7,11 +7,12 @@ from PyQt5.QtWidgets import QStyleOptionViewItem
 from PyQt5.QtGui     import QStandardItemModel, QStandardItem, QPixmap, QPainter
 from PyQt5.QtCore    import Qt, QRect
 
-from .dummy_application import application
-from ..note             import Note
-from ..note_edit        import NoteEdit
-from ..note_widget      import NoteWidget
-from ..note_delegate    import NoteDelegate
+from .dummy_application   import application
+from ..note               import Note
+from ..note_edit          import NoteEdit
+from ..note_widget        import NoteWidget
+from ..note_delegate      import NoteDelegate
+from ..note_model_helpers import item_to_note
 
 class NoteDelegateTest(unittest.TestCase):
     def setUp(self):
@@ -46,8 +47,8 @@ class NoteDelegateTest(unittest.TestCase):
         self.assertEqual(editor.dump_note().to_dict(), self.note.to_dict())
 
     def test_setModelData_should_copy_data_from_editor_to_note(self):
-        assert isinstance(self.item.data(Qt.EditRole), Note)
-        assert self.item.data(Qt.EditRole).to_dict() == self.note.to_dict()
+        assert isinstance(item_to_note(self.item), Note)
+        assert item_to_note(self.item).to_dict() == self.note.to_dict()
 
         new_note = Note(
             title      = "X",
@@ -61,7 +62,7 @@ class NoteDelegateTest(unittest.TestCase):
         editor.load_note(new_note)
 
         self.note_delegate.setModelData(editor, self.model, self.item.index())
-        new_item_value = self.item.data(Qt.EditRole)
+        new_item_value = item_to_note(self.item)
 
         self.assertTrue(isinstance(new_item_value, Note))
         self.assertNotEqual(new_item_value, self.note)

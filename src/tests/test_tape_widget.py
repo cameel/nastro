@@ -11,7 +11,7 @@ from ..tape_widget             import TapeWidget
 from ..note                    import Note
 from ..note_edit               import NoteEdit
 from ..tape_filter_proxy_model import TapeFilterProxyModel
-from ..note_model_helpers      import all_notes
+from ..note_model_helpers      import item_to_note, all_notes
 
 class TapeWidgetTest(unittest.TestCase):
     def setUp(self):
@@ -87,7 +87,7 @@ class TapeWidgetTest(unittest.TestCase):
         self.prepare_tape()
 
         for (i, note) in enumerate(self.tape_widget.notes()):
-            self.assertEqual(note, self.tape_widget.model().item(i).data(Qt.EditRole))
+            self.assertEqual(note, item_to_note(self.tape_widget.model().item(i)))
 
     def test_create_empty_note_should_not_assign_id(self):
         note = self.tape_widget.create_empty_note(666)
@@ -109,7 +109,7 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.assertEqual(len(list(self.tape_widget.notes())), 1)
 
-        note = self.tape_widget.model().item(0).data(Qt.EditRole)
+        note = item_to_note(self.tape_widget.model().item(0))
         assert isinstance(note, Note)
 
         self.assertEqual(note.title, 'Note 1')
@@ -126,7 +126,7 @@ class TapeWidgetTest(unittest.TestCase):
         self.tape_widget.add_note(self.notes[0])
 
         self.assertEqual(len(list(self.tape_widget.notes())), 1)
-        self.assertEqual(self.tape_widget.model().item(0).data(Qt.EditRole), self.notes[0])
+        self.assertEqual(item_to_note(self.tape_widget.model().item(0)), self.notes[0])
 
     def test_add_note_should_append_notes_at_the_end_of_the_tape(self):
         assert len(list(self.tape_widget.notes())) == 0
@@ -136,8 +136,8 @@ class TapeWidgetTest(unittest.TestCase):
         self.tape_widget.add_note(self.notes[1])
 
         self.assertEqual(len(list(self.tape_widget.notes())), 3)
-        self.assertEqual(self.tape_widget.model().item(0).data(Qt.EditRole), self.notes[0])
-        self.assertEqual(self.tape_widget.model().item(2).data(Qt.EditRole), self.notes[1])
+        self.assertEqual(item_to_note(self.tape_widget.model().item(0)), self.notes[0])
+        self.assertEqual(item_to_note(self.tape_widget.model().item(2)), self.notes[1])
 
     def test_add_note_should_add_child_note(self):
         assert len(self.notes) >= 3
@@ -148,7 +148,7 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 1)
         self.assertEqual(self.tape_widget.model().item(2).rowCount(), 1)
-        self.assertEqual(self.tape_widget.model().item(2).child(0).data(Qt.EditRole), new_note)
+        self.assertEqual(item_to_note(self.tape_widget.model().item(2).child(0)), new_note)
 
     def test_add_note_should_append_child_at_the_end_of_parents_list(self):
         assert len(self.notes) >= 3
@@ -156,7 +156,7 @@ class TapeWidgetTest(unittest.TestCase):
 
         parent_note = self.tape_widget.create_empty_note(777)
         self.tape_widget.add_note(parent_note, self.tape_widget.model().item(2).index())
-        assert self.tape_widget.model().item(2).child(0).data(Qt.EditRole) == parent_note
+        assert item_to_note(self.tape_widget.model().item(2).child(0)) == parent_note
         assert self.tape_widget.model().item(2).rowCount() == 1
 
         child_note_1 = self.tape_widget.create_empty_note(888)
@@ -166,8 +166,8 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 3)
         self.assertEqual(self.tape_widget.model().item(2).child(0).rowCount(), 2)
-        self.assertEqual(self.tape_widget.model().item(2).child(0).child(0).data(Qt.EditRole), child_note_1)
-        self.assertEqual(self.tape_widget.model().item(2).child(0).child(1).data(Qt.EditRole), child_note_2)
+        self.assertEqual(item_to_note(self.tape_widget.model().item(2).child(0).child(0)), child_note_1)
+        self.assertEqual(item_to_note(self.tape_widget.model().item(2).child(0).child(1)), child_note_2)
 
     def test_add_and_focus_note_should_create_a_note_and_focus_the_tape_on_it(self):
         assert len(self.notes) >= 2
@@ -213,8 +213,8 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 1)
         self.assertEqual(self.tape_widget.model().item(2).rowCount(), 1)
-        self.assertTrue(isinstance(self.tape_widget.model().item(2).child(0).data(Qt.EditRole), Note))
-        self.assertTrue(not self.tape_widget.model().item(2).child(0).data(Qt.EditRole) in self.notes)
+        self.assertTrue(isinstance(item_to_note(self.tape_widget.model().item(2).child(0)), Note))
+        self.assertTrue(not item_to_note(self.tape_widget.model().item(2).child(0)) in self.notes)
         self.assertEqual(len(self.tape_widget.selected_proxy_indexes()), 1)
         self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].row(), 0)
         self.assertEqual(self.tape_widget.selected_proxy_indexes()[0].parent(), parent_proxy_index)
@@ -227,8 +227,8 @@ class TapeWidgetTest(unittest.TestCase):
         self.tape_widget.remove_notes([index_2, index_1])
 
         self.assertEqual(self.tape_widget.model().rowCount(), 2)
-        self.assertEqual(self.tape_widget.model().item(0, 0).data(Qt.EditRole), self.notes[0])
-        self.assertEqual(self.tape_widget.model().item(1, 0).data(Qt.EditRole), self.notes[3])
+        self.assertEqual(item_to_note(self.tape_widget.model().item(0)), self.notes[0])
+        self.assertEqual(item_to_note(self.tape_widget.model().item(1)), self.notes[3])
 
     def test_by_default_all_notes_should_be_visible(self):
         assert self.tape_widget.get_filter() == ''
