@@ -10,7 +10,7 @@ from .note_delegate           import NoteDelegate
 from .note                    import Note
 from .tape_filter_proxy_model import TapeFilterProxyModel
 from .model_helpers           import all_items, remove_items
-from .note_model_helpers      import item_to_id, all_notes, assign_note_ids
+from .note_model_helpers      import item_to_id, set_item_note, all_notes, assign_note_ids
 
 class TapeWidget(QWidget):
     def __init__(self, parent = None):
@@ -118,7 +118,7 @@ class TapeWidget(QWidget):
             note = self.create_empty_note(parent_item.rowCount() + 1)
 
         item = QStandardItem()
-        item.setData(note, Qt.EditRole)
+        set_item_note(item, note)
         parent_item.appendRow(item)
 
     def add_and_focus_note(self, parent_proxy_index = None):

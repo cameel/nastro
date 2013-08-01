@@ -12,7 +12,7 @@ from ..note               import Note
 from ..note_edit          import NoteEdit
 from ..note_widget        import NoteWidget
 from ..note_delegate      import NoteDelegate
-from ..note_model_helpers import item_to_note
+from ..note_model_helpers import item_to_note, set_item_note
 
 class NoteDelegateTest(unittest.TestCase):
     def setUp(self):
@@ -28,7 +28,7 @@ class NoteDelegateTest(unittest.TestCase):
 
         root_item = self.model.invisibleRootItem()
         self.item = QStandardItem()
-        self.item.setData(self.note, Qt.EditRole)
+        set_item_note(self.item, self.note)
         root_item.appendRow(self.item)
 
         self.option = QStyleOptionViewItem()

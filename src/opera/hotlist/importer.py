@@ -6,8 +6,9 @@ from collections import deque
 from PyQt5.QtGui  import QStandardItem, QStandardItemModel
 from PyQt5.QtCore import Qt
 
-from ...note   import Note, InvalidTagCharacter
-from .iterator import HotlistIterator, ParseError, StructuralError
+from ...note               import Note, InvalidTagCharacter
+from ...note_model_helpers import set_item_note
+from .iterator             import HotlistIterator, ParseError, StructuralError
 
 class MissingNoteAttributes(ParseError): pass
 class InvalidAttributeValue(ParseError): pass
@@ -124,7 +125,7 @@ def import_opera_notes(note_file, skip_trash_folder = True):
                     assert note != None
 
                     item = QStandardItem()
-                    item.setData(note, Qt.EditRole)
+                    set_item_note(item, note)
 
                     assert len(item_stack) > 0
                     item_stack[-1].appendRow(item)

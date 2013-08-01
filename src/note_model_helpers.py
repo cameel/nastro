@@ -22,6 +22,10 @@ def item_to_note(item):
 def item_to_id(item):
     return item_to_note(item).id
 
+def set_item_note(item, note):
+    assert isinstance(note, Note)
+    item.setData(note, Qt.EditRole)
+
 def all_notes(model):
     for item in all_items(model):
         assert isinstance(item_to_note(item), Note)
@@ -103,7 +107,7 @@ def load_notes(raw_notes):
                 ))
 
         item = QStandardItem()
-        item.setData(note, Qt.EditRole)
+        set_item_note(item, note)
         item_map[note.id] = (item, note_dict['parent_id'], note_dict['prev_sibling_id'])
 
     new_model = QStandardItemModel()

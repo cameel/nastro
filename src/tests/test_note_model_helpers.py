@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt
 
 from ..note               import Note, WrongAttributeType
 from ..model_helpers      import all_items
-from ..note_model_helpers import item_to_note, item_to_id, all_notes, assign_note_ids, dump_notes, load_notes
+from ..note_model_helpers import item_to_note, item_to_id, set_item_note, all_notes, assign_note_ids, dump_notes, load_notes
 from ..note_model_helpers import EmptyNoteId, MissingParentId, MissingPrevSiblingId, MissingNote, SiblingCycle, ParentCycle, InconsistentParentIds, ConflictingSiblingIds
 
 class NoteModelHelpersTest(unittest.TestCase):
@@ -31,7 +31,7 @@ class NoteModelHelpersTest(unittest.TestCase):
     def create_note_and_append(self, parent_item, title):
         note = Note(title = title)
         item = QStandardItem()
-        item.setData(note, Qt.EditRole)
+        set_item_note(item, note)
         parent_item.appendRow(item)
         return item
 

@@ -11,7 +11,7 @@ from ..tape_widget             import TapeWidget
 from ..note                    import Note
 from ..note_edit               import NoteEdit
 from ..tape_filter_proxy_model import TapeFilterProxyModel
-from ..note_model_helpers      import item_to_note, all_notes
+from ..note_model_helpers      import item_to_note, all_notes, set_item_note
 
 class TapeWidgetTest(unittest.TestCase):
     def setUp(self):
@@ -57,7 +57,7 @@ class TapeWidgetTest(unittest.TestCase):
     def test_set_model_replace_the_model_with_a_new_one(self):
         new_model = QStandardItemModel()
         item      = QStandardItem()
-        item.setData(self.notes[0], Qt.EditRole)
+        set_item_note(item, self.notes[0])
         new_model.appendRow(item)
 
         assert self.tape_widget.model().rowCount() == 0

@@ -10,7 +10,7 @@ from .dummy_application   import application
 from ..main_window        import MainWindow
 from ..tape_widget        import TapeWidget
 from ..note               import Note
-from ..note_model_helpers import item_to_note
+from ..note_model_helpers import item_to_note, set_item_note
 
 class MainWindowTest(unittest.TestCase):
     def setUp(self):
@@ -36,7 +36,7 @@ class MainWindowTest(unittest.TestCase):
 
         new_model = QStandardItemModel()
         new_item  = QStandardItem()
-        new_item.setData(new_note, Qt.EditRole)
+        set_item_note(new_item, new_note)
         new_model.appendRow(new_item)
 
         self.window._replace_tape_widget(new_model)
