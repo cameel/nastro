@@ -23,25 +23,22 @@ class NoteWidget(QFrame):
         timestamp_font = QFont()
         timestamp_font.setPointSize(7)
 
-        self._main_layout  = QVBoxLayout(self)
-        self._title_panel  = QWidget(self)
-        self._title_layout = QHBoxLayout(self._title_panel)
+        self._main_layout = QVBoxLayout(self)
+        self._tag_panel   = QWidget(self)
+        self._tag_layout  = QHBoxLayout(self._tag_panel)
 
         self._tag_label         = QLabel(self)
         self._body_label        = QLabel(self)
-        self._created_at_label  = QLabel(self._title_panel)
-        self._modified_at_label = QLabel(self._title_panel)
+        self._created_at_label  = QLabel(self._tag_panel)
+        self._modified_at_label = QLabel(self._tag_panel)
 
-        self._timestamp_layout = QVBoxLayout()
-        self._timestamp_layout.addWidget(self._created_at_label)
-        self._timestamp_layout.addWidget(self._modified_at_label)
+        self._tag_layout.addWidget(self._tag_label)
+        self._tag_layout.addStretch()
+        self._tag_layout.addWidget(self._created_at_label)
+        self._tag_layout.addWidget(self._modified_at_label)
 
-        self._title_layout.addLayout(self._timestamp_layout)
-        self._title_layout.addStretch()
-
-        self._main_layout.addWidget(self._title_panel)
         self._main_layout.addWidget(self._body_label)
-        self._main_layout.addWidget(self._tag_label)
+        self._main_layout.addWidget(self._tag_panel)
 
         tag_palette = QPalette(self._tag_label.palette())
         tag_palette.setColor(self._tag_label.foregroundRole(), Qt.red)
