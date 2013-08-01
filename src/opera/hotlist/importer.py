@@ -50,11 +50,10 @@ def element_to_note(attributes):
         note_id = attributes['ID'] if 'ID' in attributes else '???'
         raise MissingNoteAttributes("Note (ID={}) is missing one or more required attributes: {}".format(note_id, ', '.join(missing_attributes)))
 
-    (title, body) = title_body_split(attributes.get('NAME'))
-
+    name_attribute = attributes.get('NAME')
+    
     return Note(
-        title      = title,
-        body       = body,
+        body       = line_strip(name_attribute.replace('\02\02', '\n')) if name_attribute != None else '',
         tags       = [],
         # NOTE: Opera saves timestamps in localtime rather than UTC. This makes it impossible
         # to correctly decode it unless we're now in the same time zone.

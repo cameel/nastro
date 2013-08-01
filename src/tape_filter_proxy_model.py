@@ -23,7 +23,7 @@ class TapeFilterProxyModel(QSortFilterProxyModel):
 
     @classmethod
     def note_matches(cls, regex, note):
-        for text_component in [note.title] + note.tags + [note.body]:
+        for text_component in note.tags + [note.body]:
             if regex.indexIn(text_component) != -1:
                 return True
 

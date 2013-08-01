@@ -17,10 +17,6 @@ class NoteWidget(QFrame):
         # will make Qt select some other monospace font.
         monospace_font = QFont("Liberation Mono", 10, QFont.TypeWriter)
 
-        bold_font = QFont()
-        bold_font.setPointSize(14)
-        bold_font.setWeight(QFont.Bold)
-
         tag_font = QFont()
         tag_font.setPointSize(8)
 
@@ -31,7 +27,6 @@ class NoteWidget(QFrame):
         self._title_panel  = QWidget(self)
         self._title_layout = QHBoxLayout(self._title_panel)
 
-        self._title_label       = QLabel(self._title_panel)
         self._tag_label         = QLabel(self)
         self._body_label        = QLabel(self)
         self._created_at_label  = QLabel(self._title_panel)
@@ -42,7 +37,6 @@ class NoteWidget(QFrame):
         self._timestamp_layout.addWidget(self._modified_at_label)
 
         self._title_layout.addLayout(self._timestamp_layout)
-        self._title_layout.addWidget(self._title_label)
         self._title_layout.addStretch()
 
         self._main_layout.addWidget(self._title_panel)
@@ -54,9 +48,6 @@ class NoteWidget(QFrame):
 
         timestamp_palette = QPalette(self._created_at_label.palette())
         timestamp_palette.setColor(self._created_at_label.foregroundRole(), Qt.darkGray)
-
-        self._title_label.setFont(bold_font)
-        self._title_label.setTextFormat(Qt.PlainText)
 
         self._tag_label.setPalette(tag_palette)
         self._tag_label.setTextFormat(Qt.PlainText)
@@ -80,7 +71,6 @@ class NoteWidget(QFrame):
         self.setFrameStyle(QFrame.StyledPanel)
 
     def load_note(self, note):
-        self._title_label.setText(note.title)
         self._body_label.setText(note.body)
         self._tag_label.setText(Note.join_tags(note.tags))
         self._created_at_label.setText(self.format_timestamp(note.created_at))

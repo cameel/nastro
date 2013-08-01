@@ -7,7 +7,6 @@ from ..note import Note, InvalidTagCharacter, MissingProperties, WrongAttributeT
 class NoteTest(unittest.TestCase):
     def test_init_should_initialize_note(self):
         note = Note(
-            title       = "X",
             body        = "Y",
             tags        = ["a", "b", "c"],
             created_at  = datetime(2013, 6, 16),
@@ -15,7 +14,6 @@ class NoteTest(unittest.TestCase):
             id          = 666
         )
 
-        self.assertEqual(note.title,       "X")
         self.assertEqual(note.body,        "Y")
         self.assertEqual(note.tags,        ["a", "b", "c"])
         self.assertEqual(note.created_at,  datetime(2013, 6, 16))
@@ -25,7 +23,6 @@ class NoteTest(unittest.TestCase):
     def test_init_should_initialize_note_with_defaults(self):
         note = Note()
 
-        self.assertEqual(note.title, '')
         self.assertEqual(note.body,  '')
         self.assertEqual(note.tags,  [])
         self.assertEqual(note.id,    None)
@@ -34,7 +31,6 @@ class NoteTest(unittest.TestCase):
 
     def test_init_should_set_modified_at_to_created_at_if_not_specified(self):
         note = Note(
-            title       = "X",
             body        = "Y",
             tags        = ["a", "b", "c"],
             created_at  = datetime(2013, 6, 16)
@@ -45,7 +41,6 @@ class NoteTest(unittest.TestCase):
 
     def test_to_dict_should_put_all_note_attributes_in_a_dict_containing_only_primitive_types_and_structures_composed_of_them(self):
         note_dict = Note(
-            title       = "X",
             body        = "Y",
             tags        = ["a", "b", "c"],
             created_at  = datetime(2013, 6, 16),
@@ -53,7 +48,6 @@ class NoteTest(unittest.TestCase):
             id          = 666
         ).to_dict()
 
-        self.assertEqual(note_dict['title'],       "X")
         self.assertEqual(note_dict['body'],        "Y")
         self.assertEqual(note_dict['tags'],        ["a", "b", "c"])
         self.assertEqual(note_dict['created_at'],  "2013-06-16T00:00:00.000000")
@@ -62,7 +56,6 @@ class NoteTest(unittest.TestCase):
 
     def test_from_dict_should_return_note_objects(self):
         note = Note.from_dict({
-            'title':       "X",
             'body':        "Y",
             'tags':        ["a", "b", "c"],
             'created_at':  "2013-06-16T00:00:00.000000",
@@ -71,7 +64,6 @@ class NoteTest(unittest.TestCase):
         })
 
         self.assertTrue(isinstance(note, Note))
-        self.assertEqual(note.title,       "X")
         self.assertEqual(note.body,        "Y")
         self.assertEqual(note.tags,        ["a", "b", "c"])
         self.assertEqual(note.created_at,  datetime(2013, 6, 16))
@@ -80,7 +72,6 @@ class NoteTest(unittest.TestCase):
     def test_from_dict_should_detect_missing_properties(self):
         note_dict = {
             'body':        "Y",
-            'title':       "X",
             'tags':        ["a", "b", "c"],
             'created_at':  "2013-06-16T00:00:00.000000",
             'modified_at': "2013-07-16T00:00:00.000000",
@@ -100,7 +91,6 @@ class NoteTest(unittest.TestCase):
 
     def test_from_dict_should_ignore_extra_properties(self):
         note = Note.from_dict({
-            'title':       "X",
             'body':        "Y",
             'tags':        ["a", "b", "c"],
             'created_at':  "2013-06-16T00:00:00.000000",
@@ -110,7 +100,6 @@ class NoteTest(unittest.TestCase):
         })
 
         self.assertTrue(isinstance(note, Note))
-        self.assertEqual(note.title,       "X")
         self.assertEqual(note.body,        "Y")
         self.assertEqual(note.tags,        ["a", "b", "c"])
         self.assertEqual(note.created_at,  datetime(2013, 6, 16))
@@ -120,7 +109,6 @@ class NoteTest(unittest.TestCase):
     def test_from_dict_should_detect_invalid_characters_in_tags(self):
         with self.assertRaises(InvalidTagCharacter):
             note = Note.from_dict({
-                'title':       "X",
                 'body':        "Y",
                 'tags':        ["a", "b", "c,d,e"],
                 'created_at':  "2013-06-16T00:00:00.000000",
@@ -130,7 +118,6 @@ class NoteTest(unittest.TestCase):
 
     def test_from_dict_should_detect_wrong_attribute_types(self):
         note_dict = {
-            'title':       "X",
             'body':        "Y",
             'tags':        ["a", "b", "c"],
             'created_at':  "2013-06-16T00:00:00.000000",
@@ -142,7 +129,6 @@ class NoteTest(unittest.TestCase):
         Note.from_dict(note_dict)
 
         wrong_type_samples = [
-            ('title',       1),
             ('body',        1),
             ('tags',        ("a", "b", "c")),
             ('tags',        ()),

@@ -28,7 +28,6 @@ class MainWindowTest(unittest.TestCase):
         old_note2 = item_to_note(old_tape_widget.model().item(1))
 
         new_note = Note(
-            title      = "X",
             body       = "Y",
             tags       = ["Z"],
             created_at = datetime.utcnow()
@@ -50,7 +49,6 @@ class MainWindowTest(unittest.TestCase):
 
     def test_new_handler_should_create_new_empty_tape(self):
         note = Note(
-            title      = "X",
             body       = "Y",
             tags       = ["Z"],
             created_at = datetime.utcnow()

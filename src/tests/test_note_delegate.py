@@ -20,7 +20,6 @@ class NoteDelegateTest(unittest.TestCase):
         self.model         = QStandardItemModel()
 
         self.note = Note(
-            title      = "A",
             body       = "B",
             tags       = ["C", "D"],
             created_at = datetime.utcnow()
@@ -51,7 +50,6 @@ class NoteDelegateTest(unittest.TestCase):
         assert item_to_note(self.item).to_dict() == self.note.to_dict()
 
         new_note = Note(
-            title      = "X",
             body       = "Y",
             tags       = ["W", "Z"],
             created_at = datetime.utcnow()

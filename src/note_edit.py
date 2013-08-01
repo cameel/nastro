@@ -23,22 +23,18 @@ class NoteEdit(QWidget):
         timestamp_font = QFont()
         timestamp_font.setPointSize(7)
 
-        self._title_editor = QLineEdit(self)
-        self._tag_editor   = QLineEdit(self)
-        self._body_editor  = QTextEdit(self)
+        self._tag_editor  = QLineEdit(self)
+        self._body_editor = QTextEdit(self)
         self._body_editor.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
         self._body_editor.setCurrentFont(monospace_font)
 
-        self._main_layout.addWidget(self._title_editor)
         self._main_layout.addWidget(self._body_editor)
         self._main_layout.addWidget(self._tag_editor)
 
         self._body_editor.textChanged.connect(self.touch)
         self._tag_editor.textChanged.connect(lambda text: self.touch())
-        self._title_editor.textChanged.connect(lambda text: self.touch())
 
     def load_note(self, note):
-        self._title_editor.setText(note.title)
         self._body_editor.setPlainText(note.body)
         self._tag_editor.setText(Note.join_tags(note.tags))
 
@@ -50,7 +46,6 @@ class NoteEdit(QWidget):
 
     def dump_note(self):
         return Note(
-            title       = self._title_editor.text(),
             body        = self._body_editor.toPlainText(),
             tags        = Note.split_tags(self._tag_editor.text()),
             created_at  = self._note_created_at,

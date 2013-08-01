@@ -14,14 +14,12 @@ class TestNoteWidget(unittest.TestCase):
         self.note_widget = NoteWidget()
 
         self.note = Note(
-            title      = "A",
             body       = "B",
             tags       = ["C", "D"],
             created_at = datetime.utcnow()
         )
 
     def test_load_note_should_load_note_data_into_editor_widgets(self):
-        assert self.note_widget._title_label.text() != self.note.title
         assert self.note_widget._body_label.text()  != self.note.body
         assert self.note_widget._tag_label.text()   != Note.join_tags(self.note.tags)
         assert self.note_widget._created_at_label   != NoteWidget.format_timestamp(self.note.created_at)
@@ -29,7 +27,6 @@ class TestNoteWidget(unittest.TestCase):
 
         self.note_widget.load_note(self.note)
 
-        self.assertEqual(self.note_widget._title_label.text(),       self.note.title)
         self.assertEqual(self.note_widget._body_label.text(),        self.note.body)
         self.assertEqual(self.note_widget._tag_label.text(),         Note.join_tags(self.note.tags))
         self.assertEqual(self.note_widget._created_at_label.text(),  NoteWidget.format_timestamp(self.note.created_at))

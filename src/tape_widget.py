@@ -94,12 +94,11 @@ class TapeWidget(QWidget):
     def assign_ids(self):
         assign_note_ids(self._tape_model)
 
-    def create_empty_note(self, note_number):
+    def create_empty_note(self):
         return Note(
-            title       = "Note {}".format(note_number),
-            body        = "",
-            tags        = [],
-            created_at  = datetime.utcnow()
+            body       = "",
+            tags       = [],
+            created_at = datetime.utcnow()
         )
 
     def add_note(self, note = None, parent_index = None):
@@ -115,7 +114,7 @@ class TapeWidget(QWidget):
         if note != None:
             assert note not in self.notes()
         else:
-            note = self.create_empty_note(parent_item.rowCount() + 1)
+            note = self.create_empty_note()
 
         item = QStandardItem()
         set_item_note(item, note)

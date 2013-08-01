@@ -237,23 +237,19 @@ class HotlistImporterTest(unittest.TestCase):
         # using on this machine. This means that the expected timestamp depends on our geographical
         # location. To prevent the test from failing on a different machine we have to convert it from
         # localtime rather than just hard-code UTC value.
-        self.assertEqual(notes[0].title,       "folder 1")
-        self.assertEqual(notes[0].body,        "")
+        self.assertEqual(notes[0].body,        "folder 1")
         self.assertEqual(notes[0].created_at,  localtime_to_utc(datetime(2011, 4, 4, 13, 47, 11)))
         self.assertEqual(notes[0].modified_at, notes[0].created_at)
 
-        self.assertEqual(notes[1].title,       "folder 2")
-        self.assertEqual(notes[1].body,        "")
+        self.assertEqual(notes[1].body,        "folder 2")
         self.assertEqual(notes[1].created_at,  localtime_to_utc(datetime(2011, 10, 1, 23, 36, 32)))
         self.assertEqual(notes[1].modified_at, notes[1].created_at)
 
-        self.assertEqual(notes[2].title,       "note 1")
-        self.assertEqual(notes[2].body,        "")
+        self.assertEqual(notes[2].body,        "note 1")
         self.assertEqual(notes[2].created_at,  localtime_to_utc(datetime(2011, 9, 11, 22, 56, 10)))
         self.assertEqual(notes[2].modified_at, notes[2].created_at)
 
-        self.assertEqual(notes[3].title,       "note 2 title")
-        self.assertEqual(notes[3].body,        "note body")
+        self.assertEqual(notes[3].body,        "note 2 title\n\nnote body")
         self.assertEqual(notes[3].created_at,  localtime_to_utc(datetime(2011, 9, 28, 23, 20, 17)))
         self.assertEqual(notes[3].modified_at, notes[3].created_at)
 
@@ -275,8 +271,7 @@ class HotlistImporterTest(unittest.TestCase):
 
         self.assertEqual(model.rowCount(), 1)
         self.assertEqual(len(notes),       1)
-        self.assertEqual(notes[0].title, "note title")
-        self.assertEqual(notes[0].body,  "   note body")
+        self.assertEqual(notes[0].body, "note title\n\n  \n\t\n   note body")
 
     def test_import_opera_notes_should_not_ignore_notes_with_no_text(self):
         fixture = (
@@ -293,7 +288,6 @@ class HotlistImporterTest(unittest.TestCase):
 
         self.assertEqual(model.rowCount(), 1)
         self.assertEqual(len(notes),       1)
-        self.assertEqual(notes[0].title,       '')
         self.assertEqual(notes[0].body,        '')
         self.assertEqual(notes[0].created_at,  localtime_to_utc(datetime(2011, 9, 28, 23, 20, 17)))
         self.assertEqual(notes[0].modified_at, notes[0].created_at)
@@ -351,20 +345,16 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertEqual(model.item(0).child(1).rowCount(), 1)
         self.assertEqual(model.item(0).child(1).child(0).rowCount(), 0)
 
-        self.assertEqual(notes[0].title, "F1")
-        self.assertEqual(notes[0].body,  "abc")
+        self.assertEqual(notes[0].body,  "F1\nabc")
         self.assertEqual(notes[0].tags,  [])
 
-        self.assertEqual(notes[1].title, "N1")
-        self.assertEqual(notes[1].body,  "")
+        self.assertEqual(notes[1].body,  "N1")
         self.assertEqual(notes[1].tags,  [])
 
-        self.assertEqual(notes[2].title, "F2")
-        self.assertEqual(notes[2].body,  "")
+        self.assertEqual(notes[2].body,  "F2")
         self.assertEqual(notes[2].tags,  [])
 
-        self.assertEqual(notes[3].title, "N2")
-        self.assertEqual(notes[3].body,  "def")
+        self.assertEqual(notes[3].body,  "N2\ndef")
         self.assertEqual(notes[3].tags,  [])
 
     def test_import_opera_notes_should_detect_folder_without_matching_end(self):
@@ -415,7 +405,7 @@ class HotlistImporterTest(unittest.TestCase):
 
         self.assertTrue([isinstance(note, Note) for note in notes])
         self.assertTrue([len(note.tags) == 0    for note in notes])
-        self.assertEqual([note.title for note in notes], ["F1", "N1", "N2"])
+        self.assertEqual([note.body for note in notes], ["F1", "N1", "N2"])
 
     def test_import_opera_notes_should_not_skip_notes_inside_trash_folder_if_requested_not_to(self):
         fixture = NOTE_FILE_FIXTURES[2]
@@ -443,7 +433,7 @@ class HotlistImporterTest(unittest.TestCase):
         self.assertTrue([isinstance(note, Note) for note in notes])
         self.assertTrue([len(note.tags) == 0    for note in notes])
         self.assertEqual(
-            [note.title for note in notes],
+            [note.body for note in notes],
             ["F1", "N1", "T1", "NT1", "NT2", "FT1", "FT2", "NT3", "N2"]
         )
 

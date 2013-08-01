@@ -18,7 +18,6 @@ class NoteModelHelpersTest(unittest.TestCase):
     def sample_note_dict(self, id, parent_id, prev_item_id):
         timestamp = Note.serialize_timestamp(datetime.utcnow())
         return {
-            'title':           'Note {}'.format(id),
             'body':            'body\n\t\n',
             'tags':            ['a tag', 'another tag'],
             'created_at':      timestamp,
@@ -28,8 +27,8 @@ class NoteModelHelpersTest(unittest.TestCase):
             'prev_sibling_id': prev_item_id
         }
 
-    def create_note_and_append(self, parent_item, title):
-        note = Note(title = title)
+    def create_note_and_append(self, parent_item, body):
+        note = Note(body = body)
         item = QStandardItem()
         set_item_note(item, note)
         parent_item.appendRow(item)
@@ -165,10 +164,10 @@ class NoteModelHelpersTest(unittest.TestCase):
         serialized_notes = dump_notes(self.model)
 
         self.assertEqual(len(serialized_notes), len(notes))
-        for key in ['title', 'body', 'tags', 'created_at', 'modified_at', 'id', 'parent_id', 'prev_sibling_id']:
+        for key in ['body', 'tags', 'created_at', 'modified_at', 'id', 'parent_id', 'prev_sibling_id']:
             self.assertTrue(all(key in note_dict for note_dict in serialized_notes))
 
-        for key in ['title', 'body', 'created_at', 'modified_at']:
+        for key in ['body', 'created_at', 'modified_at']:
             self.assertTrue(all(isinstance(note_dict[key], str) for note_dict in serialized_notes))
 
         for key in ['id', 'parent_id', 'prev_sibling_id']:
@@ -462,7 +461,6 @@ class NoteModelHelpersTest(unittest.TestCase):
 
     def test_load_notes_should_detect_wrong_attribute_types(self):
         note_dict = {
-            'title':           "X",
             'body':            "Y",
             'tags':            ["a", "b", "c"],
             'created_at':      "2013-06-16T00:00:00.000000",
@@ -476,7 +474,6 @@ class NoteModelHelpersTest(unittest.TestCase):
         load_notes([note_dict])
 
         wrong_type_samples = [
-            ('title',           1),
             ('body',            1),
             ('tags',            ("a", "b", "c")),
             ('tags',            ()),
