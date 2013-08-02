@@ -20,10 +20,10 @@ class TestNoteWidget(unittest.TestCase):
         )
 
     def test_load_note_should_load_note_data_into_editor_widgets(self):
-        assert self.note_widget._body_label.text()  != self.note.body
-        assert self.note_widget._tag_label.text()   != Note.join_tags(self.note.tags)
-        assert self.note_widget._created_at_label   != NoteWidget.format_timestamp(self.note.created_at)
-        assert self.note_widget._modified_at_label  != NoteWidget.format_timestamp(self.note.modified_at)
+        assert self.note_widget._body_label.text()        != self.note.body
+        assert self.note_widget._tag_label.text()         != Note.join_tags(self.note.tags)
+        assert self.note_widget._created_at_label.text()  != NoteWidget.format_timestamp(self.note.created_at)
+        assert self.note_widget._modified_at_label.text() != NoteWidget.format_timestamp(self.note.modified_at)
 
         self.note_widget.load_note(self.note)
 
