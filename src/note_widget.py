@@ -29,13 +29,11 @@ class NoteWidget(QFrame):
 
         self._tag_label         = QLabel(self)
         self._body_label        = QLabel(self)
-        self._created_at_label  = QLabel(self._tag_panel)
-        self._modified_at_label = QLabel(self._tag_panel)
+        self._timestamp_label   = QLabel(self._tag_panel)
 
         self._tag_layout.addWidget(self._tag_label)
         self._tag_layout.addStretch()
-        self._tag_layout.addWidget(self._created_at_label)
-        self._tag_layout.addWidget(self._modified_at_label)
+        self._tag_layout.addWidget(self._timestamp_label)
 
         self._main_layout.addWidget(self._body_label)
         self._main_layout.addWidget(self._tag_panel)
@@ -43,8 +41,8 @@ class NoteWidget(QFrame):
         tag_palette = QPalette(self._tag_label.palette())
         tag_palette.setColor(self._tag_label.foregroundRole(), Qt.red)
 
-        timestamp_palette = QPalette(self._created_at_label.palette())
-        timestamp_palette.setColor(self._created_at_label.foregroundRole(), Qt.darkGray)
+        timestamp_palette = QPalette(self._timestamp_label.palette())
+        timestamp_palette.setColor(self._timestamp_label.foregroundRole(), Qt.darkGray)
 
         self._tag_label.setPalette(tag_palette)
         self._tag_label.setTextFormat(Qt.PlainText)
@@ -54,11 +52,8 @@ class NoteWidget(QFrame):
         self._body_label.setWordWrap(True)
         self._body_label.setTextFormat(Qt.PlainText)
 
-        self._created_at_label.setFont(timestamp_font)
-        self._created_at_label.setPalette(timestamp_palette)
-
-        self._modified_at_label.setFont(timestamp_font)
-        self._modified_at_label.setPalette(timestamp_palette)
+        self._timestamp_label.setFont(timestamp_font)
+        self._timestamp_label.setPalette(timestamp_palette)
 
         widget_palette = QPalette(self.palette())
         widget_palette.setColor(QPalette.Background, Qt.white)
@@ -70,8 +65,14 @@ class NoteWidget(QFrame):
     def load_note(self, note):
         self._body_label.setText(note.body)
         self._tag_label.setText(Note.join_tags(note.tags))
-        self._created_at_label.setText(self.format_timestamp(note.created_at))
-        self._modified_at_label.setText(self.format_timestamp(note.modified_at))
+
+        if note.created_at != note.modified_at:
+            self._timestamp_label.setText("{} (Modified: {})".format(
+                self.format_timestamp(note.created_at),
+                self.format_timestamp(note.modified_at)
+            ))
+        else:
+            self._timestamp_label.setText(self.format_timestamp(note.created_at))
 
     @classmethod
     def format_timestamp(self, timestamp):
