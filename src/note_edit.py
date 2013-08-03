@@ -1,6 +1,7 @@
 """ The UI widget that represents a single note """
 
 from datetime import datetime
+from math     import ceil
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QSizePolicy
 from PyQt5.QtGui     import QFont, QFontMetrics
@@ -9,6 +10,14 @@ from PyQt5.QtCore    import QSize
 from .note import Note
 
 class AutoResizingTextEdit(QTextEdit):
+    MIN_LINES = 3
+
+    def minimumSizeHint(self):
+        return QSize(
+            super().minimumSizeHint().width(),
+            int(ceil(self.line_count_to_widget_height(self.MIN_LINES)))
+        )
+
     def line_count_to_widget_height(self, num_lines):
         # ASSUMPTION: The document uses only the default font
 
