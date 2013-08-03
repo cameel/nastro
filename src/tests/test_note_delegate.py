@@ -69,10 +69,11 @@ class NoteDelegateTest(unittest.TestCase):
         self.assertEqual(new_item_value.to_dict(), new_note.to_dict())
 
     def test_updateEditorGeometry_should_change_editor_size_and_position(self):
-        self.option.rect = QRect(11, 22, 33, 44)
-        expected_rect    = QRect(11 + 3, 22 + 3, 33 - 6, 44 - 6)
         editor = self.note_delegate.createEditor(self.parent, self.option, self.item.index())
         editor.load_note(self.note)
+
+        self.option.rect = QRect(11, 22, 33, 44)
+        expected_rect    = QRect(11 + 3, 22 + 3, 33 - 6, editor.sizeHint().height())
 
         self.note_delegate.updateEditorGeometry(editor, self.option, self.item.index())
 

@@ -99,7 +99,7 @@ class NoteDelegate(QItemDelegate):
             option.rect.x() + 3,
             option.rect.y() + 3,
             preferred_width,
-            option.rect.height() - 6
+            editor.sizeHint().height()
         ))
 
     def sizeHint(self, option, index):
