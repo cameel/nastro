@@ -22,11 +22,6 @@ class AutoResizingTextEdit(QTextEdit):
         size_policy.setHeightForWidth(True)
         self.setSizePolicy(size_policy)
 
-        # If we don't call adjustSize() here, document's height() keeps returning 0 even
-        # if text has been set with setPlainText(). It returns the actual height
-        # only after user modified the text through the UI.
-        self.document().adjustSize()
-
     def hasHeightForWidth(self):
         return True
 

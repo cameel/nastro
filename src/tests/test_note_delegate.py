@@ -73,7 +73,7 @@ class NoteDelegateTest(unittest.TestCase):
         editor.load_note(self.note)
 
         self.option.rect = QRect(11, 22, 33, 44)
-        expected_rect    = QRect(11 + 3, 22 + 3, 33 - 6, editor.sizeHint().height())
+        expected_rect    = QRect(11 + 3, 22 + 3, 33 - 6, max(editor.heightForWidth(33 - 6), editor.minimumSize().height()))
 
         self.note_delegate.updateEditorGeometry(editor, self.option, self.item.index())
 

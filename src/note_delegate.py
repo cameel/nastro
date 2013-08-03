@@ -92,7 +92,11 @@ class NoteDelegate(QItemDelegate):
     def updateEditorGeometry(self, editor, option, index):
         # FIXME: Why do I have to make the editor 3 pixels smaller on each side to make it have the same size
         # as the one I draw in paint()?
-        preferred_width = option.rect.width() - 6
+        preferred_width  = option.rect.width() - 6
+        if editor.hasHeightForWidth():
+            preferred_height = editor.heightForWidth(preferred_width)
+        else:
+            preferred_height = editor.sizeHint().height()
 
         editor.setMinimumSize(preferred_width, editor.minimumSize().height())
         editor.max_preferred_height = editor.parent().height() - option.rect.y() - 6
@@ -101,7 +105,7 @@ class NoteDelegate(QItemDelegate):
             option.rect.x() + 3,
             option.rect.y() + 3,
             preferred_width,
-            editor.sizeHint().height()
+            preferred_height
         ))
 
     def sizeHint(self, option, index):
