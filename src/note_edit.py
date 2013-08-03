@@ -3,12 +3,31 @@
 from datetime import datetime
 
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QSizePolicy
-from PyQt5.QtGui     import QFont
+from PyQt5.QtGui     import QFont, QFontMetrics
+from PyQt5.QtCore    import QSize
 
 from .note import Note
 
 class AutoResizingTextEdit(QTextEdit):
-    pass
+    def line_count_to_widget_height(self, num_lines):
+        # ASSUMPTION: The document uses only the default font
+
+        assert num_lines >= 0
+
+        widget_margins  = self.contentsMargins()
+        document_margin = self.document().documentMargin()
+        font_metrics    = QFontMetrics(self.document().defaultFont())
+
+        # font_metrics.lineSpacing() is ignored because it seems to be already included in font_metrics.height()
+        return (
+            widget_margins.top()                      +
+            document_margin                           +
+            max(num_lines, 1) * font_metrics.height() +
+            self.document().documentMargin()          +
+            widget_margins.bottom()
+        )
+
+        return QSize(original_hint.width(), minimum_height_hint)
 
 class NoteEdit(QWidget):
     def __init__(self, parent = None):
