@@ -27,7 +27,7 @@ class NoteEdit(QWidget):
         timestamp_font.setPointSize(7)
 
         self._tag_editor  = QLineEdit(self)
-        self._body_editor = QTextEdit(self)
+        self._body_editor = AutoResizingTextEdit(self)
         self._body_editor.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
 
         document = self._body_editor.document()
