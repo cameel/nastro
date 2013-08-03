@@ -12,6 +12,14 @@ from .note import Note
 class AutoResizingTextEdit(QTextEdit):
     MIN_LINES = 3
 
+    def __init__(self, parent = None):
+        super().__init__(parent)
+
+        # If we don't call adjustSize() here, document's height() keeps returning 0 even
+        # if text has been set with setPlainText(). It returns the actual height
+        # only after user modified the text through the UI.
+        self.document().adjustSize()
+
     def sizeHint(self):
         margins          = self.contentsMargins()
         document_height  = int(ceil(self.document().size().height()))
