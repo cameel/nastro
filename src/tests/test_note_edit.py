@@ -19,6 +19,29 @@ class NoteEditTest(unittest.TestCase):
             id         = 666
         )
 
+    def test_should_keep_preferred_height_when_extra_space_is_available(self):
+        size_hint     = self.note_edit.sizeHint()
+        parent_height = size_hint.height() + 100
+
+        layout = QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.note_edit)
+        layout.addStretch()
+
+        parent = QWidget()
+        self.note_edit.setParent(parent)
+
+        parent.resize(size_hint.width(), parent_height)
+        parent.setLayout(layout)
+
+        # The window needs to get shown for the size changes to be propagated to layout.
+        # Show it minimized to avoid stealing focus from the console running the tests.
+        parent.showMinimized()
+
+        self.assertEqual(self.note_edit.height(), size_hint.height())
+        self.assertEqual(self.note_edit.width(),  parent.width())
+
     def test_load_note_should_load_note_data_into_editor_widgets(self):
         assert self.note_edit._body_editor.toPlainText() != self.note.body
         assert self.note_edit._tag_editor.text()         != Note.join_tags(self.note.tags)
