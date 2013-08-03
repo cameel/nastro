@@ -52,6 +52,9 @@ class AutoResizingTextEdit(QTextEdit):
 class NoteEdit(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
+
+        self.max_preferred_height = None
+
         self._note_created_at  = datetime.utcnow()
         self._note_modified_at = datetime.utcnow()
         self._note_id          = None
@@ -99,3 +102,12 @@ class NoteEdit(QWidget):
 
     def touch(self):
         self._note_modified_at = datetime.utcnow()
+
+    def sizeHint(self):
+        original_hint  = super().sizeHint()
+
+        preferred_height = min(self.max_preferred_height, original_hint.height()) if self.max_preferred_height != None else original_hint.height()
+
+        # Even though we ignore self.minimumSize() here, QWidget won't let itself be resized below
+        # that size no matter what sizeHint() says.
+        return QSize(original_hint.width(), preferred_height)
