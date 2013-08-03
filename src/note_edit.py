@@ -12,6 +12,17 @@ from .note import Note
 class AutoResizingTextEdit(QTextEdit):
     MIN_LINES = 3
 
+    def sizeHint(self):
+        margins          = self.contentsMargins()
+        document_height  = int(ceil(self.document().size().height()))
+        preferred_height = margins.top() + document_height + margins.bottom()
+
+        # We return current width because any width is acceptable. Different widths just yield
+        # different heights. It's convenient because QTextDocument does not provide any method for
+        # checking what the height would be at arbitrary width - it would be hard to find height
+        # for width other than the current one.
+        return QSize(self.width(), preferred_height)
+
     def minimumSizeHint(self):
         return QSize(
             super().minimumSizeHint().width(),
