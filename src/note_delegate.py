@@ -20,6 +20,8 @@ class NoteDelegate(QItemDelegate):
     def createEditor(self, parent, option, index):
         widget = NoteEdit(parent)
 
+        widget.setMinimumSize(widget.minimumSizeHint())
+
         palette = QPalette(widget.palette())
         palette.setColor(QPalette.Background, Qt.white)
 
