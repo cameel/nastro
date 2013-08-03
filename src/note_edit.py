@@ -26,7 +26,9 @@ class NoteEdit(QWidget):
         self._tag_editor  = QLineEdit(self)
         self._body_editor = QTextEdit(self)
         self._body_editor.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
-        self._body_editor.setCurrentFont(monospace_font)
+
+        document = self._body_editor.document()
+        document.setDefaultFont(monospace_font)
 
         self._main_layout.addWidget(self._body_editor)
         self._main_layout.addWidget(self._tag_editor)
