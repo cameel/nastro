@@ -54,15 +54,8 @@ class AutoResizingTextEdit(QTextEdit):
         return margins.top() + document.size().height() + margins.bottom()
 
     def sizeHint(self):
-        margins          = self.contentsMargins()
-        document_height  = int(ceil(self.document().size().height()))
-        preferred_height = margins.top() + document_height + margins.bottom()
-
-        # We return current width because any width is acceptable. Different widths just yield
-        # different heights. It's convenient because QTextDocument does not provide any method for
-        # checking what the height would be at arbitrary width - it would be hard to find height
-        # for width other than the current one.
-        return QSize(self.width(), preferred_height)
+        original_hint = super().sizeHint()
+        return QSize(original_hint.width(), self.heightForWidth(original_hint.width()))
 
     def minimumSizeHint(self):
         return QSize(
