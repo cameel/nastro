@@ -78,7 +78,7 @@ class NoteEdit(QWidget):
         self._main_layout.addWidget(self._body_editor)
         self._main_layout.addWidget(self._tag_editor)
 
-        self._body_editor.textChanged.connect(self.touch)
+        self._body_editor.textChanged.connect(self._body_text_changed_handler)
         self._tag_editor.textChanged.connect(lambda text: self.touch())
 
     def load_note(self, note):
@@ -102,6 +102,11 @@ class NoteEdit(QWidget):
 
     def touch(self):
         self._note_modified_at = datetime.utcnow()
+
+    def _body_text_changed_handler(self):
+        self.touch()
+
+        self.adjustSize()
 
     def sizeHint(self):
         original_hint  = super().sizeHint()
