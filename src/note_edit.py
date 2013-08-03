@@ -7,6 +7,9 @@ from PyQt5.QtGui     import QFont
 
 from .note import Note
 
+class AutoResizingTextEdit(QTextEdit):
+    pass
+
 class NoteEdit(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
