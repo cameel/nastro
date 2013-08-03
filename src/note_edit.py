@@ -109,9 +109,27 @@ class NoteEdit(QWidget):
         self.adjustSize()
 
     def sizeHint(self):
-        original_hint  = super().sizeHint()
+        # NOTE: Reimplementing this method would not be necessary if the inherited sizeHint()
+        # refreshed its value when sizeHint() of one of its children (managed by the layout) changed.
+        # Instead it always returns the number based on minimumSizeHint()s of the children and
+        # only checks the result of that method once so even if it changes, sizeHint() does not change.
 
-        preferred_height = min(self.max_preferred_height, original_hint.height()) if self.max_preferred_height != None else original_hint.height()
+        # SYNC: If you add more controls you need to update this assertion and include them in size calculations below
+        assert self.layout().count() == 2
+
+        original_hint  = super().sizeHint()
+        layout         = self.layout()
+        layout_margins = layout.contentsMargins()
+
+        base_height = (
+            layout_margins.top()                  +
+            self._tag_editor.sizeHint().height()  +
+            layout.spacing()                      +
+            self._body_editor.sizeHint().height() +
+            layout_margins.bottom()
+        )
+
+        preferred_height = min(self.max_preferred_height, base_height) if self.max_preferred_height != None else base_height
 
         # Even though we ignore self.minimumSize() here, QWidget won't let itself be resized below
         # that size no matter what sizeHint() says.
