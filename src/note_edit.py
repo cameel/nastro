@@ -135,7 +135,10 @@ class NoteEdit(QWidget):
     def _body_text_changed_handler(self):
         self.touch()
 
-        self.adjustSize()
+        if self.hasHeightForWidth():
+            self.resize(self.width(), self.heightForWidth(self.width()))
+        else:
+            self.adjustSize()
 
     def sizeHint(self):
         # NOTE: Reimplementing this method would not be necessary if the inherited sizeHint()
