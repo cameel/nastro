@@ -22,6 +22,8 @@ class AutoResizingTextEdit(QTextEdit):
         size_policy.setHeightForWidth(True)
         self.setSizePolicy(size_policy)
 
+        self.textChanged.connect(lambda: self.updateGeometry())
+
     def hasHeightForWidth(self):
         return True
 
