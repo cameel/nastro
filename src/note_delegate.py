@@ -27,6 +27,16 @@ class NoteEditorContainer(QWidget):
         layout.addStretch()
         self.setLayout(layout)
 
+        layout.setContentsMargins(0, 0, 0, 0)
+
+    def set_margin_size(self, margin_size):
+        self.setContentsMargins(
+            margin_size,
+            margin_size,
+            margin_size,
+            margin_size
+        )
+
     def load_note(self, note):
         self._editor.load_note(note)
 
@@ -34,6 +44,8 @@ class NoteEditorContainer(QWidget):
         return self._editor.dump_note()
 
 class NoteDelegate(QItemDelegate):
+    SELECTION_PEN_WIDTH = 2
+
     def __init__(self, parent = None):
         super().__init__(parent)
 
@@ -41,7 +53,11 @@ class NoteDelegate(QItemDelegate):
         self._display_widget = NoteWidget()
 
     def createEditor(self, parent, option, index):
-        return NoteEditorContainer(parent)
+        editor = NoteEditorContainer(parent)
+
+        editor.set_margin_size(self.SELECTION_PEN_WIDTH)
+
+        return editor
 
     def setEditorData(self, editor, index):
         value = index.model().data(index, Qt.EditRole)
@@ -98,18 +114,17 @@ class NoteDelegate(QItemDelegate):
             painter.drawPixmap(option.rect.topLeft(), pixmap)
 
             if option.state & QStyle.State_Selected:
-                self._draw_focus_frame(painter, option.rect, 2)
+                self._draw_focus_frame(painter, option.rect, self.SELECTION_PEN_WIDTH)
 
             painter.restore()
 
     def updateEditorGeometry(self, editor, option, index):
-        # FIXME: Why do I have to make the editor 3 pixels smaller on each side to make it have the same size
-        # as the one I draw in paint()?
+
         editor.setGeometry(QRect(
-            option.rect.x() + 3,
-            option.rect.y() + 3,
-            option.rect.width() - 6,
-            editor.parent().height() - option.rect.y() - 6
+            option.rect.x(),
+            option.rect.y(),
+            option.rect.width(),
+            editor.parent().height() - option.rect.y()
         ))
 
     def sizeHint(self, option, index):
