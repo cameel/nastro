@@ -130,10 +130,3 @@ class NoteEdit(QWidget):
         # FIXME: This isn't strictly necessary but without it the vertical scrollbar shows up for a short while
         # when the body editor gets resized.
         self.updateGeometry()
-
-    def sizeHint(self):
-        original_hint = super().sizeHint()
-        if not self.hasHeightForWidth():
-            return original_hint
-
-        return QSize(original_hint.width(), self.heightForWidth(original_hint.width()))
