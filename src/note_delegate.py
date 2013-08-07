@@ -1,6 +1,6 @@
 """ A Qt delegate for models dealing with Note objects """
 
-from PyQt5.QtWidgets import QItemDelegate, QStyle
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QItemDelegate, QStyle
 from PyQt5.QtGui     import QPixmap, QPen, QPalette
 from PyQt5.QtCore    import Qt, QSize, QPoint, QRect
 
@@ -10,6 +10,29 @@ from .note_edit   import NoteEdit
 from .note_widget import NoteWidget
 from .note        import Note
 
+class NoteEditorContainer(QWidget):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+
+        self._editor = NoteEdit(self)
+
+        palette = QPalette(self._editor.palette())
+        palette.setColor(QPalette.Background, Qt.white)
+
+        self._editor.setAutoFillBackground(True)
+        self._editor.setPalette(palette)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self._editor)
+        layout.addStretch()
+        self.setLayout(layout)
+
+    def load_note(self, note):
+        self._editor.load_note(note)
+
+    def dump_note(self):
+        return self._editor.dump_note()
+
 class NoteDelegate(QItemDelegate):
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -18,17 +41,7 @@ class NoteDelegate(QItemDelegate):
         self._display_widget = NoteWidget()
 
     def createEditor(self, parent, option, index):
-        widget = NoteEdit(parent)
-
-        widget.setMinimumSize(widget.minimumSizeHint())
-
-        palette = QPalette(widget.palette())
-        palette.setColor(QPalette.Background, Qt.white)
-
-        widget.setAutoFillBackground(True)
-        widget.setPalette(palette)
-
-        return widget
+        return NoteEditorContainer(parent)
 
     def setEditorData(self, editor, index):
         value = index.model().data(index, Qt.EditRole)
@@ -92,19 +105,11 @@ class NoteDelegate(QItemDelegate):
     def updateEditorGeometry(self, editor, option, index):
         # FIXME: Why do I have to make the editor 3 pixels smaller on each side to make it have the same size
         # as the one I draw in paint()?
-        preferred_width  = option.rect.width() - 6
-        if editor.hasHeightForWidth():
-            preferred_height = editor.heightForWidth(preferred_width)
-        else:
-            preferred_height = editor.sizeHint().height()
-
-        editor.setMinimumSize(preferred_width, editor.minimumSize().height())
-
         editor.setGeometry(QRect(
             option.rect.x() + 3,
             option.rect.y() + 3,
-            preferred_width,
-            preferred_height
+            option.rect.width() - 6,
+            editor.parent().height() - option.rect.y() - 6
         ))
 
     def sizeHint(self, option, index):
