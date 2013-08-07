@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit
 from PyQt5.QtGui     import QFont
 
 from .note                    import Note
@@ -27,7 +27,6 @@ class NoteEdit(QWidget):
 
         self._tag_editor  = QLineEdit(self)
         self._body_editor = AutoResizingTextEdit(self)
-        self._body_editor.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
         document = self._body_editor.document()
         document.setDefaultFont(monospace_font)
