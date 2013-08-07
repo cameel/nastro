@@ -10,41 +10,41 @@ from .note_edit   import NoteEdit
 from .note_widget import NoteWidget
 from .note        import Note
 
-class NoteEditorContainer(QWidget):
-    def __init__(self, parent = None):
-        super().__init__(parent)
-
-        self._editor = NoteEdit(self)
-
-        palette = QPalette(self._editor.palette())
-        palette.setColor(QPalette.Background, Qt.white)
-
-        self._editor.setAutoFillBackground(True)
-        self._editor.setPalette(palette)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self._editor)
-        layout.addStretch()
-        self.setLayout(layout)
-
-        layout.setContentsMargins(0, 0, 0, 0)
-
-    def set_margin_size(self, margin_size):
-        self.setContentsMargins(
-            margin_size,
-            margin_size,
-            margin_size,
-            margin_size
-        )
-
-    def load_note(self, note):
-        self._editor.load_note(note)
-
-    def dump_note(self):
-        return self._editor.dump_note()
-
 class NoteDelegate(QItemDelegate):
     SELECTION_PEN_WIDTH = 2
+
+    class NoteEditContainer(QWidget):
+        def __init__(self, parent = None):
+            super().__init__(parent)
+
+            self._editor = NoteEdit(self)
+
+            palette = QPalette(self._editor.palette())
+            palette.setColor(QPalette.Background, Qt.white)
+
+            self._editor.setAutoFillBackground(True)
+            self._editor.setPalette(palette)
+
+            layout = QVBoxLayout()
+            layout.addWidget(self._editor)
+            layout.addStretch()
+            self.setLayout(layout)
+
+            layout.setContentsMargins(0, 0, 0, 0)
+
+        def set_margin_size(self, margin_size):
+            self.setContentsMargins(
+                margin_size,
+                margin_size,
+                margin_size,
+                margin_size
+            )
+
+        def load_note(self, note):
+            self._editor.load_note(note)
+
+        def dump_note(self):
+            return self._editor.dump_note()
 
     def __init__(self, parent = None):
         super().__init__(parent)
@@ -53,7 +53,7 @@ class NoteDelegate(QItemDelegate):
         self._display_widget = NoteWidget()
 
     def createEditor(self, parent, option, index):
-        editor = NoteEditorContainer(parent)
+        editor = self.NoteEditContainer(parent)
 
         editor.set_margin_size(self.SELECTION_PEN_WIDTH)
 

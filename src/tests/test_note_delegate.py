@@ -10,7 +10,7 @@ from .dummy_application   import application
 from ..note               import Note
 from ..note_edit          import NoteEdit
 from ..note_widget        import NoteWidget
-from ..note_delegate      import NoteDelegate, NoteEditorContainer
+from ..note_delegate      import NoteDelegate
 from ..note_model_helpers import item_to_note, set_item_note
 
 class NoteDelegateTest(unittest.TestCase):
@@ -36,7 +36,7 @@ class NoteDelegateTest(unittest.TestCase):
     def test_createEditor_should_create_note_edit(self):
         editor_container = self.note_delegate.createEditor(None, self.option, self.item.index())
 
-        self.assertIsInstance(editor_container,         NoteEditorContainer)
+        self.assertIsInstance(editor_container,         NoteDelegate.NoteEditContainer)
         self.assertIsInstance(editor_container._editor, NoteEdit)
 
     def test_setEditorData_should_copy_data_from_note_to_editor(self):
