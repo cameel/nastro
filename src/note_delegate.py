@@ -17,20 +17,23 @@ class NoteDelegate(QItemDelegate):
         def __init__(self, parent = None):
             super().__init__(parent)
 
-            self._editor = NoteEdit(self)
+            self.__editor = NoteEdit(self)
 
-            palette = QPalette(self._editor.palette())
+            palette = QPalette(self.__editor.palette())
             palette.setColor(QPalette.Background, Qt.white)
 
-            self._editor.setAutoFillBackground(True)
-            self._editor.setPalette(palette)
+            self.__editor.setAutoFillBackground(True)
+            self.__editor.setPalette(palette)
 
             layout = QVBoxLayout()
-            layout.addWidget(self._editor)
+            layout.addWidget(self.__editor)
             layout.addStretch()
             self.setLayout(layout)
 
             layout.setContentsMargins(0, 0, 0, 0)
+
+        def editor(self):
+            return self.__editor
 
         def set_margin_size(self, margin_size):
             self.setContentsMargins(
@@ -40,12 +43,6 @@ class NoteDelegate(QItemDelegate):
                 margin_size
             )
 
-        def load_note(self, note):
-            self._editor.load_note(note)
-
-        def dump_note(self):
-            return self._editor.dump_note()
-
     def __init__(self, parent = None):
         super().__init__(parent)
 
@@ -53,20 +50,19 @@ class NoteDelegate(QItemDelegate):
         self._display_widget = NoteWidget()
 
     def createEditor(self, parent, option, index):
-        editor = self.NoteEditContainer(parent)
+        editor_container = self.NoteEditContainer(parent)
+        editor_container.set_margin_size(self.SELECTION_PEN_WIDTH)
 
-        editor.set_margin_size(self.SELECTION_PEN_WIDTH)
+        return editor_container
 
-        return editor
-
-    def setEditorData(self, editor, index):
+    def setEditorData(self, editor_container, index):
         value = index.model().data(index, Qt.EditRole)
         assert isinstance(value, Note), "Note instance expected, got {}: '{}'".format(value.__class__, value)
 
-        editor.load_note(value)
+        editor_container.editor().load_note(value)
 
-    def setModelData(self, editor, model, index):
-        value = editor.dump_note()
+    def setModelData(self, editor_container, model, index):
+        value = editor_container.editor().dump_note()
         assert isinstance(value, Note), "Note instance expected, got {}: '{}'".format(value.__class__, value)
 
         if value.to_dict() != model.data(index, Qt.EditRole).to_dict():
@@ -118,13 +114,12 @@ class NoteDelegate(QItemDelegate):
 
             painter.restore()
 
-    def updateEditorGeometry(self, editor, option, index):
-
-        editor.setGeometry(QRect(
+    def updateEditorGeometry(self, editor_container, option, index):
+        editor_container.setGeometry(QRect(
             option.rect.x(),
             option.rect.y(),
             option.rect.width(),
-            editor.parent().height() - option.rect.y()
+            editor_container.parent().height() - option.rect.y()
         ))
 
     def sizeHint(self, option, index):
