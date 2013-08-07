@@ -115,11 +115,21 @@ class NoteDelegate(QItemDelegate):
             painter.restore()
 
     def updateEditorGeometry(self, editor_container, option, index):
+        if editor_container.parent() != None:
+            # Put the bottom of the editor at the same level as bottom of the tree view
+            assert editor_container.parent().height() > option.rect.y()
+
+            height = editor_container.parent().height() - option.rect.y()
+        else:
+            # It's unlikely for the view not to provide a parent widget but if it doesn't for some reason,
+            # just use provided option.rect
+            height = option.rect.height()
+
         editor_container.setGeometry(QRect(
             option.rect.x(),
             option.rect.y(),
             option.rect.width(),
-            editor_container.parent().height() - option.rect.y()
+            height
         ))
 
     def sizeHint(self, option, index):
