@@ -1,3 +1,5 @@
+from PyQt5.QtGui import QPalette
+
 from datetime import datetime, timedelta
 
 def localtime_utc_delta():
@@ -10,3 +12,11 @@ def utc_to_localtime(timestamp):
 
 def localtime_to_utc(timestamp):
     return timestamp - localtime_utc_delta()
+
+def set_widget_background_color(widget, color):
+    # Due to palette propagation in Qt this changes the background of
+    # all descendants that did not have the color set explicitly.
+
+    palette = QPalette(widget.palette())
+    palette.setColor(widget.backgroundRole(), color)
+    widget.setPalette(palette)
