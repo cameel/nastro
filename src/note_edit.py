@@ -10,8 +10,6 @@ from PyQt5.QtCore    import QSize
 from .note import Note
 
 class AutoResizingTextEdit(QTextEdit):
-    MIN_LINES = 3
-
     def __init__(self, parent = None):
         super().__init__(parent)
 
@@ -53,12 +51,6 @@ class AutoResizingTextEdit(QTextEdit):
     def sizeHint(self):
         original_hint = super().sizeHint()
         return QSize(original_hint.width(), self.heightForWidth(original_hint.width()))
-
-    def minimumSizeHint(self):
-        return QSize(
-            super().minimumSizeHint().width(),
-            int(ceil(self.line_count_to_widget_height(self.MIN_LINES)))
-        )
 
     def line_count_to_widget_height(self, num_lines):
         # ASSUMPTION: The document uses only the default font
