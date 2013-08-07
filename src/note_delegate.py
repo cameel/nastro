@@ -19,6 +19,12 @@ class NoteDelegate(QItemDelegate):
 
             self.__editor = NoteEdit(self)
 
+            # It seems that some views (e.g. QTreeView) use QPalette.Base as their background role.
+            # It makes sense for them but not for our editor - it forces the text fields and the
+            # area around them to be the same color. We have to explicitly revert it to the original
+            # state to be able to change on of these colors without changing the other.
+            self.setBackgroundRole(QPalette.Window)
+
             palette = QPalette(self.__editor.palette())
             palette.setColor(QPalette.Background, Qt.white)
 
