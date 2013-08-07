@@ -25,11 +25,7 @@ class NoteDelegate(QItemDelegate):
             # state to be able to change on of these colors without changing the other.
             self.setBackgroundRole(QPalette.Window)
 
-            palette = QPalette(self.__editor.palette())
-            palette.setColor(QPalette.Background, Qt.white)
-
             self.__editor.setAutoFillBackground(True)
-            self.__editor.setPalette(palette)
 
             layout = QVBoxLayout()
             layout.addWidget(self.__editor)
