@@ -82,8 +82,6 @@ class NoteEdit(QWidget):
     def __init__(self, parent = None):
         super().__init__(parent)
 
-        self.max_preferred_height = None
-
         self._note_created_at  = datetime.utcnow()
         self._note_modified_at = datetime.utcnow()
         self._note_id          = None
@@ -143,12 +141,6 @@ class NoteEdit(QWidget):
     def sizeHint(self):
         original_hint = super().sizeHint()
         if not self.hasHeightForWidth():
-            hint = original_hint
-        else:
-            hint = QSize(original_hint.width(), self.heightForWidth(original_hint.width()))
+            return original_hint
 
-        hint.setHeight(min(self.max_preferred_height, hint.height()) if self.max_preferred_height != None else hint.height())
-
-        # Even though we ignore self.minimumSize() here, QWidget won't let itself be resized below
-        # that size no matter what sizeHint() says.
-        return hint
+        return QSize(original_hint.width(), self.heightForWidth(original_hint.width()))

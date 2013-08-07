@@ -99,7 +99,6 @@ class NoteDelegate(QItemDelegate):
             preferred_height = editor.sizeHint().height()
 
         editor.setMinimumSize(preferred_width, editor.minimumSize().height())
-        editor.max_preferred_height = editor.parent().height() - option.rect.y() - 6
 
         editor.setGeometry(QRect(
             option.rect.x() + 3,
