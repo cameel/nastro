@@ -3,10 +3,8 @@
 
 """ Entry point of the application """
 
-from PyKDE4.kdecore import KCmdLineArgs, KCmdLineOptions, KAboutData, ki18n
-from PyKDE4.kdeui   import KApplication
-from PyQt4.QtGui    import QMessageBox
-from PyQt4.QtCore   import QTimer
+from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt5.QtCore    import QTimer
 
 import sys
 import os
@@ -16,43 +14,11 @@ from .main_window import MainWindow
 application = None
 window      = None
 
-def create_about_data():
-    app_name     = "Nastro"
-    catalog      = ""
-    program_name = ki18n("Nastro")
-    version      = "0.0.1"
-    description  = ki18n("Note organizer/journal")
-    license      = KAboutData.License_GPL
-    # FIXME: ki18n can't handle "Śliwak"
-    copyright    = ki18n("(c) 2013 Kamil Sliwak")
-    # FIXME: Is this really a good way to pass empty license text? Maybe just an empty string?
-    text         = ki18n("none")
-    # TODO: home page
-    home_page    = ""
-    bug_email    = "cameel2/at/gmail/com"
-
-    return KAboutData(app_name, catalog, program_name, version, description, license, copyright, text, home_page, bug_email)
-
-def setup_command_line():
-    about_data = create_about_data()
-    KCmdLineArgs.init(sys.argv, about_data)
-
-    options = KCmdLineOptions()
-    options.add("+[note_file]", ki18n("A JSON note file to open at startup"))
-    KCmdLineArgs.addCmdLineOptions(options)
-
-    args   = KCmdLineArgs.parsedArgs()
-    config = {}
-    if args.count() > 0:
-        config['note_file'] = args.arg(0)
-
-    return (about_data, config)
-
 def create_application():
     global application
     global window
 
-    application = KApplication()
+    application = QApplication(sys.argv)
     window      = MainWindow()
     window.show()
 
@@ -89,19 +55,10 @@ def global_exception_handler(type, value, traceback):
 def main():
     global original_excepthook
 
-    (about_data, command_line_config) = setup_command_line()
-    (application, window)             = create_application()
+    (application, window) = create_application()
 
     original_excepthook = sys.excepthook
     sys.excepthook      = global_exception_handler
-
-    if 'note_file' in command_line_config:
-        if not os.path.isfile(command_line_config['note_file']):
-            print("Note file does not exist or is a directory: {}".format(command_line_config['note_file']))
-            window.close()
-            sys.exit(1)
-
-        window.open_note_file(command_line_config['note_file'])
 
     timer = start_signal_timer()
 

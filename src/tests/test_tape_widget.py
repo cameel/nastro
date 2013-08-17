@@ -2,10 +2,10 @@ import unittest
 import sys
 from datetime import datetime, timedelta
 
-from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QApplication, QItemSelection, QItemSelectionModel, QAbstractProxyModel
-from PyQt4.QtCore import Qt, QRegExp, QAbstractItemModel
+from PyQt5.QtTest    import QTest
+from PyQt5.QtCore    import Qt, QRegExp, QAbstractItemModel, QItemSelection, QItemSelectionModel, QAbstractProxyModel
 
+from .dummy_application        import application
 from ..tape_widget             import TapeWidget
 from ..note                    import Note
 from ..note_edit               import NoteEdit
@@ -13,7 +13,6 @@ from ..tape_filter_proxy_model import TapeFilterProxyModel
 
 class TapeWidgetTest(unittest.TestCase):
     def setUp(self):
-        self.application = QApplication(sys.argv)
         self.tape_widget = TapeWidget()
 
         self.notes = [
@@ -42,11 +41,6 @@ class TapeWidgetTest(unittest.TestCase):
                 created_at = datetime.utcnow()
             )
         ]
-
-    def tearDown(self):
-        # FIXME: Python crashes without this. Probably unittest does not destroy the old instance of the
-        # class before creating a new one and PyQt does not like having two instances of QApplication?
-        self.application = None
 
     def prepare_tape(self, index_sequence = None):
         if index_sequence == None:

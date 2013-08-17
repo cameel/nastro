@@ -2,18 +2,19 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QApplication, QStandardItemModel, QStyleOptionViewItem, QStandardItem, QPainter, QPixmap
-from PyQt4.QtCore import Qt, QRect
+from PyQt5.QtTest    import QTest
+from PyQt5.QtWidgets import QStyleOptionViewItem
+from PyQt5.QtGui     import QStandardItemModel, QStandardItem, QPixmap, QPainter
+from PyQt5.QtCore    import Qt, QRect
 
-from ..note          import Note
-from ..note_edit     import NoteEdit
-from ..note_widget   import NoteWidget
-from ..note_delegate import NoteDelegate
+from .dummy_application import application
+from ..note             import Note
+from ..note_edit        import NoteEdit
+from ..note_widget      import NoteWidget
+from ..note_delegate    import NoteDelegate
 
 class NoteDelegateTest(unittest.TestCase):
     def setUp(self):
-        self.application   = QApplication(sys.argv)
         self.note_delegate = NoteDelegate()
         self.model         = QStandardItemModel()
 
@@ -30,9 +31,6 @@ class NoteDelegateTest(unittest.TestCase):
         root_item.appendRow(self.item)
 
         self.option = QStyleOptionViewItem()
-
-    def tearDown(self):
-        self.application = None
 
     def test_createEditor_should_create_note_edit(self):
         editor = self.note_delegate.createEditor(None, self.option, self.item.index())

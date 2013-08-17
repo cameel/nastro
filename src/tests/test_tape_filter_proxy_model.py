@@ -2,9 +2,9 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QStandardItemModel, QStandardItem
-from PyQt4.QtCore import Qt
+from PyQt5.QtTest import QTest
+from PyQt5.QtGui  import QStandardItemModel, QStandardItem
+from PyQt5.QtCore import Qt
 
 from ..note                    import Note
 from ..tape_filter_proxy_model import TapeFilterProxyModel

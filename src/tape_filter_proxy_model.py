@@ -1,5 +1,4 @@
-from PyQt4.QtGui  import QSortFilterProxyModel
-from PyQt4.QtCore import QRegExp
+from PyQt5.QtCore import QRegExp, QSortFilterProxyModel
 
 from .note import Note
 

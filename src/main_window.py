@@ -1,8 +1,6 @@
 """ The main UI component of the application. Controls the whole window """
 
-from PyKDE4.kdeui import KMainWindow
-from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
-from PyQt4.QtCore import SIGNAL
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFileDialog, QMessageBox, QSplitter
 
 import simplejson
 
@@ -10,7 +8,7 @@ from .tape_widget            import TapeWidget
 from .note                   import Note
 from .opera.hotlist.importer import import_opera_notes
 
-class MainWindow(KMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
@@ -27,12 +25,12 @@ class MainWindow(KMainWindow):
 
         import_opera_notes_action = import_menu.addAction("&Opera Notes...")
 
-        self.connect(new_action,     SIGNAL('triggered()'), self.new_handler)
-        self.connect(open_action,    SIGNAL('triggered()'), self.open_handler)
-        self.connect(save_as_action, SIGNAL('triggered()'), self.save_as_handler)
-        self.connect(exit_action,    SIGNAL('triggered()'), self.close)
+        new_action.triggered.connect(self.new_handler)
+        open_action.triggered.connect(self.open_handler)
+        save_as_action.triggered.connect(self.save_as_handler)
+        exit_action.triggered.connect(self.close)
 
-        self.connect(import_opera_notes_action, SIGNAL('triggered()'), self.import_opera_notes_handler)
+        import_opera_notes_action.triggered.connect(self.import_opera_notes_handler)
 
         self.resize(800, 800)
         self.setCentralWidget(self.tape_widget)
@@ -48,8 +46,8 @@ class MainWindow(KMainWindow):
             "JSON files (*.json)"
         )
 
-        if file_name != '':
-            self.save_note_file_as(file_name)
+        if file_name[0] != '':
+            self.save_note_file_as(file_name[0])
 
     def open_handler(self):
         file_name = QFileDialog.getOpenFileName(
@@ -59,8 +57,8 @@ class MainWindow(KMainWindow):
             "JSON files (*.json)"
         )
 
-        if file_name != '':
-            self.open_note_file(file_name)
+        if file_name[0] != '':
+            self.open_note_file(file_name[0])
 
     def import_opera_notes_handler(self):
         file_name = QFileDialog.getOpenFileName(
@@ -70,8 +68,8 @@ class MainWindow(KMainWindow):
             "Opera Hotlist (*.adr)"
         )
 
-        if file_name != '':
-            num_notes = self.import_opera_notes(file_name)
+        if file_name[0] != '':
+            num_notes = self.import_opera_notes(file_name[0])
             QMessageBox.information(self, "Success", "Successfully imported {} notes".format(num_notes))
 
     def save_note_file_as(self, file_name):

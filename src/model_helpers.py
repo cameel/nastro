@@ -1,6 +1,6 @@
 from itertools import islice
 
-from PyQt4.QtCore import QModelIndex
+from PyQt5.QtCore import QModelIndex
 
 def level(item):
     """ Returns a nesting level of an item. It's mostly intended to be used with

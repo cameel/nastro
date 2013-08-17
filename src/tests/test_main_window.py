@@ -2,23 +2,17 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt4.QtTest import QTest
-from PyQt4.QtGui  import QApplication
-from PyQt4.QtCore import Qt
+from PyQt5.QtTest    import QTest
+from PyQt5.QtCore    import Qt
 
-from ..main_window import MainWindow
-from ..tape_widget import TapeWidget
-from ..note        import Note
+from .dummy_application import application
+from ..main_window      import MainWindow
+from ..tape_widget      import TapeWidget
+from ..note             import Note
 
 class MainWindowTest(unittest.TestCase):
     def setUp(self):
-        self.application = QApplication(sys.argv)
-        self.window      = MainWindow()
-
-    def tearDown(self):
-        # FIXME: Python crashes without this. Probably unittest does not destroy the old instance of the
-        # class before creating a new one and PyQt does not like having two instances of QApplication?
-        self.application = None
+        self.window = MainWindow()
 
     def test_replace_tape_widget_should_destroy_old_tape_and_put_a_new_one_on_the_panel(self):
         old_tape_widget = self.window.tape_widget

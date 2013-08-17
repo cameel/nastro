@@ -2,8 +2,8 @@
 
 from datetime import datetime
 
-from PyQt4.QtGui  import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QSizePolicy, QFont
-from PyQt4.QtCore import SIGNAL
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit, QLabel, QSizePolicy
+from PyQt5.QtGui     import QFont
 
 from .note import Note
 
@@ -32,9 +32,9 @@ class NoteEdit(QWidget):
         self._main_layout.addWidget(self._body_editor)
         self._main_layout.addWidget(self._tag_editor)
 
-        self.connect(self._body_editor,   SIGNAL('textChanged()'),                lambda:      self.touch())
-        self.connect(self._tag_editor,    SIGNAL('textChanged(const QString &)'), lambda text: self.touch())
-        self.connect(self._title_editor,  SIGNAL('textChanged(const QString &)'), lambda text: self.touch())
+        self._body_editor.textChanged.connect(self.touch)
+        self._tag_editor.textChanged.connect(lambda text: self.touch())
+        self._title_editor.textChanged.connect(lambda text: self.touch())
 
     def load_note(self, note):
         self._title_editor.setText(note.title)
