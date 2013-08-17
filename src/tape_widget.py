@@ -1,14 +1,15 @@
 """ The UI widget that represents a scrollable tape composed of notes """
 
-from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QListView, QAbstractItemView
+from PyQt4.QtGui  import QLineEdit, QVBoxLayout, QHBoxLayout, QScrollArea, QWidget, QPushButton, QTreeView, QAbstractItemView, QMessageBox
 from PyQt4.QtGui  import QStandardItem, QStandardItemModel, QItemSelection, QItemSelectionModel
-from PyQt4.QtCore import SIGNAL, Qt
+from PyQt4.QtCore import SIGNAL, Qt, QModelIndex
 
 from datetime import datetime
 
 from .note_delegate           import NoteDelegate
 from .note                    import Note
 from .tape_filter_proxy_model import TapeFilterProxyModel
+from .model_helpers           import remove_items, all_items
 
 class TapeWidget(QWidget):
     def __init__(self, parent = None):
@@ -18,81 +19,125 @@ class TapeWidget(QWidget):
         self._search_box     = QLineEdit(self)
         self._button_layout  = QHBoxLayout()
 
-        self._note_list_view = QListView()
-        self._note_list_view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        self._note_list_view.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self._view = QTreeView()
+        self._view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
+        self._view.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self._view.setHeaderHidden(True)
 
         self._add_note_button = QPushButton(self)
         self._add_note_button.setText("New note")
+
+        self._add_child_button = QPushButton(self)
+        self._add_child_button.setText("New child")
+
+        self._add_sibling_button = QPushButton(self)
+        self._add_sibling_button.setText("New sibling")
 
         self._delete_note_button = QPushButton(self)
         self._delete_note_button.setText("Delete note")
 
         self._button_layout.addWidget(self._add_note_button)
+        self._button_layout.addWidget(self._add_sibling_button)
+        self._button_layout.addWidget(self._add_child_button)
         self._button_layout.addWidget(self._delete_note_button)
         self._button_layout.addStretch()
 
         self._main_layout.addWidget(self._search_box)
         self._main_layout.addLayout(self._button_layout)
-        self._main_layout.addWidget(self._note_list_view)
+        self._main_layout.addWidget(self._view)
 
         self._tape_model              = QStandardItemModel()
         self._tape_filter_proxy_model = TapeFilterProxyModel()
         self._note_delegate           = NoteDelegate()
 
         self._tape_filter_proxy_model.setSourceModel(self._tape_model)
-        self._note_list_view.setItemDelegate(self._note_delegate)
-        self._note_list_view.setModel(self._tape_filter_proxy_model)
+        self._view.setItemDelegate(self._note_delegate)
+        self._view.setModel(self._tape_filter_proxy_model)
 
-        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self._new_note_handler)
-        self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self._delete_note_handler)
+        self.connect(self._add_note_button,    SIGNAL('clicked()'),                    self.add_and_focus_note)
+        self.connect(self._add_sibling_button, SIGNAL('clicked()'),                    self._new_sibling_handler)
+        self.connect(self._add_child_button,   SIGNAL('clicked()'),                    self._new_child_handler)
+        self.connect(self._delete_note_button, SIGNAL('clicked()'),                    self.delete_selected_notes)
         self.connect(self._search_box,         SIGNAL('textChanged(const QString &)'), self._tape_filter_proxy_model.setFilterFixedString)
 
-    def note(self, position):
-        assert 0 <= position < self._tape_model.rowCount()
+    def model(self):
+        """ Returns the model that contains all notes managed by the tape.
 
-        note = self._tape_model.item(position).data(Qt.EditRole)
-        assert isinstance(note, Note)
+            The model should be treated as read-only. You can only modify it indirectly through
+            the methods provided by TapeWidget. """
 
-        return note
+        return self._tape_model
 
-    def note_count(self):
-        return self._tape_model.rowCount()
+    def proxy_model(self):
+        """ Returns the model that contains notes matching current filter.
+
+            The model should be treated as read-only. You can only modify it indirectly through
+            the methods provided by TapeWidget. """
+
+        return self._tape_filter_proxy_model
 
     def notes(self):
-        for i in range(self._tape_model.rowCount()):
-            note = self._tape_model.item(i).data(Qt.EditRole)
-            assert isinstance(note, Note)
+        for item in all_items(self._tape_model):
+            assert isinstance(item.data(Qt.EditRole), Note)
+            yield item.data(Qt.EditRole)
 
-            yield note
+    def create_empty_note(self, note_number):
+        return Note(
+            title       = "Note {}".format(note_number),
+            body        = "",
+            tags        = [],
+            created_at  = datetime.utcnow()
+        )
 
-    def add_note(self, note = None):
-        if note != None:
-            assert self._find_note(note) == None
-        else:
-            note = Note(
-                title       = "Note {}".format(self._tape_model.rowCount() + 1),
-                body        = "",
-                tags        = [],
-                created_at  = datetime.utcnow()
-            )
+    def add_note(self, note = None, parent_index = None):
+        # NOTE: Remember to use indexes from _tape_model, not _tape_filter_proxy_model here
+        assert parent_index == None or self._tape_model.itemFromIndex(parent_index) != None and parent_index.isValid()
 
         root_item = self._tape_model.invisibleRootItem()
+        if parent_index == None:
+            parent_item = root_item
+        else:
+            parent_item = self._tape_model.itemFromIndex(parent_index)
+
+        if note != None:
+            assert note not in self.notes()
+        else:
+            note = self.create_empty_note(parent_item.rowCount() + 1)
+
         item = QStandardItem()
         item.setData(note, Qt.EditRole)
-        root_item.appendRow(item)
+        parent_item.appendRow(item)
 
-    def remove_note(self, note):
-        # TODO: Removal by index may be more efficient for large lists
-        note_position = self._find_note(note)
-        if note_position != None:
-            self._tape_model.takeRow(note_position)
+    def add_and_focus_note(self, parent_proxy_index = None):
+        if parent_proxy_index != None:
+            parent_index = self._tape_filter_proxy_model.mapToSource(parent_proxy_index)
+        else:
+            parent_index = None
 
-    def _find_note(self, note_to_find):
-        try:
-            return next(i for (i, note) in enumerate(self.notes()) if note == note_to_find)
-        except StopIteration:
-            return None
+        self.add_note(parent_index = parent_index)
+
+        if parent_proxy_index != None:
+            self._view.expand(parent_proxy_index)
+
+            parent_item = self._tape_model.itemFromIndex(parent_index)
+        else:
+            parent_item = self._tape_model.invisibleRootItem()
+
+        # NOTE: It's likely that the new note does not match the filter and won't not be present
+        # in the proxy model. We want to select it and focus on it so the filter must be cleared.
+        # And it must be cleared before taking the index in the proxy because changing the filter
+        # may change the set of notes present in the proxy and invalidate the index.
+        self.set_filter('')
+
+        new_note_index       = parent_item.child(parent_item.rowCount() - 1).index()
+        new_note_proxy_index = self._tape_filter_proxy_model.mapFromSource(new_note_index)
+
+        self.clear_selection()
+        self.set_note_selection(new_note_proxy_index, True)
+        self._view.scrollTo(new_note_proxy_index)
+
+    def remove_notes(self, indexes):
+        remove_items(self._tape_model, indexes)
 
     def clear(self):
         self._tape_model.clear()
@@ -121,48 +166,47 @@ class TapeWidget(QWidget):
             self.clear()
             raise
 
-    def selected_note_positions(self):
-        selected_indexes = self._note_list_view.selectedIndexes()
+    def selected_proxy_indexes(self):
+        return self._view.selectedIndexes()
 
-        result = []
-        for index in selected_indexes:
-            result.append(index.row())
+    def selected_indexes(self):
+        return [self._tape_filter_proxy_model.mapToSource(proxy_index) for proxy_index in self.selected_proxy_indexes()]
 
-        return result
+    def set_note_selection(self, proxy_index, select):
+        assert proxy_index != None and proxy_index.isValid()
+        assert self._tape_model.itemFromIndex(self._tape_filter_proxy_model.mapToSource(proxy_index)) != None
 
-    def select_note(self, position):
-        index = self._tape_filter_proxy_model.index(position, 0)
-        self._note_list_view.selectionModel().select(
-            QItemSelection(index, index),
-            QItemSelectionModel.Select
-        )
-
-    def deselect_note(self, position):
-        index = self._tape_filter_proxy_model.index(position, 0)
-        self._note_list_view.selectionModel().select(
-            QItemSelection(index, index),
-            QItemSelectionModel.Deselect
+        self._view.selectionModel().select(
+            QItemSelection(proxy_index, proxy_index),
+            QItemSelectionModel.Select if select else QItemSelectionModel.Deselect
         )
 
     def clear_selection(self):
-        self._note_list_view.selectionModel().clear()
+        self._view.selectionModel().clear()
 
-    def _delete_note_handler(self):
-        positions = sorted(self.selected_note_positions(), reverse = True)
-        assert positions == sorted(set(positions), reverse = True), "There are duplicates"
+    def delete_selected_notes(self):
+        self.remove_notes(self.selected_indexes())
 
-        # NOTE: The list must be iterated in reversed order because positions of all elements
-        # past the deleted one shift by one and we'd have to account for that otherwise.
-        for position in positions:
-            self._tape_model.removeRow(position)
+    def _new_sibling_handler(self):
+        selected_proxy_indexes = self._view.selectedIndexes()
+        if len(selected_proxy_indexes) > 1:
+            self.clear_selection()
+            selected_proxy_indexes = []
 
-    def _new_note_handler(self):
-        self.add_note()
+        if len(selected_proxy_indexes) == 0 or selected_proxy_indexes[0].parent() == QModelIndex():
+            self.add_and_focus_note()
+        else:
+            self.add_and_focus_note(selected_proxy_indexes[0].parent())
 
-        new_note_position = self._tape_filter_proxy_model.rowCount() - 1
-        new_note_index    = self._tape_filter_proxy_model.index(new_note_position, 0)
+    def add_child_to_selected_element(self):
+        selected_proxy_indexes = self._view.selectedIndexes()
+        if len(selected_proxy_indexes) != 1:
+            return False
+        else:
+            self.add_and_focus_note(selected_proxy_indexes[0])
+            return True
 
-        self.set_filter('')
-        self.clear_selection()
-        self.select_note(new_note_position)
-        self._note_list_view.scrollTo(new_note_index)
+    def _new_child_handler(self):
+        added = self.add_child_to_selected_element()
+        if not added:
+            QMessageBox.warning(self, "Can't add note", "To be able to add a new child note select exactly one parent")
