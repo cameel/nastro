@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 
 from PyQt5.QtTest    import QTest
-from PyQt5.QtWidgets import QStyleOptionViewItem
+from PyQt5.QtWidgets import QWidget, QStyleOptionViewItem
 from PyQt5.QtGui     import QStandardItemModel, QStandardItem, QPixmap, QPainter
 from PyQt5.QtCore    import Qt, QRect
 
@@ -30,15 +30,17 @@ class NoteDelegateTest(unittest.TestCase):
         set_item_note(self.item, self.note)
         root_item.appendRow(self.item)
 
-        self.option = QStyleOptionViewItem()
+        self.parent      = QWidget()
+        self.option      = QStyleOptionViewItem()
+        self.option.rect = self.parent.geometry()
 
     def test_createEditor_should_create_note_edit(self):
         editor = self.note_delegate.createEditor(None, self.option, self.item.index())
 
-        self.assertTrue(isinstance(editor, NoteEdit))
+        self.assertIsInstance(editor, NoteEdit)
 
     def test_setEditorData_should_copy_data_from_note_to_editor(self):
-        editor = NoteEdit()
+        editor = self.note_delegate.createEditor(self.parent, self.option, self.item.index())
         assert editor.dump_note().to_dict() != self.note.to_dict()
 
         self.note_delegate.setEditorData(editor, self.item.index())
@@ -56,7 +58,7 @@ class NoteDelegateTest(unittest.TestCase):
         )
         assert new_note.to_dict() != self.note.to_dict()
 
-        editor = NoteEdit()
+        editor = self.note_delegate.createEditor(self.parent, self.option, self.item.index())
         editor.load_note(new_note)
 
         self.note_delegate.setModelData(editor, self.model, self.item.index())
@@ -70,7 +72,7 @@ class NoteDelegateTest(unittest.TestCase):
     def test_updateEditorGeometry_should_change_editor_size_and_position(self):
         self.option.rect = QRect(11, 22, 33, 44)
         expected_rect    = QRect(11 + 3, 22 + 3, 33 - 6, 44 - 6)
-        editor           = NoteEdit()
+        editor = self.note_delegate.createEditor(self.parent, self.option, self.item.index())
         editor.load_note(self.note)
 
         self.note_delegate.updateEditorGeometry(editor, self.option, self.item.index())
