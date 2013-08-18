@@ -1,7 +1,6 @@
 import unittest
 
-from PyQt5.QtTest import QTest
-from PyQt5.QtGui  import QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
 from ..model_helpers import level, tree_path, subtree_items, all_items, remove_items
 

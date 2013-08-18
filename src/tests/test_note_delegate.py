@@ -2,7 +2,6 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt5.QtTest    import QTest
 from PyQt5.QtWidgets import QWidget, QStyleOptionViewItem
 from PyQt5.QtGui     import QStandardItemModel, QStandardItem, QPixmap, QPainter
 from PyQt5.QtCore    import Qt, QRect

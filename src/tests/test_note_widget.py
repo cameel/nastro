@@ -2,8 +2,6 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt5.QtTest    import QTest
-
 from .dummy_application import application
 from ..utils            import localtime_to_utc
 from ..note             import Note

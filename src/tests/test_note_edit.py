@@ -2,7 +2,7 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt5.QtTest import QTest
+from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
 from .dummy_application import application
 from ..note             import Note

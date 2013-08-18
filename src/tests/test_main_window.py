@@ -2,7 +2,6 @@ import unittest
 import sys
 from datetime import datetime
 
-from PyQt5.QtTest import QTest
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui  import QStandardItem, QStandardItemModel
 

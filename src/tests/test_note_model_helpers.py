@@ -2,7 +2,6 @@ import unittest
 from datetime    import datetime
 from collections import deque
 
-from PyQt5.QtTest import QTest
 from PyQt5.QtGui  import QStandardItemModel, QStandardItem
 from PyQt5.QtCore import Qt
 
