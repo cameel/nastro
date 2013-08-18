@@ -19,25 +19,21 @@ class TapeWidgetTest(unittest.TestCase):
 
         self.notes = [
             Note(
-                title      = "H+X",
-                body       = "Y",
+                body       = "H+X",
                 tags       = ["Z"],
                 created_at = datetime.utcnow()
             ),
             Note(
-                title      = "A",
                 body       = "B",
                 tags       = ["C", "PPP RRR"],
                 created_at = datetime.utcnow()
             ),
             Note(
-                title      = "1",
                 body       = "2",
                 tags       = ["3", "PPP\tRRR"],
                 created_at = datetime.utcnow()
             ),
             Note(
-                title      = "I",
                 body       = "b",
                 tags       = ["VVV", "III"],
                 created_at = datetime.utcnow()
@@ -90,7 +86,7 @@ class TapeWidgetTest(unittest.TestCase):
             self.assertEqual(note, item_to_note(self.tape_widget.model().item(i)))
 
     def test_create_empty_note_should_not_assign_id(self):
-        note = self.tape_widget.create_empty_note(666)
+        note = self.tape_widget.create_empty_note()
 
         self.assertEqual(note.id, None)
 
@@ -112,9 +108,8 @@ class TapeWidgetTest(unittest.TestCase):
         note = item_to_note(self.tape_widget.model().item(0))
         assert isinstance(note, Note)
 
-        self.assertEqual(note.title, 'Note 1')
-        self.assertEqual(note.body,  '')
-        self.assertEqual(note.tags,  [])
+        self.assertEqual(note.body, '')
+        self.assertEqual(note.tags, [])
 
         # ASSUMPTION: This test executes in much less than 10 seconds.
         self.assertTrue(note.created_at > datetime.utcnow() - timedelta(0, 10))
@@ -143,7 +138,7 @@ class TapeWidgetTest(unittest.TestCase):
         assert len(self.notes) >= 3
         self.prepare_tape()
 
-        new_note = self.tape_widget.create_empty_note(777)
+        new_note = self.tape_widget.create_empty_note()
         self.tape_widget.add_note(new_note, self.tape_widget.model().item(2).index())
 
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 1)
@@ -154,14 +149,14 @@ class TapeWidgetTest(unittest.TestCase):
         assert len(self.notes) >= 3
         self.prepare_tape()
 
-        parent_note = self.tape_widget.create_empty_note(777)
+        parent_note = self.tape_widget.create_empty_note()
         self.tape_widget.add_note(parent_note, self.tape_widget.model().item(2).index())
         assert item_to_note(self.tape_widget.model().item(2).child(0)) == parent_note
         assert self.tape_widget.model().item(2).rowCount() == 1
 
-        child_note_1 = self.tape_widget.create_empty_note(888)
+        child_note_1 = self.tape_widget.create_empty_note()
         self.tape_widget.add_note(child_note_1, self.tape_widget.model().item(2).child(0).index())
-        child_note_2 = self.tape_widget.create_empty_note(999)
+        child_note_2 = self.tape_widget.create_empty_note()
         self.tape_widget.add_note(child_note_2, self.tape_widget.model().item(2).child(0).index())
 
         self.assertEqual(len(list(self.tape_widget.notes())), len(self.notes) + 3)
@@ -191,7 +186,7 @@ class TapeWidgetTest(unittest.TestCase):
         keyword = "a filter not likely to match a new note"
 
         self.tape_widget.set_filter(keyword)
-        assert not TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.tape_widget.create_empty_note(0))
+        assert not TapeFilterProxyModel.note_matches(QRegExp(keyword, False, QRegExp.FixedString), self.tape_widget.create_empty_note())
 
         self.tape_widget.add_and_focus_note()
 
@@ -461,7 +456,7 @@ class TapeWidgetTest(unittest.TestCase):
         assert len(self.notes) >= 3
         self.prepare_tape()
 
-        parent_note = self.tape_widget.create_empty_note(888)
+        parent_note = self.tape_widget.create_empty_note()
         self.tape_widget.add_note(parent_note, self.tape_widget.model().item(2).index())
 
         parent_index = self.tape_widget.proxy_model().mapFromSource(self.tape_widget.model().item(2).child(0).index())
@@ -480,7 +475,7 @@ class TapeWidgetTest(unittest.TestCase):
         assert len(self.notes) >= 3
         self.prepare_tape()
 
-        parent_note = self.tape_widget.create_empty_note(888)
+        parent_note = self.tape_widget.create_empty_note()
         self.tape_widget.add_note(parent_note, self.tape_widget.model().item(2).index())
 
         parent_index = self.tape_widget.proxy_model().mapFromSource(self.tape_widget.model().item(2).child(0).index())

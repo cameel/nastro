@@ -9,7 +9,6 @@ class WrongAttributeType(Exception):  pass
 class Note:
     TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
     SERIALIZED_ATTRIBUTE_TYPES = {
-        'title':       (str,),
         'body':        (str,),
         'tags':        (list,),
         'created_at':  (str,),
@@ -17,10 +16,9 @@ class Note:
         'id':          (int, type(None))
     }
 
-    def __init__(self, title = '', body = '', tags = [], created_at = datetime.utcnow(), modified_at = None, id = None):
+    def __init__(self, body = '', tags = [], created_at = datetime.utcnow(), modified_at = None, id = None):
         assert created_at != None
 
-        self.title       = title
         self.body        = body
         self.tags        = tags
         self.created_at  = created_at
@@ -30,7 +28,6 @@ class Note:
         # NOTE: Types are strictly enforced here because we want it to be possible to
         # serialize a note into a dict of primivites and deserialize it back into an identical object.
         # If we let the caller pass derived types, those types would be lost after deserialization.
-        assert type(self.title)       == str
         assert type(self.body)        == str
         assert type(self.created_at)  == datetime
         assert type(self.modified_at) == datetime
@@ -43,7 +40,6 @@ class Note:
             and puts them into a dict. """
 
         note_dict = {
-            'title':       self.title,
             'body':        self.body,
             'tags':        self.tags,
             'created_at':  self.serialize_timestamp(self.created_at),
@@ -81,7 +77,6 @@ class Note:
             raise InvalidTagCharacter("Commas (,) are not allowed in tags")
 
         return cls(
-            title       = note_dict['title'],
             body        = note_dict['body'],
             tags        = note_dict['tags'],
             created_at  = cls.deserialize_timestamp(note_dict['created_at']),

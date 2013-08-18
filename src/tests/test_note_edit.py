@@ -13,7 +13,6 @@ class NoteEditTest(unittest.TestCase):
         self.note_edit = NoteEdit()
 
         self.note = Note(
-            title      = "A",
             body       = "B",
             tags       = ["C", "D"],
             created_at = datetime.utcnow(),
@@ -21,7 +20,6 @@ class NoteEditTest(unittest.TestCase):
         )
 
     def test_load_note_should_load_note_data_into_editor_widgets(self):
-        assert self.note_edit._title_editor.text()       != self.note.title
         assert self.note_edit._body_editor.toPlainText() != self.note.body
         assert self.note_edit._tag_editor.text()         != Note.join_tags(self.note.tags)
         assert self.note_edit._note_created_at           != self.note.created_at
@@ -30,7 +28,6 @@ class NoteEditTest(unittest.TestCase):
 
         self.note_edit.load_note(self.note)
 
-        self.assertEqual(self.note_edit._title_editor.text(),       self.note.title)
         self.assertEqual(self.note_edit._body_editor.toPlainText(), self.note.body)
         self.assertEqual(self.note_edit._tag_editor.text(),         Note.join_tags(self.note.tags))
         self.assertEqual(self.note_edit._note_created_at,           self.note.created_at)
@@ -49,10 +46,8 @@ class NoteEditTest(unittest.TestCase):
 
     def test_load_note_should_not_store_reference_to_note_and_let_widget_modify_it_later(self):
         new_body  = "new body"
-        new_title = "new title"
         new_tags  = ["new", "tag"]
         assert new_body  != self.note.body
-        assert new_title != self.note.title
         assert new_tags  != self.note.tags
 
         dict_before = self.note.to_dict()
@@ -61,7 +56,6 @@ class NoteEditTest(unittest.TestCase):
         self.note_edit.load_note(self.note)
 
         self.note_edit._body_editor.setPlainText(new_body)
-        self.note_edit._title_editor.setText(new_title)
         self.note_edit._tag_editor.setText(Note.join_tags(new_tags))
 
         note_after = self.note_edit.dump_note()
@@ -99,32 +93,6 @@ class NoteEditTest(unittest.TestCase):
         note_after = self.note_edit.dump_note()
 
         assert self.note_edit._body_editor.toPlainText() == new_text
-        self.assertTrue(note_after.modified_at > self.note.modified_at)
-
-    def test_writing_in_title_editor_should_update_note_title(self):
-        new_text = "new text"
-        self.note_edit.load_note(self.note)
-
-        assert self.note.title != new_text
-        assert self.note_edit._title_editor.text() == self.note.title
-
-        self.note_edit._title_editor.setText(new_text)
-        note_after = self.note_edit.dump_note()
-
-        assert self.note_edit._title_editor.text() == new_text
-        self.assertEqual(note_after.title, new_text)
-
-    def test_writing_in_title_editor_should_update_modified_at_timestamp(self):
-        new_text = "new text"
-        self.note_edit.load_note(self.note)
-
-        assert self.note.title != new_text
-        assert self.note_edit._title_editor.text() == self.note.title
-
-        self.note_edit._title_editor.setText(new_text)
-        note_after = self.note_edit.dump_note()
-
-        assert self.note_edit._title_editor.text() == new_text
         self.assertTrue(note_after.modified_at > self.note.modified_at)
 
     def test_writing_in_tag_editor_should_update_note_tags(self):
