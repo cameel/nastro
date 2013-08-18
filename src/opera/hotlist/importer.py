@@ -1,17 +1,17 @@
 """ Tools for importing data from Opera """
 
-from datetime import datetime
+from datetime    import datetime
+from collections import deque
 
-from ...note   import Note, InvalidTagCharacter
-from .iterator import HotlistIterator, ParseError, StructuralError
+from PyQt5.QtGui  import QStandardItem, QStandardItemModel
+from PyQt5.QtCore import Qt
 
-FOLDER_TAG_SEPARATOR = '/'
+from ...note               import Note, InvalidTagCharacter
+from ...note_model_helpers import set_item_note
+from .iterator             import HotlistIterator, ParseError, StructuralError
 
-class MissingNoteAttributes(ParseError):
-    pass
-
-class InvalidAttributeValue(ParseError):
-    pass
+class MissingNoteAttributes(ParseError): pass
+class InvalidAttributeValue(ParseError): pass
 
 def line_strip(text):
     """Strips leading empty lines and all trailing whitespace from the text"""
@@ -42,7 +42,7 @@ def title_body_split(name_attribute):
     else:
         return ('', '')
 
-def element_to_note(attributes, folder_path):
+def element_to_note(attributes):
     required_note_attributes = ['CREATED']
 
     missing_attributes = [attribute_name for attribute_name in required_note_attributes if not attribute_name in attributes]
@@ -52,33 +52,49 @@ def element_to_note(attributes, folder_path):
 
     (title, body) = title_body_split(attributes.get('NAME'))
 
-    tag = FOLDER_TAG_SEPARATOR.join(folder_path)
     return Note(
         title      = title,
         body       = body,
-        tags       = [tag] if tag != '' else [],
+        tags       = [],
         # NOTE: Opera saves timestamps in localtime rather than UTC. This makes it impossible
         # to correctly decode it unless we're now in the same time zone.
         created_at = datetime.utcfromtimestamp(int(attributes['CREATED']))
     )
 
-def import_opera_notes(note_file, skip_trash_folder = True):
-    notes        = []
-    folder_stack = []
-    trash_level  = None
-    for element in HotlistIterator(note_file):
+def tree_validating_iterator(hotlist_iterator):
+    """ Top level elements are at level 0. 'end' elements are at the same level as their matching folders. """
+    level = 0
+    for element in hotlist_iterator:
         if element == 'end':
-            if len(folder_stack) == 0:
+            if level <= 0:
                 raise StructuralError("Found folder end marker without a matching folder")
 
-            folder_stack.pop()
+            level -= 1
 
-            if trash_level != None and len(folder_stack) < trash_level:
+            yield (element, level)
+        else:
+            element_name, attributes = element
+
+            yield (element, level)
+
+            if element_name == 'FOLDER':
+                level += 1
+
+    if level > 0:
+        # It may be a good idea to replace it with a warning when we have an UI for importers
+        raise StructuralError("Not all folders have matching end markers. The file may have been truncated.")
+
+def trash_aware_hotlist_iterator(tree_validating_iterator):
+    trash_level = None
+    for (element, level) in tree_validating_iterator:
+        if element == 'end':
+            assert level >= 0
+
+            if trash_level != None and level < trash_level:
                 trash_level = None
         else:
             element_name, attributes = element
 
-            body = ''
             if element_name == 'FOLDER':
                 if 'TRASH FOLDER' in attributes:
                     if attributes['TRASH FOLDER'].upper() not in ['YES', 'NO']:
@@ -88,20 +104,33 @@ def import_opera_notes(note_file, skip_trash_folder = True):
                         if trash_level != None:
                             raise StructuralError("Nested trash folders are not supported")
 
-                        trash_level = len(folder_stack)
+                        trash_level = level
 
-                # NOTE: If there are two folders with identical names (or differing only with whitespace),
-                # they won't be unambiguously discernible by tags after import.
-                (title, body) = title_body_split(attributes.get('NAME'))
-                folder_stack.append(title)
+        yield (element, level, trash_level != None)
 
-            if (trash_level == None or not skip_trash_folder) and (element_name == 'NOTE' or body != ''):
-                note = element_to_note(attributes, folder_stack)
-                if note != None:
-                    notes.append(note)
+def import_opera_notes(note_file, skip_trash_folder = True):
+    iterator = trash_aware_hotlist_iterator(tree_validating_iterator(HotlistIterator(note_file)))
 
-    if len(folder_stack) > 0:
-        # It may be a good idea to replace it with a warning when we have na UI for importers
-        raise StructuralError("Not all folders have matching end markers. The file may have been truncated.")
+    model      = QStandardItemModel()
+    item_stack = deque([model])
+    for (element, level, in_trash_folder) in iterator:
+        if not (in_trash_folder and skip_trash_folder):
+            if element == 'end':
+                item_stack.pop()
+            else:
+                element_name, attributes = element
 
-    return notes
+                if element_name in ['NOTE', 'FOLDER']:
+                    note = element_to_note(attributes)
+                    assert note != None
+
+                    item = QStandardItem()
+                    set_item_note(item, note)
+
+                    assert len(item_stack) > 0
+                    item_stack[-1].appendRow(item)
+
+                    if element_name == 'FOLDER':
+                        item_stack.append(item)
+
+    return model

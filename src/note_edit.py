@@ -12,6 +12,7 @@ class NoteEdit(QWidget):
         super().__init__(parent)
         self._note_created_at  = datetime.utcnow()
         self._note_modified_at = datetime.utcnow()
+        self._note_id          = None
 
         self._main_layout = QVBoxLayout(self)
 
@@ -45,6 +46,7 @@ class NoteEdit(QWidget):
         # that cause modified_at to be updated.
         self._note_created_at  = note.created_at
         self._note_modified_at = note.modified_at
+        self._note_id          = note.id
 
     def dump_note(self):
         return Note(
@@ -52,7 +54,8 @@ class NoteEdit(QWidget):
             body        = self._body_editor.toPlainText(),
             tags        = Note.split_tags(self._tag_editor.text()),
             created_at  = self._note_created_at,
-            modified_at = self._note_modified_at
+            modified_at = self._note_modified_at,
+            id          = self._note_id
         )
 
     def touch(self):

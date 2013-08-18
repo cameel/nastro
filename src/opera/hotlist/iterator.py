@@ -20,17 +20,10 @@ class LineType:
     ELEMENT   = 3
     ATTRIBUTE = 4
 
-class ParseError(Exception):
-    pass
-
-class InvalidLine(ParseError):
-    pass
-
-class StructuralError(ParseError):
-    pass
-
-class DuplicateAttribute(ParseError):
-    pass
+class ParseError(Exception):          pass
+class InvalidLine(ParseError):        pass
+class StructuralError(ParseError):    pass
+class DuplicateAttribute(ParseError): pass
 
 class HotlistIterator:
     def __init__(self, note_file):

@@ -16,7 +16,8 @@ class NoteEditTest(unittest.TestCase):
             title      = "A",
             body       = "B",
             tags       = ["C", "D"],
-            created_at = datetime.utcnow()
+            created_at = datetime.utcnow(),
+            id         = 666
         )
 
     def test_load_note_should_load_note_data_into_editor_widgets(self):
@@ -25,6 +26,7 @@ class NoteEditTest(unittest.TestCase):
         assert self.note_edit._tag_editor.text()         != Note.join_tags(self.note.tags)
         assert self.note_edit._note_created_at           != self.note.created_at
         assert self.note_edit._note_modified_at          != self.note.modified_at
+        assert self.note_edit._note_id                   != self.note.id
 
         self.note_edit.load_note(self.note)
 
@@ -33,6 +35,7 @@ class NoteEditTest(unittest.TestCase):
         self.assertEqual(self.note_edit._tag_editor.text(),         Note.join_tags(self.note.tags))
         self.assertEqual(self.note_edit._note_created_at,           self.note.created_at)
         self.assertEqual(self.note_edit._note_modified_at,          self.note.modified_at)
+        self.assertEqual(self.note_edit._note_id,                   self.note.id)
 
     def test_loading_and_dumping_a_note_should_not_modify_it(self):
         dict_before = self.note.to_dict()

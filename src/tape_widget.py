@@ -9,7 +9,8 @@ from datetime import datetime
 from .note_delegate           import NoteDelegate
 from .note                    import Note
 from .tape_filter_proxy_model import TapeFilterProxyModel
-from .model_helpers           import remove_items, all_items
+from .model_helpers           import all_items, remove_items
+from .note_model_helpers      import item_to_id, set_item_note, all_notes, assign_note_ids
 
 class TapeWidget(QWidget):
     def __init__(self, parent = None):
@@ -46,11 +47,11 @@ class TapeWidget(QWidget):
         self._main_layout.addLayout(self._button_layout)
         self._main_layout.addWidget(self._view)
 
-        self._tape_model              = QStandardItemModel()
         self._tape_filter_proxy_model = TapeFilterProxyModel()
         self._note_delegate           = NoteDelegate()
 
-        self._tape_filter_proxy_model.setSourceModel(self._tape_model)
+        self._tape_model = QStandardItemModel()
+        self.set_model(self._tape_model)
         self._view.setItemDelegate(self._note_delegate)
         self._view.setModel(self._tape_filter_proxy_model)
 
@@ -76,10 +77,22 @@ class TapeWidget(QWidget):
 
         return self._tape_filter_proxy_model
 
+    def set_model(self, model):
+        assert (
+            len(set([item_to_id(item) for item in all_items(model) if item_to_id(item) != None])) ==
+            len(    [item_to_id(item) for item in all_items(model) if item_to_id(item) != None])
+        )
+
+        # NOTE: If there's an exception in setSourceModel(), we can hope that the source model
+        # remains unchanged. That's why we assing to _tape_model only if that instruction succeeds.
+        self._tape_filter_proxy_model.setSourceModel(model)
+        self._tape_model = model
+
     def notes(self):
-        for item in all_items(self._tape_model):
-            assert isinstance(item.data(Qt.EditRole), Note)
-            yield item.data(Qt.EditRole)
+        return all_notes(self._tape_model)
+
+    def assign_ids(self):
+        assign_note_ids(self._tape_model)
 
     def create_empty_note(self, note_number):
         return Note(
@@ -105,7 +118,7 @@ class TapeWidget(QWidget):
             note = self.create_empty_note(parent_item.rowCount() + 1)
 
         item = QStandardItem()
-        item.setData(note, Qt.EditRole)
+        set_item_note(item, note)
         parent_item.appendRow(item)
 
     def add_and_focus_note(self, parent_proxy_index = None):
@@ -148,23 +161,6 @@ class TapeWidget(QWidget):
 
     def get_filter(self):
         return self._search_box.text()
-
-    def dump_notes(self):
-        notes = []
-        for note in self.notes():
-            notes.append(note.to_dict())
-
-        return notes
-
-    def load_notes(self, notes):
-        self.clear()
-
-        try:
-            for note in notes:
-                self.add_note(note)
-        except:
-            self.clear()
-            raise
 
     def selected_proxy_indexes(self):
         return self._view.selectedIndexes()

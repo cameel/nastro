@@ -8,6 +8,7 @@ from PyQt5.QtCore import Qt
 
 from ..note                    import Note
 from ..tape_filter_proxy_model import TapeFilterProxyModel
+from ..note_model_helpers      import set_item_note
 
 class TapeFilterProxyModelTest(unittest.TestCase):
     def setUp(self):
@@ -44,7 +45,7 @@ class TapeFilterProxyModelTest(unittest.TestCase):
         root_item = self.source_model.invisibleRootItem()
         for note in self.notes:
             item = QStandardItem()
-            item.setData(note, Qt.EditRole)
+            set_item_note(item, note)
             root_item.appendRow(item)
 
         assert self.source_model.rowCount() == len(self.notes)
