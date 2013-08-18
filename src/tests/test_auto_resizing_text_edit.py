@@ -1,7 +1,6 @@
 import unittest
 from datetime import datetime
 
-from PyQt5.QtTest    import QTest
 from PyQt5.QtWidgets import QTextEdit, QVBoxLayout, QWidget
 
 from .dummy_application        import application
